@@ -1,1 +1,2 @@
-# marketing_research_and_analytics
+# Course marketing research and analytics
+
