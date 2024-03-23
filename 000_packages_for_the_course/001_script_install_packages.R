@@ -20,7 +20,8 @@ packages <- c(# Packages associated to the book
               # and used in the different chapters
               # that are cover in the course but that
               # are not used constantly in the book
-              # R for Marketing Research and Analytics 
+              # R for Marketing Research and Analytics
+              "reprex",
               "tidyverse",
               "skimr",
               "tidymodels",
