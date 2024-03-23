@@ -1,0 +1,52 @@
+---
+title: "Include here some title"
+format: 
+  html:
+    date: 2024-03-23
+    author: 
+      - "Author name 1 here"
+      - "Author name 2 here"
+    embed-resources: true
+lang: en
+editor: visual
+---
+
+# This is a title header
+
+This is a quarto document. If you want to know more about quarto and using it with RStudio IDE check out: [Quarto](https://quarto.org/) \> Get Started \> Step 2 \> Rstudio
+
+In particular the video **Get started with Quarto | Mine Çetinkaya-Rundel**
+
+## This is a title subheader
+
+Quarto uses **markdown** so it is important to familiarize with the basics of this tool. Please check out: [Quarto](https://quarto.org/) \> Guide \> Authoring \> Markdown Basics
+
+# Quarto HTML Basics
+
+This is a document in HTML format. If you want to get started with this format check out: [Quarto](https://quarto.org/) \> Guide \> Documents \> HTML
+
+If you have dominated the basics check out all the possible options in: [Quarto](https://quarto.org/) \> Reference \> Documents \> HTML
+
+## Code chunks
+
+This is an R code chunk:
+
+```{r}
+1 + 1
+```
+
+For more information about inserting code chunks check out: [Quarto](https://quarto.org/) \> Guide \> Tools \> RStudio IDE \> Visual Editor \> Technical Writing
+
+## Equations with $\LaTeX$
+
+### Inline math
+
+To familiarize with $\LaTeX$ basics apply to quarto check out: [https://biostats-r.github.io/biostats/quarto/](https://biostats-r.github.io/biostats/quarto/) > Figures, tables and equations > Equations
+
+The solution to $\sqrt{x} = 3$ is $x = 9$
+
+### Display math
+
+The **pythagorean theorem**:
+
+$$a^2 + b^2 = c^2$$
