@@ -49,4 +49,5 @@ po/*~
 rsconnect/
 
 # Quarto files
-/.quarto/
+.quarto/
+*/.quarto/
