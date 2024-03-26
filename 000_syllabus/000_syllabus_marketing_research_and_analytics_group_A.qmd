@@ -29,11 +29,11 @@ p {
 }
 ```
 
-# Professor and meeting hours with students
+# Instructor and meeting hours with students
 
 -   **Name**
 
-    -   Luis Francisco Gomez López
+    -   Luis Francisco Gómez López
 
 -   **Communication through the virtual classroom**
 
@@ -53,7 +53,7 @@ p {
 
     -   Complaints regarding grades, please send an email to [**luis.gomezl\@unimilitar.edu.co**](mailto:luis.gomezl@unimilitar.edu.co){.email}
 
-        -   To make any complaints, you are asked to wait first for the grades to be published on the News Bulletin Board and to be made based on the feedbacks that will be made taking into account the evaluation parameters
+        -   Please wait for your grades to be published on the News Bulletin Board before making any complaints. Complaints should be based on the feedback provided, which takes into account the evaluation parameters.
 
         -   Urgent issues, you can call me to +57 3124541536 Monday, Wednesday and Friday between 16:00 hours and 17:00 hours. Please do not send me whatsapp messages or call me on weekends.
 
@@ -365,7 +365,7 @@ tibble(Week = c(1:9),
 
 # Use of Chat GPT-3, GPT-4, Gemini 1.5, LLaMA 2 and its friends
 
-You can use any artificial intelligence tool and in particular any Large Language Model where this practice is encourage when learning R or another programming language like Python or Julia. However, please use them in a responsible way by taking into account its capabilities and limitations and always pointing out to the professor and your colleges that you have use them.
+You can use any artificial intelligence tool and in particular any Large Language Model where this practice is encourage when learning R or another programming language like Python or Julia. However, please use them in a responsible way by taking into account its capabilities and limitations and always pointing out to the instructor and your colleges that you have use them.
 
 If you have not used any Large Language Model you can try opening an account, for example in:
 
