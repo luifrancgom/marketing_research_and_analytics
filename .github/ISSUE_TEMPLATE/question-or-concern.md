@@ -18,12 +18,12 @@ Please read the following article before proceeding, [How to debug small program
 ## Screenshots
 If applicable, add screenshots to help explain your problem.
 
-## Settings (please complete the following information)##
+## Settings (please complete the following information)
 
  - Operating system: [e.g. Windows xx, Mac OS X 10.x, Ubuntu 22.xx ]
  - R version: [e.g. 4.3.x]
  - Quarto version: [e.g. 1.4.xx]
 
-**Additional context**
+## Additional context
 
 Add any other context about the problem here.
