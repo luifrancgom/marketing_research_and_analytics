@@ -353,9 +353,9 @@ tibble(Week = c(1:9),
 
 -   Quarto (open-source scientific and technical publishing system)
 
-    -   <https://quarto.org/docs/download/> \> Pre-release vX.X.X[^1] \> *Choose your operating system and follow the instructions*
+    -   <https://quarto.org/docs/download/> \> Current Release vX.X.X[^1] \> *Choose your operating system and follow the instructions*
 
-[^1]: Quarto is constantly changing, so vX.X.X means the pre-release version that is available at the time of download
+[^1]: Quarto is constantly changing, so vX.X.X means the current Release version that is available at the time of download
 
 ## Using a cloud-based solution
 
