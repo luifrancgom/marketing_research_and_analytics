@@ -13,7 +13,7 @@ A clear, concise and general description about the problem you or your group is 
 
 ## Point out a **Minimal Reproducible Example (MRE)** in relation to the problem you are having 
 
-Please read the following article before proceeding, [How to debug small programs](https://ericlippert.com/2014/03/05/how-to-debug-small-programs/) and if possible use the package [`reprex`](https://reprex.tidyverse.org/) to point out the problem you or your group is facing
+Please read the following article before proceeding, [How to create a Minimal, Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example) and if possible use the package [`reprex`](https://reprex.tidyverse.org/) to point out the problem you or your group is facing
 
 ## Screenshots
 If applicable, add screenshots to help explain your problem.
