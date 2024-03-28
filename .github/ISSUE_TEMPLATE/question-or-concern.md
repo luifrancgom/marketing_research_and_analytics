@@ -11,9 +11,9 @@ assignees: luifrancgom
 
 A clear, concise and general description about the problem you or your group is facing.
 
-##Point out a **Minimal Reproducible Example (MRE)** related to the problem you are having##
+## Point out a **Minimal Reproducible Example (MRE)** in relation to the problem you are having 
 
-Please read the following article before proceeding, [How to debug small programs](https://ericlippert.com/2014/03/05/how-to-debug-small-programs/) and if possible use the package `regex`
+Please read the following article before proceeding, [How to debug small programs](https://ericlippert.com/2014/03/05/how-to-debug-small-programs/) and if possible use the package `regex` to point the problem you or your group is facing
 
 ## Screenshots
 If applicable, add screenshots to help explain your problem.
