@@ -64,8 +64,8 @@ p {
 -   Credits: 4
 -   Type: Theoretical-Practice
 -   Area of Knowledge: Professional
--   Semester: 1
--   Block: 1 (April 1 - June 4, 2024)
+-   Semester: 9
+-   Block: 2 (April 1 - June 4, 2024)
 
 ## Justification
 
