@@ -9,7 +9,7 @@ glimpse(bike_sales)
 # Dividing it by tables ----
 ## We can recover the original tables in that
 ## way
-closed_transactions <- bike_sales |> 
+closed_orders <- bike_sales |> 
   select(order.date:price, customer.id,
          product.id)
 
@@ -22,7 +22,7 @@ customers <- bike_sales |>
   distinct()
 
 # Checking if bike_sales can be recover
-closed_transactions |> 
+closed_orders |> 
   left_join(y = customers,
             by = join_by(customer.id)) |> 
   left_join(y = products,
@@ -32,15 +32,11 @@ closed_transactions |>
   base::setequal(bike_sales)
 
 # Importing data
-closed_transactions |> 
-  write_csv(file = "000_data/000_bike_sales/closed_transactions.csv")
+closed_orders |> 
+  write_csv(file = "000_data/000_bike_sales/closed_orders.csv")
 
 products |> 
   write_csv(file = "000_data/000_bike_sales/products.csv")
 
 customers |> 
   write_csv(file = "000_data/000_bike_sales/customers.csv")
-
-
-bike_sales |> 
-  View()

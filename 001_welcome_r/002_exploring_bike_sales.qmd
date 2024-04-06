@@ -1,0 +1,19 @@
+---
+title: "Exploring bike_sales data base"
+format: html
+editor: visual
+---
+
+```{r}
+library(sweep)
+library(tidyverse)
+```
+
+# Exploring data
+
+```{r}
+bike_sales |> 
+  head()
+```
+
+
