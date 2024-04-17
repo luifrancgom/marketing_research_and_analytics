@@ -92,8 +92,6 @@ In this second report you are going to use data from `bike_sales` as a second st
 
 -   Calculating descriptive statistics by different groups
 
--   Generate a facet grid plot to identify [product gaps](https://en.wikipedia.org/wiki/Gap_analysis)
-
 -   Apply statistical tests to identify differences between groups
 
 Use the template `002_marketing_report_part-2.qmd` to build the marketing report. You can find the template to use in 2 locations. Choose the option of your preference:
