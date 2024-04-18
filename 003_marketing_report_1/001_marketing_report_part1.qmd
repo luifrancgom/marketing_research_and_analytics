@@ -87,17 +87,17 @@ bike_sales |>
 
 There is a product gap because the availabel products are 13 and we possible products can be 18, so there is a product gap of 5 potential model:
 
-* Cyclocross Aluminium
-* Fat Bike Carbon
-* Over Mountain Aluminium 
-* Sport Carbon
-* Triathalon Aluminium
+-   Cyclocross Aluminium
+-   Fat Bike Carbon
+-   Over Mountain Aluminium
+-   Sport Carbon
+-   Triathalon Aluminium
 
 #### Actual customers
 
 Knowing our clients by the volume of products they demand
 
-* Customers we want to retain
+-   Customers we want to retain
 
 ```{r}
 bike_sales |> 
@@ -105,7 +105,7 @@ bike_sales |>
   head()
 ```
 
-* Customers that have potential
+-   Customers that have potential
 
 ```{r}
 bike_sales |> 
@@ -124,21 +124,27 @@ Check the distribution of the variables `quantity` and `price` to understand its
 #### Quantity behavior
 
 ```{r}
-# If you use base R check out the hist documentation
-## ?hist
-# If you use the tidyverse check out the geom_histogram
-# documentation
-## ?geom_histogram
-### Also you can check out the online documentation in the 
-### case of the tidyverse
-#### https://ggplot2.tidyverse.org/reference/geom_histogram.html
+#| message: false
+bike_sales |> 
+  ggplot() +
+  geom_histogram(aes(x = quantity),
+                 color = "black") +
+  labs(x = "Quantity of bikes (units)",
+       y = "Count",
+       title = "Distribution of bike sold for all bike shops")
 ```
 
 #### Price behavior
 
 ```{r}
-# Check out the comments pointed out in the 
-# Quantity behavior code chunk section
+#| message: false
+bike_sales |> 
+  ggplot() +
+  geom_histogram(aes(x = price),
+                 color = "black") +
+  labs(x = "Unitary price of bikes (dollars)",
+       y = "Count",
+       title = "Distribution of bike prices for all bike shops")
 ```
 
 ### Boxplots
