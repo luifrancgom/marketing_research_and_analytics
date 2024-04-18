@@ -35,7 +35,7 @@ library(sweep)
 
 ## Introduction
 
-Once your group has finish filling all the sections, add some text here describing the principal findings. Be straightforward and concise taking into account that it is a executive report.
+Once your group has finish filling all the sections, add some text here describing the principal findings. Be straightforward and concise taking into account that it is an executive report.
 
 ## Import data
 
