@@ -83,10 +83,25 @@ bike_sales |>
        title = "Distribution of revenue by frame")  
 
 
+bike_sales_by_bikeshop_second_category |> 
+  mutate(category.secondary = fct_reorder(category.secondary, 
+                                     total_revenue)) |> 
+  ggplot() +
+  geom_col(aes(x = total_revenue, 
+               y = category.secondary)) +
+  scale_x_continuous(labels = scales::label_dollar()) +
+  labs(x = "Revenue (Dollars)",
+       y = "Second Category",
+       title = "Revenue by second category")
+
 bike_sales_by_bikeshop_revenue |> 
   mutate(bikeshop.name = fct_reorder(bikeshop.name, 
                                      total_revenue)) |> 
   ggplot() +
   geom_col(aes(x = total_revenue, 
-               y = bikeshop.name))
+               y = bikeshop.name)) +
+  scale_x_continuous(labels = scales::label_dollar()) +
+  labs(x = "Revenue (Dollars)",
+       y = "Bike shops",
+       title = "Revenue by bike shops")
 
