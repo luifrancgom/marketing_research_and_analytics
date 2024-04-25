@@ -1,26 +1,103 @@
 ---
-title: "Untitled"
-format: html
+title: "Relationships between continuous variables"
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    number-sections: true
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
-
 ```{r}
 #| echo: false
-2 * 2
+#| message: false
+library(tidyverse)
+library(skimr)
+library(corrr)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+
+# Import data
+
+```{r}
+#| message: false
+# customer <- read_csv(file = "000_data/004_data_chapter4.csv")
+customer <- read_csv(file = "http://goo.gl/PmPkaG")
+```
+
+# Explore data
+
+```{r}
+customer |> glimpse()
+```
+
+# Transform data
+
+```{r}
+customer <- customer |>
+  mutate(cust.id = factor(x = cust.id, ordered = FALSE),
+         email = factor(x = email, ordered = FALSE),
+         online.visits = as.integer(x = online.visits),
+         online.trans = as.integer(x = online.trans),
+         store.trans = as.integer(x = store.trans),
+         sat.service = factor(x = sat.service, ordered = TRUE),
+         sat.selection = factor(x = sat.selection, ordered = TRUE))
+```
+
+# Describe data
+
+```{r}
+customer |> skim()
+```
+
+# Data visualization
+
+## Spending: online vs physical store
+
+```{r}
+ggplot(customer) +
+  geom_histogram(aes(x = store.spend),
+                 color = "black")
+```
+
+```{r}
+ggplot(customer) +
+  geom_point(aes(x = store.spend, y = online.spend,
+                 color = email)) +
+                     # See hex codes for colors
+  scale_color_manual(values = c("red",  "#33ffe9")) +
+  scale_x_continuous(breaks = c(1, 2, 5, 10, 20, 50, 100, 500),
+                     transform = "log1p") +
+  scale_y_continuous(breaks = c(1, 5, 50, 500),
+                     transform = "log1p") +
+  labs(x = "Spending in the physical store (dollars)",
+       y = "Spending online (dollars)",
+       title = "Spending in the physical store vs online",
+       color = "Email")
+```
+
+## Age vs the credit score
+
+```{r}
+ggplot(customer) +
+  geom_point(aes(x = age, y = credit.score))
+```
+
+# Pearson correlation
+
+```{r}
+cor(x = customer$age, y = customer$credit.score,
+    method = "pearson")
+```
+
+## Matrix correlation
+
+```{r}
+correlation_matrix <- customer |> 
+  select(where(is.numeric)) |> 
+  correlate(use = "pairwise.complete.obs")
+
+correlation_matrix |> 
+  autoplot(triangular = "lower")
+```
+
