@@ -31,7 +31,7 @@ customer <- read_csv(file = "http://goo.gl/PmPkaG")
 customer |> glimpse()
 ```
 
-# Transform data
+# Transform data 1
 
 ```{r}
 customer <- customer |>
@@ -99,4 +99,102 @@ correlation_matrix <- customer |>
 
 correlation_matrix |> 
   autoplot(triangular = "lower")
+```
+
+# Transform data 2
+
+## Spending in the physical store
+
+```{r}
+customer |>
+  # We apply this transformation
+  # because store.spend includes
+  # 0 values
+  mutate(log_store.spend = log(store.spend + 1)) |> 
+  ggplot() +
+  geom_histogram(aes(x = log_store.spend),
+                 color = "black",
+                 bins = 30)
+```
+
+## Distance to the store
+
+```{r}
+customer |>
+  ggplot() +
+  geom_histogram(aes(x = distance.to.store),
+                 color = "black",
+                 bins = 30) +
+  scale_x_continuous(transform = "log")
+```
+
+### Improve correlation
+
+#### Case 1
+
+```{r}
+cor(x = customer$store.spend, 
+    y = customer$distance.to.store)
+```
+
+#### Case 2
+
+```{r}
+cor(x = customer$store.spend,
+    y = 1 / customer$distance.to.store)
+```
+
+#### Case 3
+
+```{r}
+cor(x = customer$store.spend,
+    y = 1 / sqrt(customer$distance.to.store))
+```
+
+```{r}
+customer |> 
+  mutate(distance.to.store_trans2 = 1 / sqrt(distance.to.store)) |> 
+  ggplot() +
+  geom_point(aes(x = distance.to.store_trans2, 
+                 y = store.spend))
+```
+
+# Visualizing categorical values
+
+## Alternative 1
+
+```{r}
+customer |> 
+  ggplot() +
+  geom_point(aes(x = sat.service, y = sat.selection),
+             position = position_jitter(width = 0.2,
+                                        height = 0.2))
+```
+
+## Alternative 2
+
+```{r}
+customer |> 
+  count(sat.service, sat.selection) |> 
+  ggplot() +
+  ## Check out 
+  ## https://ggplot2.tidyverse.org/reference/geom_text.html
+  geom_text(aes(x = sat.service, y = sat.selection,
+                label = n))
+```
+
+## Alternative 3
+
+```{r}
+customer |> 
+  count(sat.service, sat.selection) |> 
+  ggplot() +
+  ## Check out 
+  ## https://ggplot2.tidyverse.org/reference/geom_tile.html
+  geom_tile(aes(x = sat.service, y = sat.selection,
+                fill = n),
+            color = "black") +
+  ## Check out 
+  ## https://ggplot2.tidyverse.org/reference/scale_gradient.html
+  scale_fill_gradient2()
 ```

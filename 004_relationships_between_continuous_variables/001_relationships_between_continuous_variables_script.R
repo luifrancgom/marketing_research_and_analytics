@@ -95,6 +95,7 @@ cor(x = customer$store.spend,
 #  geom_function(fun = log, 
 #                xlim = c(-5, 5))
 
+## Discard this option
 cor(x = log(customer$store.spend + 1),
     y = 1 / sqrt(customer$distance.to.store))
 
