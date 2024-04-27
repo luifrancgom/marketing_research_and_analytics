@@ -3115,14 +3115,20 @@ vertical-align: -.125em;
 <section id="import-data" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Import data</h1>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># customer &lt;- read_csv(file = &quot;000_data/004_data_chapter4.csv&quot;)</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>customer <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="at">file =</span> <span class="st">&quot;http://goo.gl/PmPkaG&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </section>
 <section id="explore-data" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Explore data</h1>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>customer <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 1,000
 Columns: 12
@@ -3144,6 +3150,8 @@ $ sat.selection     &lt;dbl&gt; 3, 3, NA, 2, 1, NA, 3, 3, 2, 2, 2, NA, NA, 2, NA
 <section id="transform-data" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Transform data</h1>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>customer <span class="ot">&lt;-</span> customer <span class="sc">|&gt;</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cust.id =</span> <span class="fu">factor</span>(<span class="at">x =</span> cust.id, <span class="at">ordered =</span> <span class="cn">FALSE</span>),</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">email =</span> <span class="fu">factor</span>(<span class="at">x =</span> email, <span class="at">ordered =</span> <span class="cn">FALSE</span>),</span>
@@ -3152,12 +3160,16 @@ $ sat.selection     &lt;dbl&gt; 3, 3, NA, 2, 1, NA, 3, 3, 2, 2, 2, NA, NA, 2, NA
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">store.trans =</span> <span class="fu">as.integer</span>(<span class="at">x =</span> store.trans),</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">sat.service =</span> <span class="fu">factor</span>(<span class="at">x =</span> sat.service, <span class="at">ordered =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">sat.selection =</span> <span class="fu">factor</span>(<span class="at">x =</span> sat.selection, <span class="at">ordered =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </section>
 <section id="describe-data" class="level1" data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> Describe data</h1>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>customer <span class="sc">|&gt;</span> <span class="fu">skim</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <caption>Data summary</caption>
@@ -3400,9 +3412,12 @@ $ sat.selection     &lt;dbl&gt; 3, 3, NA, 2, 1, NA, 3, 3, 2, 2, 2, NA, NA, 2, NA
 <section id="spending-online-vs-physical-store" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="spending-online-vs-physical-store"><span class="header-section-number">5.1</span> Spending: online vs physical store</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(customer) <span class="sc">+</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> store.spend),</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> <span class="st">&quot;black&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 </div>
@@ -3415,6 +3430,8 @@ $ sat.selection     &lt;dbl&gt; 3, 3, NA, 2, 1, NA, 3, 3, 2, 2, 2, NA, NA, 2, NA
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(customer) <span class="sc">+</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> store.spend, <span class="at">y =</span> online.spend,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> email)) <span class="sc">+</span></span>
@@ -3428,6 +3445,7 @@ $ sat.selection     &lt;dbl&gt; 3, 3, NA, 2, 1, NA, 3, 3, 2, 2, 2, NA, NA, 2, NA
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Spending online (dollars)&quot;</span>,</span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;Spending in the physical store vs online&quot;</span>,</span>
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Email&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -3440,8 +3458,11 @@ $ sat.selection     &lt;dbl&gt; 3, 3, NA, 2, 1, NA, 3, 3, 2, 2, 2, NA, NA, 2, NA
 <section id="age-vs-the-credit-score" class="level2" data-number="5.2">
 <h2 data-number="5.2" class="anchored" data-anchor-id="age-vs-the-credit-score"><span class="header-section-number">5.2</span> Age vs the credit score</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(customer) <span class="sc">+</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> credit.score))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -3455,8 +3476,11 @@ $ sat.selection     &lt;dbl&gt; 3, 3, NA, 2, 1, NA, 3, 3, 2, 2, 2, NA, NA, 2, NA
 <section id="pearson-correlation" class="level1" data-number="6">
 <h1 data-number="6"><span class="header-section-number">6</span> Pearson correlation</h1>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(<span class="at">x =</span> customer<span class="sc">$</span>age, <span class="at">y =</span> customer<span class="sc">$</span>credit.score,</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">&quot;pearson&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.2545045</code></pre>
 </div>
@@ -3464,16 +3488,22 @@ $ sat.selection     &lt;dbl&gt; 3, 3, NA, 2, 1, NA, 3, 3, 2, 2, 2, NA, NA, 2, NA
 <section id="matrix-correlation" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="matrix-correlation"><span class="header-section-number">6.1</span> Matrix correlation</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="ot">&lt;-</span> customer <span class="sc">|&gt;</span> </span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span> </span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">correlate</span>(<span class="at">use =</span> <span class="st">&quot;pairwise.complete.obs&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Correlation computed with
 • Method: &#39;pearson&#39;
 • Missing treated using: &#39;pairwise.complete.obs&#39;</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="sc">|&gt;</span> </span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>(<span class="at">triangular =</span> <span class="st">&quot;lower&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

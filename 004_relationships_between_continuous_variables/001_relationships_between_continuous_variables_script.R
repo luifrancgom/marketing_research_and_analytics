@@ -59,3 +59,100 @@ correlation_matrix <- customer |>
 
 correlation_matrix |> 
   autoplot(triangular = "lower")
+
+# Transform data 2 -----
+customer |>
+  mutate(log_store.spend = log(store.spend + 1)) |> 
+  ggplot() +
+  geom_histogram(aes(x = log_store.spend),
+                 color = "black",
+                 bins = 30)
+
+customer |>
+  ggplot() +
+  geom_histogram(aes(x = distance.to.store),
+                 color = "black",
+                 bins = 30) +
+  scale_x_continuous(transform = "log")
+
+customer |> 
+  ggplot() +
+  geom_point(aes(x = distance.to.store,
+                 y = store.spend))
+
+## Improving correlation ----
+
+cor(x = customer$store.spend, 
+    y = customer$distance.to.store)
+
+cor(x = customer$store.spend,
+    y = 1 / customer$distance.to.store)
+
+cor(x = customer$store.spend,
+    y = 1 / sqrt(customer$distance.to.store))
+
+# ggplot() +
+#  geom_function(fun = log, 
+#                xlim = c(-5, 5))
+
+cor(x = log(customer$store.spend + 1),
+    y = 1 / sqrt(customer$distance.to.store))
+
+customer |> 
+  mutate(distance.to.store_trans1 = 1 / distance.to.store) |> 
+  ggplot() +
+  geom_point(aes(x = distance.to.store_trans1, 
+                 y = store.spend))
+
+customer |> 
+  mutate(distance.to.store_trans2 = 1 / sqrt(distance.to.store)) |> 
+  ggplot() +
+  geom_point(aes(x = distance.to.store_trans2, 
+                 y = store.spend))
+
+# Categorical ordinal variables
+## You can do that but it is not
+## conceptually correct
+# cor(x = customer$sat.selection,
+#    y = customer$sat.service)
+customer |> 
+  ggplot() +
+  geom_point(aes(x = sat.service, y = sat.selection))
+
+customer |> 
+  ggplot() +
+  geom_point(aes(x = sat.service, y = sat.selection),
+             position = position_jitter(width = 0.2,
+                                        height = 0.2))
+
+# Alternative 1
+## Using numbers
+customer |> 
+  count(sat.service, sat.selection) |> 
+  ggplot() +
+  ## Check out 
+  ## https://ggplot2.tidyverse.org/reference/geom_text.html
+  geom_text(aes(x = sat.service, y = sat.selection,
+                label = n))
+
+# Alternative 2
+## Using colors
+customer |> 
+  count(sat.service, sat.selection) |> 
+  ggplot() +
+  ## Check out 
+  ## https://ggplot2.tidyverse.org/reference/geom_tile.html
+  geom_tile(aes(x = sat.service, y = sat.selection,
+                fill = n),
+            color = "black")  
+
+## Improving colors
+customer |> 
+  count(sat.service, sat.selection) |> 
+  ggplot() +
+  geom_tile(aes(x = sat.service, y = sat.selection,
+                fill = n),
+            color = "black") +
+  ## Check out 
+  ## https://ggplot2.tidyverse.org/reference/scale_gradient.html
+  scale_fill_gradient2()

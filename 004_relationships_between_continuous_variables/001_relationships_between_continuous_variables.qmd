@@ -5,6 +5,7 @@ format:
     embed-resources: true
     toc: true
     number-sections: true
+    code-fold: true
 editor: visual
 ---
 
@@ -15,7 +16,6 @@ library(tidyverse)
 library(skimr)
 library(corrr)
 ```
-
 
 # Import data
 
@@ -100,4 +100,3 @@ correlation_matrix <- customer |>
 correlation_matrix |> 
   autoplot(triangular = "lower")
 ```
-
