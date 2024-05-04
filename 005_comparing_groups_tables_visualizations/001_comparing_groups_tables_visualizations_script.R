@@ -138,4 +138,3 @@ segmentation |>
   labs(x = "Income (US dollars)",
        y = "",
        title = "Distribution of income by Segment and own home")
-
