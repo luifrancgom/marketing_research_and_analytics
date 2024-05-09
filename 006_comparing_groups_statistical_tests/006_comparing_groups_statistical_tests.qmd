@@ -1,26 +1,48 @@
 ---
-title: "Untitled"
-format: html
+title: "Comparing groups: statistical tests"
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    code-fold: true
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+#| message: false
+#| warning: false
+library(tidyverse)
+library(tidymodels)
 ```
 
-You can add options to executable code like this
+# Import data
 
 ```{r}
-#| echo: false
-2 * 2
+#| message: false
+# segmentation <- read_csv(file = "http://goo.gl/qw303p")
+# If this fail use the above code
+segmentation <- read_csv(file = "../000_data/005_data_chapter5.csv")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+# Exploring data
+
+```{r}
+segmentation |> glimpse()
+segmentation |> count(Segment)
+```
+
+# Chi squared test: given probabilities
+
+```{r}
+segmentation |> 
+  chisq_test(response = Segment,
+             p = c(1/4, 1/4, 1/4, 1/4))
+```
+
+# Chi squared test: independence
+
+```{r}
+segmentation |>
+  chisq_test(formula = subscribe ~ ownHome,
+             correct = FALSE)
+```
