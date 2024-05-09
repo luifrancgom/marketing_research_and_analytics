@@ -1,0 +1,212 @@
+---
+title: "Marketing report part 3"
+date: 1900-01-01
+author: 
+  - Norah Jones   
+  - Bill Gates
+format: 
+  html:
+    toc: true
+    code-fold: true
+    number-sections: true
+    embed-resources: true
+editor: visual
+---
+
+```{r }
+#| label: libraries
+#| echo: false
+
+# Check out https://quarto.org/docs/output-formats/html-basics.html
+## to get started with html documents
+
+# Check out https://quarto.org/docs/reference/formats/html.html
+## to examine all the possible options for html documents
+
+# You can control the execution options of each code 
+# chunk
+## For more information check out 
+### https://quarto.org/docs/computations/execution-options.html
+# You can include the libraries you are going to use here
+library(sweep)
+```
+
+# Modeling
+
+## Introduction
+
+Once your group has finish filling all the sections, add some text here describing the principal findings. Be straightforward and concise taking into account that it is an executive report.
+
+## Import data
+
+Add some text if your group consider to be necessary.
+
+```{r}
+# Import the data from the sweep package
+bike_sales <- bike_sales
+```
+
+## The product gap
+
+Add some text pointing out the principal findings as a result of generating the following visualization about the [product gap](https://en.wikipedia.org/wiki/Gap_analysis):
+
+Use the available functions from the `tidyverse` to create a visualization so the Research and Development (R & D) division can understand the [product gap](https://en.wikipedia.org/wiki/Gap_analysis)
+
+Brake the process in 2 steps: 
+
+- Prepare the data
+
+    -   You can use `select`, `group_by`, `summarise`, `ungroup`, `arrange`, `mutate` and `fct_reorder`
+
+```{r}
+# Use bike_sales to calculate the total revenue
+# grouped by model, category.secondary and frame
+
+## You can proceed in the following way
+### This is only a template you can modify the code
+### if you want to add or apply another way to 
+### prepare the data
+#### Remember to load the tidyverse library: library(tidyverse)
+
+# total_sales_by_model_second_category_frame <- bike_sales |> 
+#   select(model, category.secondary, frame, price.ext) |> 
+#   group_by(model, category.secondary, frame) |> 
+#   summarise(total_revenue = sum(price.ext)) |> 
+#   ungroup() |> 
+#   arrange(desc(total_revenue)) |> 
+#   mutate(category.secondary = fct_reorder(.f = category.secondary,
+#                                           .x = total_revenue))
+# 
+# total_sales_by_model_second_category_frame
+```
+
+- Generate an informative plot
+
+    -   You can use `ggplot`, `geom_point`, `position_jitter`, `scale_y_continuous`, `scales::label_dollar` and `facet_wrap`
+    
+    -   You can also use `labs` to personalize the labels of the x-axis, y-axis and title and change the colors if you want
+    
+Using `facet_wrap` you can identify which combinations between `category.secondary` and `frame` are empty without data where they correspond to the [product gap](https://en.wikipedia.org/wiki/Gap_analysis)
+
+Also check out the combinations that you reported in the first marketing report to verify that your plot is reflecting this aspect
+    
+```{r}
+# You can visualize the product gap by generating 
+# group visualizations by category.secondary
+# when inspecting the relation between frame and
+# total revenue
+
+## You can proceed in the following way
+### This is only a template you can modify the code
+### if you want to add or apply another way to 
+### visualize the data or personalize the plot
+
+# total_sales_by_model_second_category_frame |> 
+#   ggplot() + 
+#   geom_point(aes(x = frame, y = total_revenue), 
+#              position = position_jitter(width = 0.2, 
+#                                         height = 0.2)) +
+#   scale_y_continuous(labels = scales::label_dollar()) +
+#   facet_wrap(facets = vars(category.secondary))
+```
+
+## Determine the price of a new product
+
+Add some text pointing out the principal findings as a result of applying a linear statistical model to determine the price of a new product
+
+### Selecting a new potential product
+
+Once you have identify the combination of categories that belong to the product gap please choose a product that is not offer by the corporation so the Research and Development (R & D) division can develop it
+
+According to the results of the first marketing report remember that the categories that belong to the product gap are:
+
+-   Cyclocross Aluminum
+-   Fat Bike Carbon
+-   Over Mountain Aluminum
+-   Sport Carbon
+-   Triathalon Aluminum
+
+Taking into account that it is difficult for the Research and Development (R & D) division to develop 5 new products please recommend this division a new product to develop by pointing out a sound reason based on you marketing expertise
+
+### Building a model to price a new product
+
+Once you have choose the new product you want to recommend to the Research and Development (R & D) division in this section you are going to determine the price of this new product using similar products already offer by the corporation
+
+#### Choosing a model
+
+Using the results developed in the second marketing report in relation to the **Analysis of Variance (ANOVA)** section choose a model that you consider appropiate.
+
+Recall that you explored the following models, which are organized by level of complexity from the lowest to the highest:
+
+-   `price ~ category.secondary`
+-   `price ~ category.secondary + frame`
+-   `price ~ category.secondary*frame`
+-   `price ~ category.secondary*frame*bikeshop.state`
+
+**Note 1**: If the model is to complex like `price ~ category.secondary*frame*bikeshop.state` you will obtain a considerable parameters but if the model is to simple like `price ~ category.secondary` you will not be able to obtain good predictions. Choose the level of complexity that you consider appropriate to help the Research and Development (R & D) division and to determine the new price of the new product
+
+**Note 2**: If you find that the model generates silly results, like for example negative or 0 values for the price, abandon the choosen model and use another model or change the product gap combination or discard particular locations where the product will going to be offer.
+
+#### Fit the model
+
+One you have choose the model, fit it using the function `lm` and explore the results of the model with the `tidy` function from the `tidymodels` library:
+
+```{r}
+# For example if you choose the model
+# price ~ category.secondary*frame*bikeshop.state 
+# you will fit the following model
+## Remember to load the tidymodels library: library(tidymodels) 
+
+# model <- lm(formula = price ~ category.secondary*frame*bikeshop.state,
+#             data = bike_sales)
+# 
+# model |> tidy()
+```
+
+#### Predict the price of the new product
+
+Once you fit the model and taking into account the selected new potential product predict the new price for the new product
+
+Remember to create a tibble or data frame with the new data you want to predict
+
+In this part you can use the functions `predict`, `enframe` and `bind_cols` to present your results in an organized way 
+
+```{r}
+# For example if you choose the model
+# price ~ category.secondary*frame*bikeshop.state
+# and the new product to develop as Cyclocross Aluminium
+# you proceed in the following way
+
+## In this case because the model 
+## price ~ category.secondary*frame*bikeshop.state
+## include the bikeshop.state you need to select at least 
+## one state to make predictions
+
+### Lets predict the price for 3 states and the combination
+### Triathalon Aluminum: 
+#### "AZ": Arizona 
+#### "CA": California
+#### "CO": Colorado
+#### category.secondary = "Triathalon"
+#### frame = "Aluminum"
+
+# new_data <- tibble(category.secondary = c("Triathalon", "Triathalon", "Triathalon"),
+#                    frame = c("Aluminum", "Aluminum", "Aluminum"),
+#                    bikeshop.state = c("AZ", "CA", "CO"))
+# 
+# predict(object = model, newdata = new_data) |>
+#   enframe(name = "observation", value = "price_prediction") |>
+#   bind_cols(new_data)
+
+### If you check this example you will get
+#   observation price_prediction category.secondary frame    bikeshop.state
+#   <chr>                  <dbl> <chr>              <chr>    <chr>         
+# 1 1                     -705.  Triathalon         Aluminum AZ            
+# 2 2                       95.8 Triathalon         Aluminum CA            
+# 3 3                    -1157.  Triathalon         Aluminum CO
+
+#### In this case it only make sense to offer this product in California (CA)
+#### In the remaining states, the product is not worth offering. In such cases 
+#### you would have to give it free to the public.
+```
+
