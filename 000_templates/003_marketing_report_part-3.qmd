@@ -52,9 +52,9 @@ Add some text pointing out the principal findings as a result of generating the 
 
 Use the available functions from the `tidyverse` to create a visualization so the Research and Development (R & D) division can understand the [product gap](https://en.wikipedia.org/wiki/Gap_analysis)
 
-Brake the process in 2 steps: 
+Brake the process in 2 steps:
 
-- Prepare the data
+-   Prepare the data
 
     -   You can use `select`, `group_by`, `summarise`, `ungroup`, `arrange`, `mutate` and `fct_reorder`
 
@@ -80,16 +80,16 @@ Brake the process in 2 steps:
 # total_sales_by_model_second_category_frame
 ```
 
-- Generate an informative plot
+-   Generate an informative plot
 
     -   You can use `ggplot`, `geom_point`, `position_jitter`, `scale_y_continuous`, `scales::label_dollar` and `facet_wrap`
-    
+
     -   You can also use `labs` to personalize the labels of the x-axis, y-axis and title and change the colors if you want
-    
+
 Using `facet_wrap` you can identify which combinations between `category.secondary` and `frame` are empty without data where they correspond to the [product gap](https://en.wikipedia.org/wiki/Gap_analysis)
 
 Also check out the combinations that you reported in the first marketing report to verify that your plot is reflecting this aspect
-    
+
 ```{r}
 # You can visualize the product gap by generating 
 # group visualizations by category.secondary
@@ -169,7 +169,7 @@ Once you fit the model and taking into account the selected new potential produc
 
 Remember to create a tibble or data frame with the new data you want to predict
 
-In this part you can use the functions `predict`, `enframe` and `bind_cols` to present your results in an organized way 
+In this part you can use the functions `predict`, `enframe` and `bind_cols` to present your results in an organized way
 
 ```{r}
 # For example if you choose the model
@@ -209,4 +209,3 @@ In this part you can use the functions `predict`, `enframe` and `bind_cols` to p
 #### In the remaining states, the product is not worth offering. In such cases 
 #### you would have to give it free to the public.
 ```
-

@@ -90,9 +90,9 @@ In this third report you are going to use data from `bike_sales` as a third step
 
 -   Estimating an statistical linear model to determine the price of a new product not offer by the company with information of the products the corporation already offer to support the Research and Development (R & D) division
 
--   Build a customer segmentation model by grouping the bike shops into clusters to suppor the marketing team 
+-   Build a customer segmentation model by grouping the bike shops into clusters to support the marketing team
 
-Use the template `002_marketing_report_part-3.qmd` to build the marketing report. You can find the template to use in 2 locations. Choose the option of your preference:
+Use the template `003_marketing_report_part-3.qmd` to build the marketing report. You can find the template to use in 2 locations. Choose the option of your preference:
 
 -   <https://github.com/luifrancgom/marketing_research_and_analytics/> \> 000_templates \> 003_marketing_report_part-3.qmd
 
