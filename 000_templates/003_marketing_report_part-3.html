@@ -3088,6 +3088,13 @@ vertical-align: -.125em;
   <li><a href="#selecting-a-new-potential-product" id="toc-selecting-a-new-potential-product" class="nav-link" data-scroll-target="#selecting-a-new-potential-product"><span class="header-section-number">1.4.1</span> Selecting a new potential product</a></li>
   <li><a href="#building-a-model-to-price-a-new-product" id="toc-building-a-model-to-price-a-new-product" class="nav-link" data-scroll-target="#building-a-model-to-price-a-new-product"><span class="header-section-number">1.4.2</span> Building a model to price a new product</a></li>
   </ul></li>
+  <li><a href="#segment-bike-shops-with-k-means-clustering" id="toc-segment-bike-shops-with-k-means-clustering" class="nav-link" data-scroll-target="#segment-bike-shops-with-k-means-clustering"><span class="header-section-number">1.5</span> Segment bike shops with k-means clustering</a>
+  <ul class="collapse">
+  <li><a href="#bike-shop-revenue-trends" id="toc-bike-shop-revenue-trends" class="nav-link" data-scroll-target="#bike-shop-revenue-trends"><span class="header-section-number">1.5.1</span> Bike shop revenue trends</a></li>
+  <li><a href="#prepare-data" id="toc-prepare-data" class="nav-link" data-scroll-target="#prepare-data"><span class="header-section-number">1.5.2</span> Prepare data</a></li>
+  <li><a href="#performing-k-means-clustering" id="toc-performing-k-means-clustering" class="nav-link" data-scroll-target="#performing-k-means-clustering"><span class="header-section-number">1.5.3</span> Performing k-means clustering</a></li>
+  <li><a href="#data-visualization-with-k-means-clustering-and-principal-component-analysis" id="toc-data-visualization-with-k-means-clustering-and-principal-component-analysis" class="nav-link" data-scroll-target="#data-visualization-with-k-means-clustering-and-principal-component-analysis"><span class="header-section-number">1.5.4</span> Data visualization with k-means clustering and principal component analysis</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -3304,6 +3311,191 @@ vertical-align: -.125em;
 <span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="do">#### In this case it only make sense to offer this product in California (CA)</span></span>
 <span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="do">#### In the remaining states, the product is not worth offering. In such cases </span></span>
 <span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="do">#### you would have to give it free to the public.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+</section>
+<section id="segment-bike-shops-with-k-means-clustering" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="segment-bike-shops-with-k-means-clustering"><span class="header-section-number">1.5</span> Segment bike shops with k-means clustering</h2>
+<p>Add some text pointing out the principal findings as a result of applying a k-means clustering model to segment the bike shops</p>
+<section id="bike-shop-revenue-trends" class="level3" data-number="1.5.1">
+<h3 data-number="1.5.1" class="anchored" data-anchor-id="bike-shop-revenue-trends"><span class="header-section-number">1.5.1</span> Bike shop revenue trends</h3>
+<p>In this section the objective is to group and aggregate data to calculate the total revenue using the variable <code>price.ext</code></p>
+<ul>
+<li><p>Select the variables <code>bikeshop.name</code>, <code>price.ext</code>, <code>model</code>, <code>category.primary</code>, <code>category.secondary</code> and <code>frame</code></p></li>
+<li><p>Group the data by <code>bikeshop.name</code>, <code>model</code>, <code>category.primary</code>, <code>category.secondary</code> and <code>frame</code></p></li>
+<li><p>Calculate the total revenue and ungroup the data using the <code>ungroup</code> function or the <code>.groups = &quot;drop&quot;</code> argument from <code>summarise</code></p></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In this part you can use the functions</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># select, group_by and summarise</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="do">## You can use at the end ungroup of </span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## the argument .groups = &quot;drop&quot; to </span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">## ungroup the data</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="do">### If you name the variable as total_revenue the first 5 rows </span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="do">### and the first and last column of the  final data will be:</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># # A tibble: 5 × 2</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   bikeshop.name      total_revenue</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   &lt;chr&gt;                      &lt;dbl&gt;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 Albuquerque Cycles         92800</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 2 Albuquerque Cycles          5320</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 3 Albuquerque Cycles          8310</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 4 Albuquerque Cycles         19170</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 5 Albuquerque Cycles          1620</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="do">### Remember that you will get 6 columns but I am only showing</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="do">### 2 columns of the data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="prepare-data" class="level3" data-number="1.5.2">
+<h3 data-number="1.5.2" class="anchored" data-anchor-id="prepare-data"><span class="header-section-number">1.5.2</span> Prepare data</h3>
+<p>The objective of this part is to:</p>
+<ul>
+<li><p>Normalize the data so you can apply latter the <strong>principal component analysis</strong> dimensionality reduction technique</p></li>
+<li><p>Create a customer-product table with a column that includes all the bikeshops and the rest of the columns with information about the percentage of total revenue of the <strong>97</strong> models offered by the corporation and described in the variable <code>model</code></p></li>
+</ul>
+<section id="normalization" class="level4" data-number="1.5.2.1">
+<h4 data-number="1.5.2.1" class="anchored" data-anchor-id="normalization"><span class="header-section-number">1.5.2.1</span> Normalization</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Follow this template to normalize the data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># bike_sales_total_revenue_pct &lt;- bike_sales_total_revenue |&gt; </span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(bikeshop.name) |&gt; </span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(total_revenue_pct = total_revenue / sum(total_revenue)) |&gt; </span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   ungroup()</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="do">## You can check the data using</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="do">### bike_sales_total_revenue_pct |&gt; glimpse()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="customer-product-table" class="level4" data-number="1.5.2.2">
+<h4 data-number="1.5.2.2" class="anchored" data-anchor-id="customer-product-table"><span class="header-section-number">1.5.2.2</span> Customer-product table</h4>
+<p>In this part you are going to use the function <code>pivot_wider</code> to create the customer-product table. For more information checkout <code>?pivot_wider</code></p>
+<p>Also check out the argument <code>values_fill</code> from this function and try this function with and without this argument so you can understand why it is important to use <code>values_fill = 0</code></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Follow this template to create a customer-product table</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># customer_product_table &lt;- bike_sales_total_revenue_pct |&gt; </span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(bikeshop.name,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#          model,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#          total_revenue_pct) |&gt; </span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   pivot_wider(id_cols = bikeshop.name, </span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#               names_from = model, </span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#               values_from = total_revenue_pct, </span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#               values_fill = 0)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="do">## You can check the data using</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="do">### bike_sales_total_revenue_pct |&gt; glimpse()</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="do">#### A particular cell of the data will correspond to </span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="do">#### the percentage revenue generated by a model and a </span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="do">#### bike shop</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="do">#### For example if the row and the column corresponds to</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="do">##### bikeshop.name = Albuquerque Cycles</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="do">##### `Bad Habit 1` = 0.00571</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="do">#### It will mean that this model has a participation </span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="do">#### in the total revenue generated by Albuquerque </span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="do">#### Cycles of 0.571 %</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="performing-k-means-clustering" class="level3" data-number="1.5.3">
+<h3 data-number="1.5.3" class="anchored" data-anchor-id="performing-k-means-clustering"><span class="header-section-number">1.5.3</span> Performing k-means clustering</h3>
+<p>The objective of this section is to apply the k-means clustering technique by grouping the bike shops in <strong>5</strong> clusters</p>
+<ul>
+<li>If you want you can try with a different number of clusters but first it is important that you at least be able to complete the task with <strong>5</strong> clusters</li>
+</ul>
+<p>Use the <code>kmeans</code> function with the argument <code>centers = 5</code> and applying it to the customer product table</p>
+<ul>
+<li><p>Remember that <code>kmeans</code> only works with numerical data so you will need to drop the <code>bikeshop.name</code> from the customer product table</p>
+<ul>
+<li>Checkout <code>?kmeans</code> and the argument <code>x</code> in relation to this aspect</li>
+</ul></li>
+<li><p>Once you have apply the k-means clustering technique save this object as <code>kmeans_object</code></p></li>
+</ul>
+<section id="extracting-the-cluster-assignment" class="level4" data-number="1.5.3.1">
+<h4 data-number="1.5.3.1" class="anchored" data-anchor-id="extracting-the-cluster-assignment"><span class="header-section-number">1.5.3.1</span> Extracting the cluster assignment</h4>
+<p>Now that you have apply the k-means clustering technique you are going to extract the clusters and assign them to each bike shop</p>
+<p>You are going to use the <code>glance</code> function from the <code>tidymodels</code> library to extract the cluster assignment and select the bike shop names and the clusters to obtain the information required by the marketing team</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Follow this template to obtain the relevant information</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># required by the marketing team</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># clusters &lt;- kmeans_object |&gt; </span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   augment(data = customer_product_table) |&gt; </span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(bikeshop.name, .cluster)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="do">## You can check the data using</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="do">### clusters |&gt; glimpse()</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="do">### clusters |&gt; count(.cluster)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="data-visualization-with-k-means-clustering-and-principal-component-analysis" class="level3" data-number="1.5.4">
+<h3 data-number="1.5.4" class="anchored" data-anchor-id="data-visualization-with-k-means-clustering-and-principal-component-analysis"><span class="header-section-number">1.5.4</span> Data visualization with k-means clustering and principal component analysis</h3>
+<p>It is difficult to visualize the clusters that are identified using <code>kmeans</code> taking into account that in our case we use <strong>97</strong> variables (the participation of the total revenue of the <strong>97</strong> models) and a human being can not visualize a plot 97 dimensional plot</p>
+<p>In this section you are going to reduce the data complexity by generating a 2 dimensional projection of the <strong>97</strong> variables by applying the principal component analysis technique</p>
+<p>Use the <code>prcomp</code> function with the argument <code>center = TRUE</code> and applying it to the customer product table</p>
+<ul>
+<li><p>Remember that <code>prcomp</code> only works with numerical data so you will need to drop the <code>bikeshop.name</code> from the customer product table</p>
+<ul>
+<li>Checkout <code>?prcomp</code> and the argument <code>x</code> in relation to this aspect</li>
+</ul></li>
+<li><p>Also take into account that you don’t need to scale the data using the argument <code>scale. = TRUE</code> because each data point from the customer product table corresponds to the participation of the total revenue of each model generated by each bike shop</p></li>
+<li><p>Once you have apply the principal component analysis technique save this object as <code>pca_object</code></p></li>
+</ul>
+<section id="extracting-the-first-2-principal-components" class="level4" data-number="1.5.4.1">
+<h4 data-number="1.5.4.1" class="anchored" data-anchor-id="extracting-the-first-2-principal-components"><span class="header-section-number">1.5.4.1</span> Extracting the first 2 principal components</h4>
+<p>In this section you are going to extract the first 2 principal components so you can use them to visualize the clusters in a 2 dimensional plot</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Follow this template to obtain the first 2 </span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># principal components</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># pca_1_2 &lt;- pca_object$x |&gt; </span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   as_tibble() |&gt; </span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(PC1, PC2)</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Name this object as pca_1_2 so you will remember</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="do">## that it contains the first 2 principal components</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="do">## You can check the data using</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="do">### pca_1_2 |&gt; glimpse()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="cluster-visualization-using-k-means-and-principal-component-analysis" class="level4" data-number="1.5.4.2">
+<h4 data-number="1.5.4.2" class="anchored" data-anchor-id="cluster-visualization-using-k-means-and-principal-component-analysis"><span class="header-section-number">1.5.4.2</span> Cluster visualization using k-means and principal component analysis</h4>
+<p>Using the information about the cluster assignment and the 2 principal components consolidate these parts into a tibble to generate a plot and visualize the clusters using the 2 dimensional projection</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Follow this template to visualize the fill clusters</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># clusters_pca_1_2 |&gt; </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot() + </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(x = PC1, </span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#                  y = PC2,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#                  color = .cluster))</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Improve the plot by adding labels to the x, y axis </span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="do">## and a title to explain the visualization to the</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="do">## marketing team</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
