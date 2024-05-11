@@ -3079,6 +3079,8 @@ vertical-align: -.125em;
   <li><a href="#exploring-data" id="toc-exploring-data" class="nav-link" data-scroll-target="#exploring-data">Exploring data</a></li>
   <li><a href="#chi-squared-test-given-probabilities" id="toc-chi-squared-test-given-probabilities" class="nav-link" data-scroll-target="#chi-squared-test-given-probabilities">Chi squared test: given probabilities</a></li>
   <li><a href="#chi-squared-test-independence" id="toc-chi-squared-test-independence" class="nav-link" data-scroll-target="#chi-squared-test-independence">Chi squared test: independence</a></li>
+  <li><a href="#t-test-mean-difference" id="toc-t-test-mean-difference" class="nav-link" data-scroll-target="#t-test-mean-difference">t-test: mean difference</a></li>
+  <li><a href="#f-test-multiple-mean-difference" id="toc-f-test-multiple-mean-difference" class="nav-link" data-scroll-target="#f-test-multiple-mean-difference">f-test: multiple mean difference</a></li>
   </ul>
 </nav>
 </div>
@@ -3185,6 +3187,61 @@ $ Segment   &lt;chr&gt; &quot;Suburb mix&quot;, &quot;Suburb mix&quot;, &quot;Su
   statistic chisq_df p_value
       &lt;dbl&gt;    &lt;int&gt;   &lt;dbl&gt;
 1    0.0741        1   0.785</code></pre>
+</div>
+</div>
+</section>
+<section id="t-test-mean-difference" class="level1">
+<h1>t-test: mean difference</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>t_test <span class="ot">&lt;-</span> <span class="fu">t.test</span>(<span class="at">formula =</span> income <span class="sc">~</span> ownHome,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">mu =</span> <span class="dv">0</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                 <span class="co"># alpha = 1 - conf.level</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                 <span class="do">## 0.05</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> segmentation)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>t_test</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  income by ownHome
+t = -3.2731, df = 285.25, p-value = 0.001195
+alternative hypothesis: true difference in means between group ownNo and group ownYes is not equal to 0
+95 percent confidence interval:
+ -12080.155  -3007.193
+sample estimates:
+ mean in group ownNo mean in group ownYes 
+            47391.01             54934.68 </code></pre>
+</div>
+</div>
+</section>
+<section id="f-test-multiple-mean-difference" class="level1">
+<h1>f-test: multiple mean difference</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>anova_table_2_or_more_var <span class="ot">&lt;-</span> <span class="fu">aov</span>(<span class="at">formula =</span> income <span class="sc">~</span> Segment<span class="sc">*</span>ownHome,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">data =</span> segmentation) <span class="sc">|&gt;</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anova</span>()</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>anova_table_2_or_more_var</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: income
+                 Df     Sum Sq    Mean Sq F value Pr(&gt;F)    
+Segment           3 5.4970e+10 1.8323e+10 81.1305 &lt;2e-16 ***
+ownHome           1 6.9918e+07 6.9918e+07  0.3096 0.5784    
+Segment:ownHome   3 2.6329e+08 8.7762e+07  0.3886 0.7613    
+Residuals       292 6.5948e+10 2.2585e+08                   
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 </div>
 </div>
 </section>

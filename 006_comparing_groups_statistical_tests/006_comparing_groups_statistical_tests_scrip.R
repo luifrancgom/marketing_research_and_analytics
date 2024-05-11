@@ -76,3 +76,111 @@ pchisq(q = 0.074113,
        df = 1, 
        lower.tail = FALSE)
 
+# Distributions ---- 
+
+## Binomial distribution ----
+### https://en.wikipedia.org/wiki/Binomial_distribution
+n <- 40
+p <- 0.5
+
+?dbinom
+toss_coin <- tibble(x = 0:40) |> 
+  mutate(f_x = dbinom(x = x,
+                      size = n,
+                      prob = p))
+
+toss_coin |> 
+  ggplot() + 
+  geom_point(aes(x = x, y = f_x))
+
+## Normal distribution ----
+### https://en.wikipedia.org/wiki/Normal_distribution
+?dnorm
+toss_coin |> 
+  ggplot() + 
+  geom_point(aes(x = x, y = f_x)) + 
+  geom_function(fun = dnorm,
+                args = list(mean = n*p,
+                            sd = sqrt(n*p*(1-p))),
+                color = "red")
+
+## Chi squared
+### https://en.wikipedia.org/wiki/Chi-squared_distribution
+?dchisq
+
+tibble(z_1 = rnorm(n = 1000, mean = 0, sd = 1),
+       z_2 = rnorm(n = 1000, mean = 0, sd = 1),
+       z_3 = rnorm(n = 1000, mean = 0, sd = 1),
+       z_1_2 = z_1^2,
+       z_2_2 = z_1^2,
+       z_3_2 = z_1^2,
+       # In this case chi will have
+       # 3 degrees of freedom
+       ## https://en.wikipedia.org/wiki/Chi-squared_distribution
+       chi = z_1_2 + z_2_2 + z_3_2) |> 
+  ggplot() +
+  geom_histogram(aes(x = chi,
+                     y = after_stat(density)),
+                 color = "black",
+                 # Make histogram start at zero
+                 boundary = 0) +
+  geom_function(fun = dchisq,
+                args = list(df = 3),
+                color = "red",
+                xlim = c(0, 30))
+
+# t-test: mean difference ----
+?t.test
+segmentation |> 
+  group_by(ownHome) |> 
+  summarise(mean_income = mean(income),
+            var_income = var(income),
+            n = n())
+
+qt(p = 0.025, df = 285.25, lower.tail = TRUE)
+
+## Applying t-test
+?t.test
+
+t_test <- t.test(formula = income ~ ownHome,
+                 alternative = "two.sided",
+                 mu = 0,
+                 # alpha = 1 - conf.level
+                 ## 0.05
+                 conf.level = 0.95,
+                 data = segmentation)
+
+t_test
+
+# p-value = 0.001195
+pt(q = -3.2731, df = 285.25) * 2
+
+# F- test: difference between multiple means ----
+segmentation |> 
+  group_by(Segment) |> 
+  summarise(mean_income = mean(income),
+            var_income = var(income),
+            n = n())
+
+mean(segmentation$income)
+
+?aov
+?anova
+f_test <- aov(formula = income ~ Segment,
+              data = segmentation) 
+
+anova_table <- f_test |> anova()
+
+f_test
+anova_table
+
+# Multiple variables f-statistic
+anova_table_2_or_more_var <- aov(formula = income ~ Segment + ownHome + Segment:ownHome,
+              data = segmentation) |> 
+  anova()
+
+anova_table_2_or_more_var <- aov(formula = income ~ Segment*ownHome,
+                                 data = segmentation) |> 
+  anova()
+
+anova_table_2_or_more_var
