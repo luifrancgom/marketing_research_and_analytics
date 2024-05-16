@@ -3,26 +3,118 @@ title: "Identifying drivers of outcomes: Linear models"
 format: 
   html:
     embed-resources: true
+    code-fold: true
+    toc: true
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+#| message: false
+library(tidyverse)
+library(skimr)
+library(corrr)
+library(tidymodels)
 ```
 
-You can add options to executable code like this
+# Import data
 
 ```{r}
-#| echo: false
-2 * 2
+#| message: false
+amusement_park <- read_csv("../000_data/007_data_chapter7.csv")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+# Explore data 
+
+```{r}
+amusement_park |> glimpse()
+```
+
+# Transform data
+
+```{r}
+amusement_park <- amusement_park |> 
+  mutate(weekend = factor(x = weekend,
+                          ordered = FALSE),
+         num.child = as.integer(x = num.child),
+         logdist = log(x = distance, 
+                       base = exp(1)))
+```
+
+# Summary statistics
+
+```{r}
+amusement_park |> 
+  skim()
+```
+
+## Inspecting correlations
+
+```{r}
+correlation_matrix <- amusement_park |> 
+  select(num.child, rides:logdist) |> 
+  correlate()
+
+correlation_matrix
+```
+
+## Visualizing correlations
+
+```{r}
+correlation_matrix |> 
+  autoplot(triangular = "lower")
+```
+
+# Linear models
+
+## Visualizing linear models
+
+```{r}
+amusement_park |>
+  ggplot(aes(x = rides, y = overall)) + 
+  geom_point() +
+  # https://ggplot2.tidyverse.org/reference/geom_smooth.html >
+  # Examples
+  geom_smooth(method = "lm",
+              se = FALSE)
+```
+
+## Estimating linear models
+
+```{r}
+model1 <- lm(formula = overall ~ rides,
+             data = amusement_park)
+
+model1
+```
+
+### Inspecting the linear model
+
+```{r}
+summary(model1)
+tidy(model1)
+```
+
+## Making predictions 
+
+```{r}
+model1$coefficients
+
+### Assume we have a client that scores
+### the rides with a value of 95
+-94.962246 + 1.703285*95
+```
+
+## Confidence intervals
+
+```{r}
+tidy(model1, conf.int = 0.95)
+```
+
+## Checking assumptions
+
+```{r}
+par(mfrow=c(2,2))
+plot(model1)
+par(mfrow=c(1,1))
+```
+
