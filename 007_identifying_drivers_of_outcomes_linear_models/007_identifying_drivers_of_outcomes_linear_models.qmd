@@ -14,6 +14,7 @@ library(tidyverse)
 library(skimr)
 library(corrr)
 library(tidymodels)
+library(coefplot)
 ```
 
 # Import data
@@ -23,7 +24,7 @@ library(tidymodels)
 amusement_park <- read_csv("../000_data/007_data_chapter7.csv")
 ```
 
-# Explore data 
+# Explore data
 
 ```{r}
 amusement_park |> glimpse()
@@ -94,7 +95,7 @@ summary(model1)
 tidy(model1)
 ```
 
-## Making predictions 
+## Making predictions
 
 ```{r}
 model1$coefficients
@@ -116,5 +117,87 @@ tidy(model1, conf.int = 0.95)
 par(mfrow=c(2,2))
 plot(model1)
 par(mfrow=c(1,1))
+```
+
+## Multiple linear regression
+
+```{r}
+model2 <- lm(formula =  overall ~ rides + games + wait + clean,
+             data = amusement_park)
+
+model2
+```
+
+### Checking the assumptions of the model
+
+```{r}
+par(mfrow = c(2,2))
+plot(model2)
+par(mfrow = c(1,1))
+```
+
+### Inspecting the model
+
+```{r}
+summary(model2)
+```
+
+### Confidence intervals
+
+```{r}
+tidy(model2, conf.int = 0.95)
+coefplot(model = model2,
+         intercept = FALSE,
+         lwdOuter = 1.5)
+```
+
+### Comparing models
+
+#### R squared adjusted
+
+```{r}
+summary(model1)$adj.r.squared
+summary(model2)$adj.r.squared
+```
+
+#### Analysis of variance (ANOVA)
+
+```{r}
+anova_lm <- anova(model1,
+                  model2,
+                  test = "F")
+
+anova_lm
+```
+
+### Predictions
+
+#### Manual
+
+```{r}
+(-131.4091939 +
+    # rides
+    0.5290780*70 +
+    # games
+    0.1533361*60 +
+    # wait
+    0.5533264*40 +
+    #clean
+    0.9842126*90)
+```
+
+#### In a more automatic way
+
+```{r}
+new_data <- tibble(rides = c(30, 70, 100),
+                   games = c(10, 80, 100),
+                   wait = c(57, 60, 100),
+                   clean = c(90, 93, 100))
+
+predict(object = model2,
+        newdata = new_data) |> 
+  enframe(name = "observation", 
+          value = "pred_overall") |> 
+  bind_cols(new_data)
 ```
 
