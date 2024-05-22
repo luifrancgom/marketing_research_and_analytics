@@ -1,0 +1,30 @@
+---
+title: "Reducing data complexity"
+format: 
+  html:
+    embed-resources: true
+    code-fold: true
+    toc: true
+editor: visual
+---
+
+```{r}
+#| message: false
+library(tidyverse)
+```
+
+# Import data
+
+```{r}
+#| message: false
+
+# consumer_brand <- read_csv("http://goo.gl/IQl8nc")
+consumer_brand <- read_csv("../000_data/008_data_chapter8.csv")
+```
+
+# Explore data
+
+```{r}
+consumer_brand |> glimpse()
+```
+
