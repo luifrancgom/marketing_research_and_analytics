@@ -4,7 +4,6 @@ format:
   html:
     embed-resources: true
     code-fold: true
-    toc: true
 editor: visual
 ---
 
@@ -27,4 +26,3 @@ consumer_brand <- read_csv("../000_data/008_data_chapter8.csv")
 ```{r}
 consumer_brand |> glimpse()
 ```
-
