@@ -1,9 +1,11 @@
 # Libraries ----
-# library(imager)
+library(imager)
 library(tidyverse)
 library(skimr)
 library(corrr)
 library(tidyheatmaps)
+library(tidymodels)
+library(ggbiplot)
 
 # Import data ----
 # consumer_brand <- read_csv("http://goo.gl/IQl8nc")
@@ -88,20 +90,89 @@ tidyheatmap(df = brand_mean_long,
             cluster_rows = TRUE, 
             cluster_cols = TRUE)
 
-# Using images to understand data complexity ----
+# PCA example ----
+set.seed(seed = 1234)
+consumer_brand_sample <- consumer_brand |>
+  slice_sample(n = 1, by = brand) |> 
+  select(brand, perform, leader)
 
-# boat_gray <- imager::load.image(file = "000_images/008_boat_gray_512_x_512.tiff")
-# plot(boat_gray)
+consumer_brand_sample
+
+consumer_brand_sample |> 
+  summarise(across(.cols = perform:leader,
+                   .fns = mean))
+
+# Using images to understand data complexity ----
+boat_gray <- load.image(file = "000_images/008_boat_gray_512_x_512.tiff")
+plot(boat_gray)
 # 
-# boat_gray_long <- boat_gray |> 
-#   as.data.frame() |> 
-#   as_tibble()
+boat_gray_long <- boat_gray |>
+  as.data.frame() |>
+  as_tibble()
+
+boat_gray_long
 # 
-# boat_gray_long
-# 
-# boat_gray_wider <- boat_gray_long |>
-#   pivot_wider(id_cols = x, 
-#               names_from = y, 
-#               values_from = value)
-# 
-# boat_gray_wider
+boat_gray_wider <- boat_gray_long |>
+  pivot_wider(id_cols = x,
+              names_from = y,
+              values_from = value)
+
+boat_gray_wider
+
+# PCA applied to marketing
+consumer_brand_sample_matrix <- consumer_brand_sample |> 
+  select(perform:leader) |> 
+  as.matrix()
+
+consumer_brand_sample_matrix_pca <- consumer_brand_sample_matrix |> 
+  prcomp(center = TRUE, 
+         scale. = TRUE)
+
+consumer_brand_sample_matrix_pca
+
+consumer_brand_sample_matrix_pca |> 
+  str()
+
+consumer_brand_sample_matrix_pca |> 
+  glimpse()
+
+scores <- consumer_brand_sample_matrix_pca$x
+scores  
+
+loadings <- consumer_brand_sample_matrix_pca$rotation
+loadings
+
+
+consumer_brand_sample_matrix_center_scale <- consumer_brand_sample_matrix |>
+  scale(center = TRUE, scale = TRUE) 
+
+consumer_brand_sample_matrix_center_scale
+
+
+consumer_brand_sample_matrix_center_scale %*% loadings
+scores
+
+scores %*% t(loadings)
+
+scores[, 1] %*% t(loadings[,1]) |> 
+  scale(center = FALSE, scale = 1/consumer_brand_sample_matrix_pca$scale) |> 
+  scale(center = -consumer_brand_sample_matrix_pca$center, scale = FALSE)
+
+eingevalues <- consumer_brand_sample_matrix_pca |> 
+  tidy(matrix = "eigenvalues")
+
+eingevalues
+
+# PCA apply to marketing for all data
+consumer_brand$brand
+
+consumer_brand_pca <- consumer_brand |> 
+  select(perform:rebuy) |> 
+  prcomp(center = TRUE, scale. = TRUE)
+  
+consumer_brand_pca |>   
+  ggbiplot(groups = consumer_brand$brand,
+           scale = 1, pc.biplot = FALSE)
+  
+
+  
