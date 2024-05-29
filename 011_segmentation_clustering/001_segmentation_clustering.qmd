@@ -1,0 +1,16 @@
+---
+title: "Segmentation: clustering"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+library(skimr)
+```
+
+# Import data 
