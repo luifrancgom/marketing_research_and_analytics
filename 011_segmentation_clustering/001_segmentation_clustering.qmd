@@ -3,6 +3,9 @@ title: "Segmentation: clustering"
 format: 
   html:
     embed-resources: true
+    code-fold: true
+    toc: true
+    number-sections: true
 editor: visual
 ---
 
@@ -11,6 +14,88 @@ editor: visual
 #| message: false
 library(tidyverse)
 library(skimr)
+library(cluster)
 ```
 
-# Import data 
+# Import data
+
+```{r}
+#| message: false
+segmentation <- read_csv(file = "../000_data/005_data_chapter5.csv") |> 
+  select(-Segment)
+```
+
+# Data transformation
+
+```{r}
+segmentation <- segmentation |>  
+  mutate(gender = factor(x = gender, 
+                         ordered = FALSE),
+         kids = as.integer(x = kids),
+         ownHome = factor(x = ownHome,
+                          ordered = FALSE),
+         subscribe = factor(x = subscribe,
+                            ordered = FALSE))
+```
+
+# Summarizing data
+
+```{r}
+segmentation |> skim()
+```
+
+# Notions of distance
+
+## Euclidean
+
+```{r}
+customers <- tibble(Customer = c("a", "b"),
+                    Age = c(45, 23),
+                    Income = c(3500, 1500))
+customers
+```
+
+```{r}
+customers |> 
+  select(-Customer) |> 
+  daisy(metric = "euclidean")
+```
+
+## Gower
+
+```{r}
+customers2 <- tibble(Customer = c("a", "b"),
+                     Sex = c("Female", "Male"),
+                     Income = c(3500, 1500),
+                     Satisfaction = c("Medium", "High"),
+                     Age = c(45, NA)) |>
+  mutate(Sex = factor(x = Sex,
+                      ordered = FALSE),
+         Satisfaction = factor(x = Satisfaction,
+                               levels = c("Low", "Medium", "High"),
+                               ordered = TRUE))
+
+customers2
+```
+
+```{r}
+customers2 |> 
+  select(-Customer) |> 
+  daisy(metric = "gower")
+```
+
+### Segmentation data
+
+```{r}
+segmentation_dist <- segmentation |> 
+  daisy(metric = "gower")
+```
+
+```{r}
+segmentation_dist_tbl <- segmentation_dist |> 
+  as.matrix() |> 
+  as_tibble()
+
+segmentation_dist_tbl
+```
+
