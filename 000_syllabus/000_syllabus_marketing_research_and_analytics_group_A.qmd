@@ -6,6 +6,7 @@ author:
     affiliations:
       - name: Universidad Militar Nueva Granada
 date: 2024-01-25
+date-modified: last-modified
 execute: 
   echo: false
   warning: false
@@ -15,12 +16,20 @@ format:
     toc: true
     embed-resources: true
 bibliography: ../000_references/marketing_research_and_analytics.bib
+knitr: 
+  opts_chunk: 
+    echo: false
+    warning: false
+    message: false
 editor: visual
 ---
 
-```{r libraries}
+```{r}
+#| label: libraries
+
 library(tidyverse)
-library(kableExtra)
+library(knitr)
+# library(kableExtra)
 ```
 
 ```{css}
@@ -65,7 +74,7 @@ p {
 -   Type: Theoretical-Practice
 -   Area of Knowledge: Professional
 -   Semester: 9
--   Block: 2 (April 1 - June 4, 2024)
+-   Block: 2 (September 23 - November 30, 2024)
 
 ## Justification
 
@@ -98,9 +107,11 @@ Develop skills in programming, statistics, and data analysis to solve business p
 ## Reading schedule
 
 ```{r}
-# Include a footnote for the optional sections
-# Generate a section for the exercises
-# See https://github.com/quarto-dev/quarto-cli/issues/3340
+
+# Possible solution using kableExtra
+## Include references
+## See https://github.com/quarto-dev/quarto-cli/issues/3340
+### #| results: asis
 tibble(Week = c(1:9),
        Material = rep("[@chapman_r_2019]", 
                       times = 9),
@@ -124,11 +135,15 @@ tibble(Week = c(1:9),
                      "1-7",
                      "1-5")) |> 
   kable()
+  # kbl() |>
+  # kable_styling() |>
+  # unclass() |>
+  # cat()
 ```
 
 ### Primer corte 30%
 
--   April 1
+-   September 23
 
     -   Start Block 2
 
@@ -139,7 +154,7 @@ tibble(Week = c(1:9),
             -   Review the course program in advance, which can be downloaded by following the route: **Primer corte 30% \> Learning Resources \> Support material \> Presentations \> 000_syllabus_marketing_rearch_and_analytics**
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   April 3
+-   September 25
 
     -   **Welcome to R**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -147,15 +162,24 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 1]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   April 5
+-   September 27
 
-    -   **Welcome to R**
+    -   **Business Case**
         -   **Meeting time**: 19:00 - 20:30 hours
         -   **Prerequisites**:
-            -   Read and review [@chapman_r_2019, Chapter 1]
             -   Have a headset with a built-in microphone to isolate noise from the environment
+            
+-   September 28
 
--   April 10
+    -   **Progress marketing report 1**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
+
+-   October 2
 
     -   **An overview of the R language**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -163,7 +187,7 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 2]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   April 12
+-   October 4
 
     -   **An overview of the R language**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -171,7 +195,17 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 2]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   April 17
+-   October 5
+
+    -   **Progress marketing report 1**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
+
+-   October 16
 
     -   **Describing data**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -179,7 +213,7 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 3]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   April 19
+-   October 18
 
     -   **Describing data**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -187,7 +221,15 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 3]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   April 20
+-   October 19
+
+    -   **Progress marketing report 1**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
 
     -   **Oral presentation marketing report part 1**
         -   **Opening time**: 18:00 hours
@@ -197,7 +239,7 @@ tibble(Week = c(1:9),
 
 ### Segundo corte 30%
 
--   April 24
+-   October 23
 
     -   **Relationship between continuous variables**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -205,7 +247,7 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 4]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   April 26
+-   October 25
 
     -   **Relationship between continuous variables**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -213,7 +255,17 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 4]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 1
+-   October 26
+
+    -   **Progress marketing report 2**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
+
+-   October 30
 
     -   **Comparing groups: tables and visualizations**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -221,7 +273,7 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 5]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 3
+-   November 1
 
     -   **Comparing groups: tables and visualizations**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -229,7 +281,17 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 5]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 8
+-   November 2
+
+    -   **Progress marketing report 2**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
+
+-   November 6
 
     -   **Comparing groups: statistical tests**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -237,7 +299,7 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 6]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 10
+-   November 8
 
     -   **Comparing groups: statistical tests**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -245,7 +307,16 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 6]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 11
+-   November 9
+
+    -   **Progress marketing report 2**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
+
 
     -   **Oral presentation marketing report part 2**
         -   **Opening time**: 18:00 hours
@@ -255,7 +326,7 @@ tibble(Week = c(1:9),
 
 ### Tercer corte 40%
 
--   May 15
+-   November 13
 
     -   **Identifying drivers of outcomes: linear models**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -263,7 +334,7 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 7]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 17
+-   November 15
 
     -   **Identifying drivers of outcomes: linear models**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -271,7 +342,17 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 7]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 22
+-   November 16
+
+    -   **Progress marketing report 3**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
+
+-   November 20
 
     -   **Reducing data complexity**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -279,7 +360,7 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 8]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 24
+-   November 22
 
     -   **Reducing data complexity**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -287,7 +368,17 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 8]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 29
+-   November 23
+
+    -   **Progress marketing report 3**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
+
+-   November 27
 
     -   **Segmentation: Clustering**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -295,7 +386,7 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 11]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   May 31
+-   November 29
 
     -   **Segmentation: Clustering**
         -   **Meeting time**: 19:00 - 20:30 hours
@@ -303,7 +394,15 @@ tibble(Week = c(1:9),
             -   Read and review [@chapman_r_2019, Chapter 11]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   June 1
+-   November 30
+
+    -   **Progress marketing report 3**
+        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Prerequisites**:
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+        -   **Observations**:
+            -   At least 1 member of the group must attend
+            -   The meeting will last 10 minutes per group, no more and no less
 
     -   **Oral presentation marketing report part 3**
         -   **Opening time**: 18:00 hours
@@ -326,6 +425,8 @@ tibble(Week = c(1:9),
 -   **Tercer corte (3 weeks)**: 40%
 
     -   **Oral presentation marketing report part 3**: 40%
+    
+[Disclaimer:]{style="color: red;"} Participants enrolled in the course will work in groups in a business case taken from the course [Data Science for Business Part 1](https://university.business-science.io/p/ds4b-101-r-business-analysis-r) offered by the company [Business Science](https://www.business-science.io/) and adapted to be in line with the topics covered in [@chapman_r_2019].
 
 ## Process in case of no presentation
 
@@ -338,6 +439,10 @@ tibble(Week = c(1:9),
         -   If the student was unable to participate due to the force majeure or illness, their grade will be equal to the grade they receive on the subsequent activity. If the absence occurred during the final oral presentation, their grade will be equal to the grade they receive on the second oral presentation. To receive this benefit, the student must actively participate in the development of at least 2 oral presentations.
 
 # Software
+
+-   Check out all the necessary instructions in: 
+
+    -   [Primeros pasos curso Marketing Research and Analytics con R](https://youtube.com/playlist?list=PLvL0Mlbw5cm0-BI4LfX76OpgcNwLQNZSW&si=YzBoowOavXzmqMxq)
 
 ## Install locally
 
@@ -359,22 +464,22 @@ tibble(Week = c(1:9),
 
 ## Using a cloud-based solution
 
--   <https://posit.cloud/> \> Get Started \> Cloud Free \> Learn more \> Sign Up
+-   [https://posit.cloud/](https://posit.cloud/) \> Get Started \> Cloud Free \> Learn more \> Sign Up
 
     -   If you use this option after opening the account check out <https://posit.cloud/learn/guide> for getting started and using it
 
-# Use of Chat GPT-3, GPT-4, Gemini 1.5, LLaMA 2 and its friends
+# Use of Chat GPT-3, Gemini 1.5, LLaMA 2 and its friends
 
 You can use any artificial intelligence tool and in particular any Large Language Model where this practice is encourage when learning R or another programming language like Python or Julia. However, please use them in a responsible way by taking into account its capabilities and limitations and always pointing out to the instructor and your colleges that you have use them.
 
 If you have not used any Large Language Model you can try opening an account, for example in:
 
--   <https://chat.openai.com>
--   <https://gemini.google.com/>
+-   [https://chat.openai.com](https://chat.openai.com)
+-   [https://gemini.google.com/](https://chat.openai.com)
 
 Or you can run a Large Language Model locally, like CodeLlama 7B, using:
 
--   <https://lmstudio.ai/>
+-   [https://lmstudio.ai/](https://lmstudio.ai/)
 
 If you use the last option remember that you are using your personal computer so depending on the specifications of your machine you will or not will be able to use the chosen model
 
@@ -384,37 +489,21 @@ If you use the last option remember that you are using your personal computer so
 
 -   [@chapman_r_2019, Chapters 1-8, 11]
 
-    -   Complete route:
-
-        -   <https://www.umng.edu.co/inicio> \> Biblioteca \> Bases virtuales y libros electrónicos \> S \> Springer Link \> Ingresar usuario y contraseña [^2] \> Search "R For Marketing Research and Analytics" \> R For Marketing Research and Analytics Book 2019 [^3]
-
-    -   Direct link:
-
-        -   <https://doi-org.ezproxy.umng.edu.co/10.1007/978-3-030-14316-9>
-
     -   Book companion website:
 
-        -   <https://r-marketing.r-forge.r-project.org/>
-
-            -   Code: <https://r-marketing.r-forge.r-project.org/code.html>
-            -   Data: <https://r-marketing.r-forge.r-project.org/data.html>
-            -   Exercices and solutions: <https://r-marketing.r-forge.r-project.org/exercises/index.html>
-
-[^2]: Remember that the user and password to access and read the e-book are the same that you use to check your grades
-
-[^3]: Download the book in your preferred format from the available options
+        -   [https://r-marketing.r-forge.r-project.org/](https://r-marketing.r-forge.r-project.org/)
 
 ## Support material
 
 -   Quarto
 
-    -   <https://quarto.org/>
+    -   [https://quarto.org/](https://quarto.org/)
 
-        -   Get started with Rstudio: <https://quarto.org/docs/get-started/hello/rstudio.html>
+        -   Get started with Rstudio: [https://quarto.org/docs/get-started/hello/rstudio.html](https://quarto.org/docs/get-started/hello/rstudio.html)
 
-        -   Guide: <https://quarto.org/docs/guide/> \> Documents \> HTML
+        -   Guide: [https://quarto.org/docs/guide/](https://quarto.org/docs/guide/) \> Documents \> HTML
 
-        -   Reference: <https://quarto.org/docs/reference/> \> Documents \> HTML
+        -   Reference: [https://quarto.org/docs/reference/](https://quarto.org/docs/reference/) \> Documents \> HTML
 
 -   StatQuest with Josh Starmer
 
@@ -422,7 +511,7 @@ If you use the last option remember that you are using your personal computer so
 
         -   Video index
 
-            -   <https://statquest.org/> \> Video Index
+            -   [https://statquest.org/](https://statquest.org/) \> Video Index
 
 # About plagiarism
 
