@@ -1,34 +1,45 @@
 # Packages ----
-packages <- c(# Packages associated to the book
-              # R for Marketing Research and 
-              # Analytics in relation to the 
-              # chapters cover in the course
+packages <- c(
+              ## Chapman & Feit (2019) ----
+              ### Chapter 2 ----
               "lavaan", 
               "semPlot", 
               "corrplot", 
               "multcomp",
+              ### Chapter 3 ----
               "car",
               "psych",
               "beanplot",
+              ### Chapter 4 ----
               "gplots",
+              ### Chapter 5 ----
               "lattice",
+              ### Chapter 6 ----
               "binom",
+              "multcomp",
+              ### Chapter 7 ----
               "coefplot",
+              ### Chapter 8 ----
               "RColorBrewer",
               "cluster",
-              # Packages using a tidyverse approach
-              # and used in the different chapters
-              # that are cover in the course but that
-              # are not used constantly in the book
-              # R for Marketing Research and Analytics
-              "reprex",
+              ## Tidyverse approach ----
+              ### Data science ----
               "tidyverse",
-              "skimr",
+              ### Modeling and machine learning ----
               "tidymodels",
               "corrr",
+              ### Visualization ----
               "dotwhisker",
               "tidyheatmaps",
               "ggbiplot",
+              ### Summary statistics ---- 
+              "skimr",
+              ### Prepare REPRoducible EXamples ----
+              "reprex",
+              ### Tables ----
+              #### HTML tables ----
+              "DT",
+              ### Data: bike_sales 
               "sweep")
 
 for (package in packages) {
