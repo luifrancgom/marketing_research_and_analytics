@@ -1,0 +1,253 @@
+---
+title: Welcome to R
+author: 
+  - Luis Francisco Gómez López
+institute: 
+  - FAEDIS
+date: last-modified
+format: 
+  beamer:
+    colortheme: dolphin
+    fonttheme: structurebold
+    theme: AnnArbor
+    link-citations: true
+    colorlinks: true
+    toc: true
+    slide-level: 2
+    section-titles: false
+    keep-tex: true
+    include-in-header:
+      file: ../000_tex/preamble.tex
+fig-cap-location: bottom
+tbl-cap-location: top
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig-align: center
+    out-width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+---
+
+```{r}
+#| label: libraries
+
+
+```
+
+# Please Read Me
+
+## 
+
+-   This presentation is based on [@chapman_r_2019, Chapter 1]
+
+# Purpose
+
+## 
+
+-   Deliver essential knowledge within a minimal timeframe by employing hands-on learning techniques to enhance productivity in the R programming language
+
+# Forgetting curves
+
+## 
+
+-   **Learning and forgetting curves** [@posit_pbc_learning_2023]
+
+![Learning and forgetting curves](../000_images/002_forgetting_curves.png){width="350px" height="350px"}
+
+## 
+
+-   **Practicing and forgetting curves** [@posit_pbc_learning_2023]
+
+![Practicing and forgetting curves](../000_images/002_forgetting_curves_practice.png){width="350px" height="350px"}
+
+# Installing R, RStudio IDE and Quarto
+
+## 
+
+-   **What are R and RStudio IDE?** [@ismay_statistical_2020, Chapter 1]
+
+::: {#fig-r_vs_rstudio_ide_1 layout-ncol="2"}
+![R: Engine](../000_images/002_car_engine.jpg){#fig-r-1 width="200px" height="200px"}
+
+![RStudio IDE: Dashboard](../000_images/002_dashboard_car.jpg){#fig-rstudio-ide-1 width="200px" height="200px"}
+
+Analogy of difference between R and RStudio
+:::
+
+## 
+
+-   **What is Quarto?**
+
+    -   Open-source scientific and technical publishing system
+    -   It is possible to integrate prose, code and results via Rstudio IDE [@wickham_r_2023, Chapter 29]
+
+![Quarto workflow](../000_images/002_quarto_flow.png){#fig-quarto fig-alt="Quarto workflow" fig-align="center" width="400px" height="400px"}
+
+## 
+
+-   **Download and install R**: <https://cloud.r-project.org/>
+
+    -   Download R for Linux (Debian, Fedora/Redhat, Ubuntu)
+    -   Download R for macOS
+    -   Download R for Windows
+
+-   **Download and install RStudio IDE**: <https://posit.co/download/rstudio-desktop/>
+
+    -   Windows 10/11
+    -   macOS 11+
+    -   Ubuntu 18/Debian 10, Ubuntu 20/Debian 11, Ubuntu 22, Fedora 19/Red Hat 7, OpenSUSE 15, Fedora 34/Red Hat 8, Fedora 36/Red Hat 9
+
+## 
+
+-   **Download and install Quarto**: <https://quarto.org/docs/get-started/>
+
+    -   Ubuntu 18+/Debian 10+, Linux Arm64
+    -   Mac OS
+    -   Windows
+
+-   **Nothing works help me!!!**
+
+    -   Don't worry posit get you cover!!!
+
+    -   Use posit Cloud: <https://posit.cloud/>
+
+        -   Sign Up \> Cloud Free \> Sign Up
+
+## 
+
+-   **Using R and Quarto via RStudio IDE** [@ismay_statistical_2020, Chapter 1]
+
+    -   Don't worry about Quarto because it will be embedded in RStudio IDE
+        -   If you are using posit Cloud don't worry about anything!!!
+
+::: {#fig-r_vs_rstudio_ide_2 layout-ncol="2"}
+![R: Do not open this](../000_images/002_R_logo.png){#fig-r-2 width="100px" height="100px"}
+
+![RStudio IDE: Open this](../000_images/002_RStudio_ide_logo.png){#fig-rstudio-ide-2 width="80px" height="80px"}
+
+R versus RStudio IDE icons on your computer
+:::
+
+# R packages
+
+## 
+
+-   **What are R packages?** [@ismay_statistical_2020, Chapter 1]
+
+::: {#fig-r_packages layout-ncol="2"}
+![R: A new phone](../000_images/002_cell_phone.png){#fig-package-base width="100px" height="100px"}
+
+![R packages: Apps you can download](../000_images/002_apps.jpg){#fig-package width="140px" height="80px"}
+
+Analogy of R vs R packages
+:::
+
+## 
+
+-   **Installing the tidyverse as an example**
+
+    -   Copy and paste this code in the console. If you have already installed the tidyverse nothing will happen but if you don't have installed the tidyverse then the package is going to be installed
+
+    -   Installing a package is like downloading an app from a store where you need to do it only once
+
+\tiny
+
+```{r}
+#| eval: false
+packages <- c("tidyverse")
+for (package in packages) {
+  if (!(package %in% rownames(installed.packages()))) {
+    install.packages(package)
+  }
+}
+```
+
+\normalsize
+
+-   **Loading a package**
+
+    -   Loading a package is like opening an app you already installed on your phone where you need to do it every time you want to use the app
+
+\tiny
+
+```{r}
+#| eval: false
+library(tidyverse)
+```
+
+# Please help me: Errors, warnings, and messages
+
+## 
+
+-   **Error**: Generally when there's an error, the code will not run and a message will try to explain what went wrong [@ismay_statistical_2020, Chapter 1]
+
+\tiny
+
+```{r}
+#| error: true
+x <- c(1, 2, 3, 4, 5)
+X
+```
+
+\normalsize
+
+-   **Warning**: Generally your code will still work, but with some caveats [@ismay_statistical_2020, Chapter 1]
+
+\tiny
+
+```{r}
+#| warning: true
+sqrt(-9)
+```
+
+## 
+
+\normalsize
+
+-   **Message**: it's just a friendly message [@ismay_statistical_2020, Chapter 1]
+
+    -   Read it, wave back at R, and thank it for talking to you [@ismay_statistical_2020, Chapter 1]
+
+\tiny
+
+```{r}
+#| message: true
+#| echo: true
+packages<-c("tidyverse")
+for(package in packages) {
+  if(!(package %in% rownames(installed.packages()))) {
+    install.packages(package)
+  }
+}
+library(tidyverse)
+```
+
+# R for Marketing Research and Analytics, 2nd Ed
+
+## 
+
+-   **Download from UMNG Springer Link database**:
+
+    -   <https://doi-org.ezproxy.umng.edu.co/10.1007/978-3-030-14316-9>
+
+-   **Check the book site**:
+
+    -   <http://r-marketing.r-forge.r-project.org>
+
+# Acknowledgments
+
+## 
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+-   To the [**Linux kernel community**](https://www.kernel.org/category/about.html) for allowing me the possibility to use some [**Linux distributions**](https://static.lwn.net/Distributions/) as my main [**OS**](https://en.wikipedia.org/wiki/Operating_system) without paying for a license
+
+# References {.allowframebreaks}
