@@ -1,0 +1,333 @@
+---
+title: Business Case
+author: 
+  - Luis Francisco Gómez López
+institute: 
+  - FAEDIS
+date: last-modified
+format: 
+  beamer:
+    colortheme: dolphin
+    fonttheme: structurebold
+    theme: AnnArbor
+    link-citations: true
+    colorlinks: true
+    toc: true
+    slide-level: 2
+    section-titles: false
+    keep-tex: true
+    include-in-header:
+      file: ../000_tex/preamble.tex
+fig-cap-location: bottom
+tbl-cap-location: top
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig-align: center
+    out-width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+---
+
+```{r}
+#| echo: false
+#| label: libraries
+
+library(tigris)
+library(tidyverse)
+library(janitor)
+library(ggrepel)
+library(sweep)
+library(kableExtra)
+```
+
+# Please Read Me
+
+## 
+
+-   This presentation is based on a business case taken from the course [Data Science for Business Part 1](https://university.business-science.io/p/ds4b-101-r-business-analysis-r) offered by the company [Business Science](https://www.business-science.io/) and adapted to be in line with the topics covered in [@chapman_r_2019]
+
+# Purpose
+
+## 
+
+-   Deliver essential knowledge within a minimal timeframe by employing hands-on learning techniques to enhance productivity in the R programming language
+
+# Business Case
+
+##
+
+-   You and your team will work for a corporation located in Wilton, Connecticut, United States that supplies bicycle frames and other components related to bicycles to different bicycle shops through the United States.
+
+-   Your team is assigned to complete 2 tasks:
+
+    -   Support the Research and Development (R & D) division in identifying potential new products and pricing them by using data collected from the bicycle shops.
+
+    -   Support the marketing team in the creation of a marketing segmentation clustering model by using data collected from to the bicycle shops to offer more personalized products and messaging them.
+    
+##
+
+-   Business unit: Cannondale Bicycle Corporation (Manufacturer)
+    
+    -   Location: USA
+    -   Product: Bicycle frames
+    -   Retailers: Bikeshops located through USA
+    
+        -   We are not going to analyze the business-to-customer (B2B) subchannel (Retailer to Customer) where the focus will be on the business-to-business (B2B) subchannel (Manufacturer to Retailer)  
+
+```{dot}
+//| label: fig-distribution-channel
+//| fig-cap: Distribution channel
+//| fig-width: 4
+//| fig-height: 2
+
+digraph boxes_and_circles {
+
+  graph [rankdir = LR]
+
+  node [shape = oval, color = "#2C3E50"]
+ 
+  "Cannondale Bicycle\nCorporation\n(Manufacturer)";
+
+  node [shape = oval, color = "#E31A1C"]
+
+  "Bike shops\n(Retailers)";
+  
+  node [shape = oval, color = "#18BC9C"]
+  
+  Customers;
+
+  subgraph cluster_manufacturer_retailers {
+  
+    label = "Manufacturer to Retailer"
+    style = filled;
+    color = "#B2DF8A";
+
+    "Cannondale Bicycle\nCorporation\n(Manufacturer)";
+    "Bike shops\n(Retailers)";
+
+     "Cannondale Bicycle\nCorporation\n(Manufacturer)" -> "Bike shops\n(Retailers)";
+  }
+  
+  "Bike shops\n(Retailers)" -> Customers;
+  
+}
+```
+
+##
+
+\tiny
+
+```{r}
+#| echo: false
+#| include: false
+
+map_usa_states <- states() |> 
+  as_tibble() |>
+  clean_names() |> 
+  select(stusps, name, geometry) |> 
+  filter(!(stusps %in% c("AK", "HI", 
+                         "VI", "MP", "GU", "AS",
+                         "PR")))
+
+bike_sales <- bike_sales
+
+bike_shops <- bike_sales |> 
+  distinct(pick(bikeshop.name:longitude)) |> 
+  clean_names()
+
+bike_shops_map <- map_usa_states |> 
+  left_join(y = bike_shops,
+            by = join_by(stusps == bikeshop_state)) |> 
+  rename(bikeshop_state = stusps)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| label: fig-bike-shops-locations
+#| fig-cap: Bike shops locations
+
+bike_shops_map |> 
+  ggplot() + 
+  geom_sf(aes(geometry = geometry)) + 
+  geom_label_repel(aes(x = longitude, y = latitude,
+                       label = bikeshop_city,
+                       box.padding = 0.5, 
+                       max.overlaps = Inf,
+                       min.segment.length = 0,
+                       seed = 1234)) + 
+  geom_point(aes(x = longitude, y = latitude),
+             shape = 21, color = "black", fill = "#E31A1C") +
+  theme_void()
+```
+
+##
+
+![Invoice example representing a transaction](../000_images/001_example_invoice_transaction.png){width="350px" height="285px"}
+
+##
+
+-   Entities
+
+    -   **Product**
+    
+        -   Product Id: unique product identification number
+        -   Model: model name of the bicycle
+        -   Category primary: main bicycle category (Mountain, Road)
+        -   Category secondary: More specific bicycle category (9 categories)
+        -   Frame: bicycle frame material (Carbon, Aluminum) 
+
+    -   **Retailer**
+    
+        -   Bike shop Id: unique bike shop identification number
+        -   Bike shop name
+        -   Bike shop state: state that the bike shop is located
+        -   Bike shop city: city that the bike shop is located
+        -   Latitude: geograhpic latitude of the bike shop location
+        -   Longitude: geograhpic longitude of the bike shop location
+
+##
+
+-   Entities
+
+    -   **Closed order**
+    
+        -   Order Id: unique order identification number
+        -   Order date: date the order was placed
+        -   Order line: sequential identification number for products on an order
+        -   Quantity: number of units purchased by the retailer
+        -   Price: unit price of the bicycle
+        -   Bike shop Id: unique bike shop identification number
+        -   Product Id: unique product identification number
+
+##
+
+![Database Entity Relationship Diagram (ERD)[^1]](../000_images/001_database_er_diagram_foot_crow_notation.png){width="350px" height="350px"}
+
+[^1]: See [@abba_crows_2022]  
+
+##
+
+-   Understand the business data
+
+\tiny
+
+```{r}
+#| eval: false
+library(tidyverse) # Remember to load the tidyverse library
+library(sweep) # Remember to load the sweep library
+```
+
+```{r}
+bike_sales
+```
+
+\normalsize
+
+-   Only works in RStudio IDE
+
+\tiny
+
+```{r}
+#| eval: false
+bike_sales |> View()
+```
+
+##
+
+-   Products
+
+    -   97 bicycle models
+
+```{r}
+#| echo: false
+#| label: tbl-products-first
+#| tbl-cap: First 5 products
+
+bike_sales_products <- bike_sales |>
+  distinct(pick(product.id:frame))
+
+bike_sales_products |> 
+  slice_head(n = 5) |> 
+  kable(format = "latex", booktabs = TRUE,
+        col.names = c("Product Id",
+                      "Model",
+                      "Primary category",
+                      "Secondary category",
+                      "Frame")) |> 
+  kable_styling(font_size = 7, latex_options = "striped") |>
+  row_spec(row = 0, bold = TRUE)
+```
+
+##
+
+-   Retailers
+
+    -   30 bike shops
+
+```{r}
+#| echo: false
+#| label: tbl-retailers-first
+#| tbl-cap: First 5 retailers
+
+bike_sales_retailers <- bike_sales |>
+  distinct(pick(customer.id:longitude))
+
+bike_sales_retailers |> 
+  slice_head(n = 5) |> 
+  kable(format = "latex", booktabs = TRUE,
+        col.names = c("Retailer Id",
+                      "Bike shop name",
+                      "City",
+                      "State",
+                      "Latitude",
+                      "Longitude")) |> 
+  kable_styling(font_size = 7, latex_options = "striped") |>
+  row_spec(row = 0, bold = TRUE)
+```
+
+##
+
+-   Closed orders
+
+    -   2000 orders
+    
+```{r}
+#| echo: false
+#| label: tbl-transactions-first
+#| tbl-cap: First 5 orders
+
+bike_sales |> 
+  select(order.date:price,
+         customer.id, product.id) |> 
+  slice_head(n = 14) |> 
+  kable(format = "latex", booktabs = TRUE,
+        linesep = "",
+        col.names = c("Order date",
+                      "Order Id",
+                      "Order line",
+                      "Quantity",
+                      "Price",
+                      "Retailer Id",
+                      "Product Id")) |> 
+  kable_styling(font_size = 7, latex_options = "striped") |>
+  row_spec(row = 0, bold = TRUE)
+```
+
+# Acknowledgments
+
+## 
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+-   To the [**Linux kernel community**](https://www.kernel.org/category/about.html) for allowing me the possibility to use some [**Linux distributions**](https://static.lwn.net/Distributions/) as my main [**OS**](https://en.wikipedia.org/wiki/Operating_system) without paying for a license
+
+# References {.allowframebreaks}
