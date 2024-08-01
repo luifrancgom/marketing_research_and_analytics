@@ -1,0 +1,361 @@
+---
+title: An Overview of the R Language
+author: 
+  - Luis Francisco Gómez López
+institute: 
+  - FAEDIS
+date: last-modified
+format: 
+  beamer:
+    colortheme: dolphin
+    fonttheme: structurebold
+    theme: AnnArbor
+    link-citations: true
+    colorlinks: true
+    toc: true
+    slide-level: 2
+    section-titles: false
+    keep-tex: true
+    include-in-header:
+      file: ../000_tex/preamble.tex
+fig-cap-location: bottom
+tbl-cap-location: top
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig-align: center
+    out-width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+---
+
+```{r}
+#| label: libraries
+
+
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on [@chapman_r_2019, Chapter 2]
+
+# Purpose
+
+##
+
+-   Equip beginners with a programming foundation by leveraging the R language, enabling practical application in marketing research and analytics
+
+# Sales and product satisfaction survey
+
+##
+
+-   **Ordinal 7 point scale**
+
+    -   Extremely satisfied: 7
+    -   Moderately satisfied: 6
+    -   Slightly satisfied: 5
+    -   Neither satisfied or dissatisfied: 4
+    -   Slightly dissatisfied: 3
+    -   Moderately dissatisfied: 2
+    -   Extremely dissatisfied: 1
+
+-   **Variables**
+
+    -   iProdSAT: satisfaction with a product
+    -   iSalesSAT: satisfaction with sales experience
+    -   iProdREC: likelihood to recommend the product
+    -   iSalesREC: likelihood to recommend the sales person
+    -   Segment: market segment assigned by a clustering algorithm [@chapman_r_2019, Chapter 11]
+
+##
+
+-   **Import data: the base R way**
+
+\tiny
+
+```{r}
+satisfaction_data <- read.csv(file = "http://goo.gl/UDv12g")
+satisfaction_data |> head(n=5)
+```
+
+##
+
+-   **Import data: the tidyverse way**
+
+\tiny
+
+```{r}
+library(tidyverse) # Remember to load the tidyverse library
+satisfaction_data <- read_csv(file = "http://goo.gl/UDv12g")
+satisfaction_data |> head(n=5)
+```
+
+##
+
+-   **Transform data: the base R way**
+
+\tiny
+
+```{r}
+satisfaction_data$Segment <- factor(x = satisfaction_data$Segment, 
+                                    ordered = FALSE)
+summary(object = satisfaction_data)
+```
+
+##
+
+-   **Transform data: the skimr and the tidyverse way**
+
+    -   Ups the table is really big!!! Try it in your console to see the complete table
+
+\tiny
+
+```{r}
+library(skimr) # Remember to install the package if it is not installed
+satisfaction_data <- satisfaction_data |>
+  mutate(Segment = factor(x = Segment, ordered = FALSE))
+```
+
+```{r}
+#| eval: false
+satisfaction_data |> skim()
+```
+
+##
+
+-   **R objects**: everything in R is an object (object-oriented). For now, we will only inspect a few selected objects:
+
+    -   **Atomic vectors**[^1]
+
+        -   Logical
+        -   Integer
+        -   Double
+
+    -   **Factors**
+
+    -   **Data Frames**
+
+    -   **Tibbles**
+
+[^1]: In R the atomic vectors are logical, integer, double, numeric (which includes integer and double), character, complex and raw but for pedagogical purposes we are going to check later character, numeric includes integer and double and we are not going to use complex and raw
+
+##
+
+-   **Atomic vectors**
+
+    -   Logical
+
+\tiny
+
+```{r}
+#| echo: true
+as.integer(satisfaction_data$Segment)[1:5] == 1
+```
+
+```{r}
+#| echo: true
+as.integer(satisfaction_data$Segment)[1:5] > 1
+```
+
+```{r}
+#| echo: true
+as.integer(satisfaction_data$Segment)[1:5] >= 1
+```
+
+##
+
+-   **Atomic vectors**
+
+    -   Integer
+
+\tiny
+
+```{r}
+as.integer(satisfaction_data$Segment)[1:5]
+```
+
+\normalsize
+
+-   **Atomic vectors**
+
+    -   Double
+
+\tiny
+
+```{r}
+sprintf("%.2f", satisfaction_data$iProdSAT[1:5])
+```
+
+##
+
+-   **Factors**
+
+\tiny
+
+```{r}
+satisfaction_data$Segment[1:5]
+```
+
+\normalsize
+
+-   **Data Frames**
+
+\tiny
+
+```{r}
+#| echo: true
+as.data.frame(satisfaction_data) |> head(n=5)
+```
+
+##
+
+-   **Tibble**
+
+\tiny
+
+```{r}
+class(satisfaction_data)
+```
+
+```{r}
+satisfaction_data |> head(n=5)
+```
+
+##
+
+-   **Add new variables: the base R way**
+
+\tiny
+
+```{r}
+satisfaction_data$customer <- 1:nrow(satisfaction_data)
+as.data.frame(satisfaction_data) |> head(n=5)
+```
+
+\normalsize
+
+-   **Add new variables: the tidyverse way**
+
+\tiny
+
+```{r}
+satisfaction_data |>
+  mutate(customer = 1:nrow(satisfaction_data)) |> 
+  head(n=5)
+```
+
+##
+
+-   **Picks variables based on their names: the base R way**
+
+\tiny
+
+```{r}
+as.data.frame(satisfaction_data)[c("customer", "Segment",
+                                   "iProdSAT", "iSalesSAT", "iProdREC", "iSalesREC")] |>
+  head(n=5)
+```
+
+\normalsize
+
+-   **Picks variables based on their names: the tidyverse way**
+
+\tiny
+
+```{r}
+satisfaction_data |>
+  select(customer, Segment, iProdSAT, iSalesSAT, iProdREC, iSalesREC) |>
+  head(n=5)
+```
+
+##
+
+-   **Picks cases based on their values: the base R way**
+
+\tiny
+
+```{r}
+as.data.frame(satisfaction_data)[satisfaction_data$Segment == 2, ] |> 
+  head(n=5)
+```
+
+\normalsize
+
+-   **Picks cases based on their values: the tidyverse way**
+
+\tiny
+
+```{r}
+satisfaction_data |>
+  filter(Segment == 2) |>
+  head(n=5)
+```
+
+##
+
+-   **Reduces multiple values to a single summary: the base R way**
+
+\tiny
+
+```{r}
+data.frame(mean_iProdSAT = mean(satisfaction_data$iProdSAT),
+           median_iSalesSAT = median(satisfaction_data$iSalesSAT))
+```
+
+\normalsize
+
+-   **Reduces multiple values to a single summary: the tidyverse way**
+
+\tiny
+
+```{r}
+satisfaction_data |>
+  summarise(mean_iProdSAT = mean(iProdSAT), median_iSalesSAT = median(iSalesSAT))
+```
+
+##
+
+\scriptsize
+
+-   **Does product and sales satisfaction differ by segment?: the base R way**
+
+\tiny
+
+```{r}
+#| echo: true
+satisfaction_data[c("iProdSAT", "iSalesSAT")] |> 
+  aggregate(by = satisfaction_data[c("Segment")], FUN = mean) |>
+  setNames(nm = c("Segment", "mean_iProdSAT", "mean_iSalesSAT"))
+```
+
+\scriptsize
+
+-   **Does product and sales satisfaction differ by segment?: the tidyverse way**
+
+\tiny
+
+```{r}
+satisfaction_data |>
+  group_by(Segment) |> 
+  select(iProdSAT, iSalesSAT) |>
+  summarise(mean_iProdSAT = mean(iProdSAT), mean_iSalesSAT = mean(iSalesSAT))
+```
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**skimr**](https://CRAN.R-project.org/package=skimr) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+-   To the [**Linux kernel community**](https://www.kernel.org/category/about.html) for allowing me the possibility to use some [**Linux distributions**](https://static.lwn.net/Distributions/) as my main [**OS**](https://en.wikipedia.org/wiki/Operating_system) without paying for a license
+
+# References {.allowframebreaks}
