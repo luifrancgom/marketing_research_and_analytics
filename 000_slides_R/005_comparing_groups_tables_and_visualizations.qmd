@@ -1,0 +1,366 @@
+---
+title: "Comparing Groups: Tables and Visualizations"
+author: 
+  - Luis Francisco Gómez López
+institute: 
+  - FAEDIS
+date: last-modified
+format: 
+  beamer:
+    colortheme: dolphin
+    fonttheme: structurebold
+    theme: AnnArbor
+    link-citations: true
+    colorlinks: true
+    toc: true
+    slide-level: 2
+    section-titles: false
+    keep-tex: true
+    include-in-header:
+      file: ../000_tex/preamble.tex
+fig-cap-location: bottom
+tbl-cap-location: top
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig-align: center
+    out-width: 50%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+---
+
+```{r}
+#| echo: false
+#| label: libraries
+
+library(tidyverse)
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on [@chapman_r_2019, Chapter 5]
+
+# Purpose
+
+##
+
+-   Use descriptive summaries by groups and visualize them to investigate differences between groups
+
+# Consumer segmentation survey
+
+##
+
+-   **age**: age of the consumer in years
+-   **gender**: if the consumer is male of female
+-   **income**: yearly disposable income of the consumer
+-   **kids**: number of children of the consumer
+-   **ownHome**: if the consumer owns a home
+-   **subscribe**: if the consumer is subscribed or not
+-   **Segment**: market segment assigned by a clustering algorithm [@chapman_r_2019, chapter 11], expert assignment or a segmentation typing tool
+
+##
+
+-   **Segment**:
+
+    -   **Moving up**: consumers experiencing upward mobility in terms of their socioeconomic status
+    -   **Suburb mix**: consumers living in suburban areas
+    -   **Travelers**: consumers who prioritize experiences and adventures
+    -   **Urban Hip**: consumers interested in urban culture, artistic expression, and modern trends
+
+##
+
+-   **Import data**
+
+\tiny
+
+```{r}
+segmentation <- read_csv(file = "http://goo.gl/qw303p")
+segmentation |> head(n = 5)
+```
+
+##
+
+-   **Transform data**
+
+\tiny
+
+```{r}
+segmentation <- segmentation |>
+  mutate(gender = factor(gender, ordered = FALSE),
+         kids = as.integer(kids),
+         ownHome = factor(ownHome, ordered = FALSE),
+         subscribe = factor(subscribe, ordered = FALSE),
+         Segment = factor(Segment, ordered = FALSE))
+
+segmentation |> head(n = 5)
+```
+
+##
+
+-   **Basic Formula Syntax**
+
+    -   $\sim$ and $+$: operators
+
+    -   $y$: response variable
+
+    -   $x, z$: explanatory variables
+
+    -   $y \sim x + z$: a formula which means that $y$ depends on $x$ and $z$
+
+        -   $+$ is used to indicate the addition of predictor variables to the right of the formula
+        -   Be careful not to confuse the arithmetic operator $+$ with $+$ within a formula
+
+\tiny
+
+```{r}
+#| eval: false
+?`+` # Arithmetic Operators
+?formula # operators in a formula
+```
+
+##
+
+-   **Descriptives for n-Way Groups: the base R way**
+
+    -   Split data into $n$ subsets and compute summary statistics
+
+\tiny
+
+```{r}
+aggregate(x = income ~ Segment + ownHome, 
+          data = segmentation, FUN = mean)
+```
+
+##
+
+-   **Descriptives for n-Way Groups: the base R way**
+
+    -   Split data into $n$ subsets and compute summary statistics
+
+\tiny
+
+```{r}
+aggregate(x = kids ~ Segment + ownHome, 
+          data = segmentation, FUN = sum)
+```
+
+##
+
+-   **Descriptives for n-Way Groups: the tidyverse way**
+
+    -   Split data into $n$ subsets and compute summary statistics
+
+\tiny
+
+```{r}
+segmentation |> 
+  group_by(Segment, ownHome) |>
+  summarise(mean_income = mean(income))
+```
+
+##
+
+-   **Descriptives for n-Way Groups: the tidyverse way**
+
+    -   Split data into $n$ subsets and compute summary statistics
+
+\tiny
+
+```{r}
+segmentation |> 
+  group_by(Segment, ownHome) |>
+  summarise(sum_kids = sum(kids))
+```
+
+##
+
+-   **Basic Formula Syntax**
+
+    -   $\sim$, $+$ and $|$: operators
+
+    -   $y$: response variable
+
+    -   $x$: explanatory variable
+
+    -   $z$: grouping variable
+
+    -   $y \sim x | z$: $y$ depends on $x$ based on different groups defined by $z$
+
+        -   $|$ is used to separate the grouping variable from the explanatory variable
+        -   Be careful not to confuse the logical operator $|$ with $|$ within a formula
+
+\tiny
+
+```{r}
+#| eval: false
+?`|` # Logical Operators
+?lattice::xyplot # operators in a formula (you need first to install the package lattice)
+```
+
+##
+
+-   **Visualization by group as frequencies: the lattice way**
+
+\tiny
+
+```{r}
+library(lattice)
+histogram(~ subscribe | Segment + ownHome, data = segmentation)
+```
+
+##
+
+-   **Visualization by group as frequencies: the tidyverse way**
+
+\tiny
+
+```{r}
+# Prepare data
+subscriber_by_segment_home_ownership <- segmentation |>
+  count(subscribe, Segment, ownHome) |>
+  group_by(Segment, ownHome) |>
+  mutate(n_pct = (n / sum(n)) * 100) |>
+  ungroup()
+subscriber_by_segment_home_ownership
+```
+
+##
+
+-   **Visualization by group as frequencies: the tidyverse way**
+
+\tiny
+
+```{r}
+subscriber_by_segment_home_ownership |>
+  ggplot() + 
+  geom_col(aes(x = subscribe, y=n_pct)) + 
+  facet_wrap(facets = vars(Segment,ownHome), 
+             nrow = 2, ncol = 4)
+```
+
+##
+
+-   **Visualization by group as proportions: the lattice way**
+
+\tiny
+
+```{r}
+# Prepare data
+prop_table <- table(segmentation$subscribe,
+                    segmentation$Segment) |>
+  prop.table(margin = 2) |>
+  _[2, ] # You can use _ as a placeholder. Check ?pipeOp
+```
+
+```{r}
+barchart(prop_table, 
+         xlab='Subscriber proportion by Segment', col='darkolivegreen')
+```
+
+##
+
+-   **Visualization by group as proportions: the tidyverse way**
+
+\tiny
+
+```{r}
+# Prepare data
+prop_table <- segmentation |>
+  count(subscribe, Segment) |>
+  group_by(Segment) |>
+  mutate(n_pct = n / sum(n)) |>
+  filter(subscribe == 'subYes')
+```
+
+```{r}
+prop_table |> ggplot() + 
+  geom_col(aes(x=n_pct, y=Segment),
+           fill='darkolivegreen') +
+  labs(x='Subscriber proportion by Segment', 
+       y=NULL)
+```
+
+##
+
+-   **Visualization by group with continuous data: the lattice way**
+
+\tiny
+
+```{r}
+# Prepare data
+seg_income_agg <- aggregate(income ~ Segment + ownHome, 
+                            data=segmentation, FUN = mean)
+```
+
+```{r}
+#| echo: true
+barchart(income ~ Segment, data = seg_income_agg,
+         groups=ownHome, auto.key=TRUE, # Add groups
+         par.settings=simpleTheme(col=terrain.colors(n = 2))) # Change default colors
+```
+
+##
+
+-   **Visualization by group with continuous data: the tidyverse way**
+
+\tiny
+
+```{r}
+# Prepare data
+seg_income_agg <- segmentation |> 
+  group_by(Segment, ownHome) |> 
+  summarise(mean_income = mean(income)) |> 
+  ungroup()
+```
+
+```{r}
+seg_income_agg |> ggplot() +
+  geom_col(aes(x=Segment, y=mean_income, fill=ownHome),
+           position = position_dodge(), color='black') +
+  scale_fill_manual(values=terrain.colors(n = 2))
+```
+
+##
+
+-   **Visualization by group with continuous data: the lattice way**
+
+\tiny
+
+```{r}
+bwplot(Segment ~ income | ownHome,
+       data = segmentation,
+       xlab = 'Income')
+```
+
+##
+
+-   **Visualization by group with continuous data: the lattice way**
+
+\tiny
+
+```{r}
+segmentation |> ggplot() +
+  geom_boxplot(aes(x=income, y=Segment)) +
+  facet_wrap(facets = vars(ownHome)) +
+  labs(x='Income',
+       y=NULL)
+```
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+-   To the [**Linux kernel community**](https://www.kernel.org/category/about.html) for allowing me the possibility to use some [**Linux distributions**](https://static.lwn.net/Distributions/) as my main [**OS**](https://en.wikipedia.org/wiki/Operating_system) without paying for a license
+
+# References {.allowframebreaks}

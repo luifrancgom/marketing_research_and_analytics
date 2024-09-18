@@ -1,0 +1,990 @@
+---
+title: "Comparing Groups: Statistical Tests"
+author: 
+  - Luis Francisco Gómez López
+institute: 
+  - FAEDIS
+date: last-modified
+format: 
+  beamer:
+    colortheme: dolphin
+    fonttheme: structurebold
+    theme: AnnArbor
+    link-citations: true
+    colorlinks: true
+    toc: true
+    slide-level: 2
+    section-titles: false
+    keep-tex: true
+    include-in-header:
+      file: ../000_tex/preamble.tex
+fig-cap-location: bottom
+tbl-cap-location: top
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig-align: center
+    out-width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+---
+
+```{r}
+#| echo: false
+#| label: libraries
+
+library(tidyverse)
+library(skimr)
+library(latex2exp)
+library(tidymodels)
+library(patchwork)
+library(hardhat)
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on [@chapman_r_2019, Chapter 6]
+
+# Purpose
+
+##
+
+-   Understand the use of statistical tests to identify differences between groups in data
+
+# Consumer segmentation survey
+
+##
+
+-   **Import data**
+
+\tiny
+
+```{r}
+segmentation <- read_csv(file = "http://goo.gl/qw303p")
+segmentation |> head(n = 5)
+```
+
+##
+
+-   Chi-squared test
+
+\tiny
+
+```{r}
+segmentation |> count(Segment)
+```
+
+```{r}
+segmentation |> 
+  count(subscribe, ownHome) |> 
+  pivot_wider(id_cols = subscribe,
+              names_from = ownHome,
+              values_from = n)
+```
+
+##
+
+-   Chi-squared test for given probabilities
+
+$H_0: p_1 = \frac{1}{4} \land p_2 = \frac{1}{4} \land p_3 = \frac{1}{4} \land p_4 = \frac{1}{4}$
+
+$H_1: p_1 \neq \frac{1}{4} \lor p_2 \neq \frac{1}{4} \lor p_3 = \frac{1}{4} \lor p_4 \neq \frac{1}{4}$
+
+$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{70 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{100 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{80 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{50 - 300\frac{1}{4}}{300\frac{1}{4}}$
+
+-   **Base R way**
+
+\tiny
+
+```{r}
+chi_statistic <- table(segmentation$Segment) |> 
+  chisq.test(p = c(1/4, 1/4, 1/4, 1/4))
+chi_statistic
+```
+
+##
+
+-   Chi-squared test for given probabilities
+
+```{r}
+#| echo: false
+ggplot() + 
+  geom_function(fun=dchisq, args=list(df=3, ncp=0, log=FALSE),
+                xlim=c(0,20),
+                color='#2C3E50')+
+  geom_ribbon(data = tibble(x = seq.int(from = qchisq(p = 0.05, 
+                                                      df = 3, 
+                                                      lower.tail = FALSE),
+                                        to = 20,
+                                        by = 0.01),
+                            y = dchisq(x = x, df = 3)),
+              aes(x = x, ymin = 0, ymax = y),
+              fill='#E31A1C',
+              alpha=0.1) +
+  geom_vline(xintercept = qchisq(p = 0.05, df = 3, lower.tail = FALSE),
+             color="#E31A1C") +
+  geom_vline(xintercept = unname(chi_statistic$statistic),
+             color="#18BC9C") +
+  scale_x_continuous(breaks = c(0,
+                                qchisq(p = 0.05, df = 3, lower.tail = FALSE),
+                                unname(chi_statistic$statistic),
+                                20),
+                     labels = scales::label_number(accuracy = 0.01)) +
+  labs(x=NULL,
+       y=NULL,
+       color=NULL,
+       title = 'Chi-squared distribution function',
+       subtitle = str_glue('k=3
+                           Critical value: {qchisq(p = 0.05, df = 3, lower.tail = FALSE) |> round(digits=2)}
+                           Chi-squared statistic: {chi_statistic$statistic |> round(digits=2)}')) +
+  theme(panel.border      = element_rect(fill = NA, color = "black"),
+        plot.background   = element_rect(fill = "#f3fcfc"),
+        panel.background  = element_rect(fill = "#f3f7fc"),
+        plot.title        = element_text(face = "bold"),
+        axis.title        = element_text(face = "bold"),
+        legend.title      = element_text(face = "bold"),
+        legend.position   = 'bottom', 
+        axis.text         = element_text(face = "bold"))
+```
+
+##
+
+-   Chi-squared test for given probabilities
+
+$H_0: p_1 = \frac{1}{4} \land p_2 = \frac{1}{4} \land p_3 = \frac{1}{4} \land p_4 = \frac{1}{4}$
+
+$H_1: p_1 \neq \frac{1}{4} \lor p_2 \neq \frac{1}{4} \lor p_3 = \frac{1}{4} \lor p_4 \neq \frac{1}{4}$
+
+$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{70 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{100 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{80 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{50 - 300\frac{1}{4}}{300\frac{1}{4}}$
+
+-   **tidymodels way**
+
+\tiny
+
+```{r}
+library(tidymodels)
+segmentation |>  
+  chisq_test(response = Segment,
+             p = c(1/4, 1/4, 1/4, 1/4))
+```
+
+##
+
+-   Pearson's Chi-squared test
+
+$H_0: p_{11} = \frac{260}{300}\frac{159}{300} \land p_{12} = \frac{260}{300}\frac{141}{300} \land p_{21} = \frac{40}{300}\frac{159}{300} \land p_{22} = \frac{40}{300}\frac{141}{300}$
+
+$H_1: p_{11} \neq \frac{260}{300}\frac{159}{300} \lor p_{12} \neq \frac{260}{300}\frac{141}{300} \lor p_{21} \neq \frac{40}{300}\frac{159}{300} \lor p_{22} \neq \frac{40}{300}\frac{141}{300}$
+
+$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{(137 - 300\frac{260}{300}\frac{159}{300})^2}{300\frac{260}{300}\frac{159}{300}} + \frac{(123 - 300\frac{260}{300}\frac{141}{300})^2}{300\frac{260}{300}\frac{141}{300}} + \frac{(22 - 300\frac{40}{300}\frac{159}{300})^2}{300\frac{40}{300}\frac{159}{300}} + \frac{(18 - 300\frac{40}{300}\frac{141}{300})^2}{300\frac{40}{300}\frac{141}{300}}$
+
+-   **Base R way**
+
+\tiny
+
+```{r}
+chi_statistic <- chisq.test(table(segmentation$subscribe, 
+                 segmentation$ownHome), 
+           correct = FALSE)
+```
+
+##
+
+-   Pearson's Chi-squared test
+
+```{r}
+#| echo: false
+ggplot() + 
+  geom_function(fun=dchisq, args=list(df=1, ncp=0, log=FALSE),
+                xlim=c(0,20),
+                color='#2C3E50') +
+  geom_ribbon(data = tibble(x = seq.int(from = qchisq(p = 0.05, 
+                                                      df = 1, 
+                                                      lower.tail = FALSE),
+                                        to = 20,
+                                        by = 0.01),
+                            y = dchisq(x = x, df = 1)),
+              aes(x = x, ymin = 0, ymax = y),
+              fill='#E31A1C',
+              alpha=0.1) +
+  geom_vline(xintercept = qchisq(p = 0.05, df = 1, lower.tail = FALSE),
+             color="#E31A1C") +
+  geom_vline(xintercept = unname(chi_statistic$statistic),
+             color="#18BC9C") +
+  scale_x_continuous(breaks = c(qchisq(p = 0.05, df = 1, lower.tail = FALSE),
+                                unname(chi_statistic$statistic),
+                                20),
+                     labels = scales::label_number(accuracy = 0.01)) +
+  labs(x=NULL,
+       y=NULL,
+       color=NULL,
+       title = 'Chi-squared distribution function',
+       subtitle = str_glue('k=1
+                           Critical value: {qchisq(p = 0.05, df = 1, lower.tail = FALSE) |> round(digits=2)}
+                           Chi-squared statistic: {chi_statistic$statistic |> round(digits=2)}')) +
+  theme(panel.border      = element_rect(fill = NA, color = "black"),
+        plot.background   = element_rect(fill = "#f3fcfc"),
+        panel.background  = element_rect(fill = "#f3f7fc"),
+        plot.title        = element_text(face = "bold"),
+        axis.title        = element_text(face = "bold"),
+        legend.title      = element_text(face = "bold"),
+        legend.position   = 'bottom', 
+        axis.text         = element_text(face = "bold"))
+```
+
+##
+
+-   Pearson's Chi-squared test
+
+$H_0: p_{11} = \frac{260}{300}\frac{159}{300} \land p_{12} = \frac{260}{300}\frac{141}{300} \land p_{21} = \frac{40}{300}\frac{159}{300} \land p_{22} = \frac{40}{300}\frac{141}{300}$
+
+$H_1: p_{11} \neq \frac{260}{300}\frac{159}{300} \lor p_{12} \neq \frac{260}{300}\frac{141}{300} \lor p_{21} \neq \frac{40}{300}\frac{159}{300} \lor p_{22} \neq \frac{40}{300}\frac{141}{300}$
+
+$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{(137 - 300\frac{260}{300}\frac{159}{300})^2}{300\frac{260}{300}\frac{159}{300}} + \frac{(123 - 300\frac{260}{300}\frac{141}{300})^2}{300\frac{260}{300}\frac{141}{300}} + \frac{(22 - 300\frac{40}{300}\frac{159}{300})^2}{300\frac{40}{300}\frac{159}{300}} + \frac{(18 - 300\frac{40}{300}\frac{141}{300})^2}{300\frac{40}{300}\frac{141}{300}}$
+
+-   **tidymodels way**
+
+\tiny
+
+```{r}
+segmentation |> 
+  chisq_test(formula = subscribe ~ ownHome, 
+           correct = FALSE)
+```
+
+##
+
+-   Exact binomial test
+
+$H_0: p = 0.5$ $H_1: p \neq 0.5$
+
+$B = \sum_{i=1}^n x_i = 157$ where $x_i \in {0,1}$
+
+-   **R base way**
+
+\tiny
+
+```{r}
+binom_test <- binom.test(x = 157, n = 300, p = 0.5, 
+           alternative = 'two.sided',
+           conf.level = 0.95)
+binom_test
+```
+
+##
+
+-   Exact binomial test
+
+```{r}
+#| echo: false
+
+tibble(x = 0:300,
+       y = dbinom(x, size = 300, prob = 0.5, log = FALSE)) |> 
+  ggplot() + 
+  geom_point(aes(x = x, y = y),
+             shape=21, color='black', fill='#2C3E50') +
+  geom_ribbon(data = tibble(x = seq.int(from = 0, 
+                                        # See line 310 for why this 
+                                        # value
+                                        to = 132,
+                                        by = 1),
+                            y= dbinom(x = x, size = 300, prob = 0.5)),
+              aes(x=x, ymin=0, max=y),
+              fill="#CCBE93") +
+                                        # See line 319 for why this 
+                                        # value
+  geom_ribbon(data = tibble(x = seq.int(from = 167, 
+                                        to = 300,
+                                        by = 1),
+                            y= dbinom(x = x, size = 300, prob = 0.5)),
+              aes(x=x, ymin=0, max=y),
+              fill="#CCBE93") +
+  ## pbinom(q = 132, size = 300, prob = 0.5, lower.tail = TRUE)
+  ### I choose 132 and not 133 because with the last one I obtain
+  ### a probability of 0.02828283 which is above 0.025 but with 
+  ### the first one I obtain a probability of 0.02156425
+  geom_vline(xintercept = 132,
+             color="#E31A1C") +
+  ## pbinom(q = 167, size = 300, prob = 0.5, lower.tail = FALSE)
+  ### I choose 167 and not 166 becuase with the last one I obtain
+  ### a probability of 0.02828283 which is above 0.025 but with 
+  ### the first one I obtain a probability of 0.02156425
+  geom_vline(xintercept = 167,
+             color="#E31A1C") +
+  geom_vline(xintercept = unname(binom_test$statistic),
+             color="#18BC9C") +
+  scale_x_continuous(breaks = c(0,
+                                132,
+                                167,
+                                300)) +
+  labs(x=NULL,
+       y=NULL,
+       color=NULL,
+       title = 'Binomial distribution function',
+       subtitle = str_glue('n=300,
+                           p = 0.5
+                           Critical values: ({qbinom(p = 0.025, size = 300, prob = 0.5, lower.tail = TRUE)},{qbinom(p = 0.025, size = 300, prob = 0.5, lower.tail = FALSE)})
+                           Binomial statistic: {binom_test$statistic}')) +
+  theme(panel.border      = element_rect(fill = NA, color = "black"),
+        plot.background   = element_rect(fill = "#f3fcfc"),
+        panel.background  = element_rect(fill = "#f3f7fc"),
+        plot.title        = element_text(face = "bold"),
+        axis.title        = element_text(face = "bold"),
+        legend.title      = element_text(face = "bold"),
+        legend.position   = 'bottom', 
+        axis.text         = element_text(face = "bold"))
+```
+
+##
+
+-   Exact binomial test
+
+    -   Confidence interval:
+
+$$p_L < p < p_U$$
+
+-   $p_L$ and $p_U$ are random variables but $p$ is not a random variable. Therefore $[p_L, p_U]$ is a random interval where we have that:
+
+$$P(0.4651595 \approx p_L < p < p_U \approx 0.5810418) = 0.95$$
+
+##
+
+-   Exact binomial test
+
+$H_0: p = 0.5$ $H_1: p \neq 0.5$
+
+$B = \sum_{i=1}^n x_i = 157$ where $x_i \in {0,1}$
+
+-   **tidymodels way**
+
+\tiny
+
+```{r}
+binom.test(x = 157, n = 300, p = 0.5, 
+           alternative = 'two.sided',
+           conf.level = 0.95) |> 
+  tidy()
+```
+
+##
+
+-   2 sample t-test: independent samples
+
+\tiny
+
+```{r}
+segmentation |> ggplot() + 
+  geom_histogram(aes(x = income), color='black') + 
+  facet_wrap(facets = vars(ownHome))
+```
+
+##
+
+-   2 sample t-test: independent samples
+
+\tiny
+
+```{r}
+segmentation |> 
+  group_by(ownHome) |> 
+  summarise(mean_income = mean(income),
+            var_income = var(income),
+            n = n())
+```
+
+##
+
+-   2 sample t-test: independent samples
+
+$H_0: \mu_{ownNo} - \mu_{ownYes}= 0$ $H_1: \mu_{ownNo} - \mu_{ownYes} \neq 0$
+
+$t = \frac{\overline{ownNo} - \overline{ownYes}}{\sqrt{\frac{s_{ownNo}^2}{n_{ownNo}} - \frac{s_{ownYes}^2}{n_{ownYes}}}} = \frac{47391.01 - 54934.68}{\sqrt{ \frac{358692875}{159} - \frac{430890091}{141}}} \approx -3.273094$
+
+-   **R base way**
+
+\tiny
+
+```{r}
+t_test <- t.test(income ~ ownHome, data = segmentation,
+                 alternative='two.sided', mu = 0,
+                 conf.level = 0.95)
+t_test
+```
+
+##
+
+-   2 sample t-test: independent samples
+
+```{r}
+#| echo: false
+
+ggplot() + 
+  geom_function(fun=dt, args=list(df=t_test$parameter),
+                xlim=c(-5,5),
+                color='#2C3E50') +
+  geom_vline(xintercept = qt(p = 0.025, df = t_test$parameter, ncp = 0, 
+                             lower.tail = TRUE),
+             color="#E31A1C") +
+  geom_vline(xintercept = qt(p = 0.025, df = t_test$parameter, ncp = 0, 
+                             lower.tail = FALSE),
+             color="#E31A1C") +
+  geom_vline(xintercept = unname(t_test$statistic),
+             color="#18BC9C") +
+  geom_ribbon(data = tibble(x = seq.int(from = -5,
+                                        to = qt(p = 0.025, df = t_test$parameter, ncp = 0, 
+                                                lower.tail = TRUE),
+                                        by = 0.01),
+                            y = dt(x = x, df = t_test$parameter, ncp = 0)),
+              aes(x=x, ymin = 0, ymax=y),
+              fill='#CCBE93', alpha=0.5) +
+  geom_ribbon(data = tibble(x = seq.int(from = qt(p = 0.025, df = t_test$parameter, ncp = 0, 
+                                                  lower.tail = FALSE),
+                                        to = 5,
+                                        by = 0.01),
+                            y = dt(x = x, df = t_test$parameter, ncp = 0)),
+              aes(x=x, ymin = 0, ymax=y),
+              fill='#CCBE93', alpha=0.5) +
+  scale_x_continuous(breaks = c(-5,
+                                unname(t_test$statistic),
+                                qt(p = 0.025, df = t_test$parameter, ncp = 0, 
+                                   lower.tail = TRUE),
+                                qt(p = 0.025, df = t_test$parameter, ncp = 0, 
+                                   lower.tail = FALSE),
+                                5),
+                     labels = scales::label_number(accuracy = 0.01)) +
+  labs(x=NULL,
+       y=NULL,
+       color=NULL,
+       title = "Student's t-distribution distribution function",
+       subtitle = str_glue('Degrees of freedom= {t_test$parameter |> round(digits=2)},
+                           Critical values: ({qt(p = 0.025, df = t_test$parameter, ncp = 0, 
+                                                lower.tail = TRUE) |> round(digits=2)},{qt(p = 0.025, df = t_test$parameter, ncp = 0, 
+                                                lower.tail = FALSE) |> round(digits=2)})
+                           T statistic: {unname(t_test$statistic) |> round(digits=2)}')) +
+  theme(panel.border      = element_rect(fill = NA, color = "black"),
+        plot.background   = element_rect(fill = "#f3fcfc"),
+        panel.background  = element_rect(fill = "#f3f7fc"),
+        plot.title        = element_text(face = "bold"),
+        axis.title        = element_text(face = "bold"),
+        legend.title      = element_text(face = "bold"),
+        legend.position   = 'bottom', 
+        axis.text         = element_text(face = "bold"))
+```
+
+##
+
+-   2 sample t-test: independent samples
+
+    -   Confidence interval:
+
+$$c_L < \mu_{ownNo} - \mu_{ownYes} < c_U$$
+
+-   $\mu_{ownNo} - \mu_{ownYes}$ is not a random variable so we need to use a random variable
+
+$$P \Biggr( t_L < \frac{\overline{x}_{ownNo} - \overline{x}_{ownYes} - (\mu_{ownNo} - \mu_{ownYes})}{\sqrt{\frac{s^2_{ownNo}}{n_{ownNo} } +\frac{s^2_{ownYes}}{n_{ownYes}}}} < t_U \Biggr) = 0.95$$
+
+-   $\overline{x}_{ownNo} - \overline{x}_{ownYes}$ is a random variable
+
+##
+
+-   2 sample t-test: independent samples
+
+    -   Confidence interval:
+
+        -   $\frac{\overline{x}_{ownNo} - \overline{x}_{ownYes} - (\mu_{ownNo} - \mu_{ownYes})}{\sqrt{\frac{s^2_{ownNo}}{n_{ownNo} } +\frac{s^2_{ownYes}}{n_{ownYes}}}}$ is also a random variable with student's t-distribution and $\nu \approx \frac{(\frac{s_{ownNo}^2}{n_{ownNo}} + \frac{s_2^2}{n_{ownYes}})^2}{\frac{(\frac{s_{ownNo}^2}{n_{ownNo}})^2}{n_{ownNo}-1} + \frac{(\frac{s_2^2}{n_{ownYes}})^2}{n_{ownYes}-1}} = 285.2521$ degrees of freedom
+
+        -   Also we need to specify $t_L$ and $t_U$
+
+\tiny
+
+```{r}
+t_L <- qt(p = 0.025, df = 285.25, lower.tail = TRUE)
+t_L
+t_U <- qt(p = 0.975, df = 285.25, lower.tail = TRUE)
+t_U
+```
+
+##
+
+-   2 sample t-test: independent samples
+
+    -   Confidence interval:
+
+\tiny
+
+$$P(-7543.674 - 1.968315\times2304.753 < \mu_{ownNo} - \mu_{ownYes} < -7543.674 - 1.968315\times2304.753) = 0.95$$ $$P(-12080.16 < \mu_{ownNo} - \mu_{ownYes} < -3007.193) = 0.95$$
+
+\normalsize
+
+-   In the long run 95% of confidence intervals constructed in this manner will contain the true parameter
+
+##
+
+-   2 sample t-test: independent samples
+
+$H_0: \mu_{ownNo} - \mu_{ownYes}= 0$ $H_1: \mu_{ownNo} - \mu_{ownYes} \neq 0$
+
+$t = \frac{\overline{ownNo} - \overline{ownYes}}{\sqrt{\frac{s_{ownNo}^2}{n_{ownNo}} - \frac{s_{ownYes}^2}{n_{ownYes}}}} = \frac{47391.01 - 54934.68}{\sqrt{ \frac{358692875}{159} - \frac{430890091}{141}}} \approx -3.273094$
+
+-   **tidymodels way**
+
+\tiny
+
+```{r}
+
+segmentation |> 
+  t_test(formula = income ~ ownHome,
+         alternative = "two-sided",
+         order = c("ownNo", "ownYes"),
+         mu = 0,
+         conf_level = 0.95)
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\tiny
+
+```{r}
+
+segmentation |> 
+  group_by(Segment) |> 
+  summarise(mean = mean(income),
+            variance = var(income),
+            n = n())
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+```{r}
+#| echo: false
+
+segmentation |> 
+  ggplot(aes(x = Segment, y = income)) + 
+  geom_point(position = position_jitter(width = 0.1)) + 
+  geom_hline(yintercept = mean(segmentation$income),
+             color = '#2C3E50') +
+  stat_summary(geom = "point", fun = 'mean',
+               size = 4,
+               shape = 21, fill = '#E31A1C', color = 'black')
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+$H_0: \mu_{Moving\;up} = \mu_{Suburb\;mix} = \mu_{Travelers} = \mu_{Urban\;hip}$
+
+$H_1: \text{At least one group mean is different from the rest}$
+
+$n = \sum_{j=1}^4 n_j = n_1 + \cdots + n_4 = 70 + 100 + 80 + 50 = 300$
+
+$\overline{income} = \frac{1}{n} \sum_{j=1}^4 \sum_{i=1}^{n_j} income_{ij}$
+
+$\overline{income}_j = \frac{1}{n_j} \sum_{i=1}^{n_j} income_{ij}$
+
+$F = \frac{\frac{\sum_{j=1}^4 \sum_{i=1}^{n_j} (\overline{income}_j - \overline{income})^2}{4-1}}{\frac{\sum_{j=1}^4 \sum_{i=1}^{n_j} (income_{ij} - \overline{income}_j)^2}{300 - 4}} = \frac{\frac{54969675428}{3}}{\frac{66281072794}{296}} = \frac{18323225143}{223922543} = 81.82841$
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+    -   **R base way**
+
+\tiny
+
+```{r}
+anova_table <- aov(data = segmentation, formula = income ~ Segment) |>
+  anova()
+anova_table
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+```{r}
+#| echo: false
+
+ggplot() + 
+  geom_function(fun=df, args=list(df1=3, df2=294, log=FALSE),
+                xlim=c(0,90),
+                color='#2C3E50') +
+  geom_ribbon(data = tibble(x = seq.int(from = qf(p = 0.05,
+                                                  df1 = 3,
+                                                  df2 = 294,
+                                                  lower.tail = FALSE),
+                                        to = 90,
+                                        by = 0.01),
+                            y = df(x = x, df1 = 3, df2 = 294)),
+              aes(x = x, ymin = 0, ymax = y),
+              fill='#E31A1C',
+              alpha=0.1) +
+  geom_vline(xintercept = qf(p = 0.05, df1=3, df2=294, lower.tail = FALSE),
+             color="#E31A1C") +
+  geom_vline(xintercept = unname(anova_table$`F value`)[1],
+             color="#18BC9C") +
+  scale_x_continuous(breaks = c(qf(p = 0.05, df1 = 3, df2=294, lower.tail = FALSE),
+                                unname(anova_table$`F value`)[1],
+                                90),
+                     labels = scales::label_number(accuracy = 0.1)) +
+  labs(x=NULL,
+       y=NULL,
+       color=NULL,
+       title = 'F-squared distribution function',
+       subtitle = str_glue('df1=3,
+                           df2=294,
+                           Critical value: {qf(p = 0.05, df1 = 3, df2=294, lower.tail = FALSE) |> round(digits=2)}
+                           F statistic: {unname(anova_table$`F value`)[1] |> round(digits=2)}')) +
+  theme(panel.border      = element_rect(fill = NA, color = "black"),
+        plot.background   = element_rect(fill = "#f3fcfc"),
+        panel.background  = element_rect(fill = "#f3f7fc"),
+        plot.title        = element_text(face = "bold"),
+        axis.title        = element_text(face = "bold"),
+        legend.title      = element_text(face = "bold"),
+        legend.position   = 'bottom', 
+        axis.text         = element_text(face = "bold"))
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+    -   **tidymodels way**
+
+\tiny
+
+```{r}
+anova_table <- aov(data = segmentation, formula = income ~ Segment) |>
+  anova() |> 
+  tidy()
+anova_table
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\tiny
+
+```{r}
+segmentation |> 
+  distinct(Segment) |> 
+  arrange(Segment) |> 
+  rowid_to_column(var = 'i')
+```
+
+\tiny
+
+```{r}
+segmentation |> 
+  distinct(ownHome) |> 
+  rowid_to_column(var = 'j')
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\tiny
+
+```{r}
+segmentation |> 
+  count(Segment, ownHome, name = "n_ij")
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\tiny
+
+```{r}
+mu_ij <- segmentation |> 
+  group_by(Segment, ownHome) |> 
+  summarise(mean = mean(income)) |> 
+  ungroup()
+mu_11 <- mu_ij$mean[1]
+mu_11
+```
+
+```{r}
+segmentation |> 
+  select(income, Segment, ownHome) |> 
+  head(n=5)
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+```{r}
+#| echo: false
+
+mean_Segment <- segmentation |> 
+  group_by(Segment) |> 
+  summarise(mean = mean(income)) |> 
+  ungroup()
+
+mean_ownHome <- segmentation |> 
+  group_by(ownHome) |> 
+  summarise(mean = mean(income)) |> 
+  ungroup()
+
+mean_Segment_ownHome <- segmentation |> 
+  group_by(Segment, ownHome) |> 
+  summarise(mean = mean(income)) |> 
+  ungroup()
+
+g1 <- segmentation |> 
+  ggplot(aes(x = Segment, y = income)) + 
+  geom_point(position = position_jitter(width = 0.1)) +
+  stat_summary(geom = "point", fun = 'mean',
+               size = 3,
+               shape = 21, fill = '#E31A1C', color = 'black') + 
+  geom_line(data = mean_Segment,
+            aes(x = Segment, y = mean, group = 1),
+            color = "#2C3E50")
+
+g2 <- segmentation |> 
+  ggplot(aes(x = ownHome, y = income)) + 
+  geom_point(position = position_jitter(width = 0.1)) +
+  stat_summary(geom = "point", fun = 'mean',
+               size = 3,
+               shape = 21, fill = '#E31A1C', color = 'black') + 
+  geom_line(data = mean_ownHome,
+            aes(x = ownHome, y = mean, group = 1),
+            color = "#2C3E50")
+
+g3 <- segmentation |> 
+  ggplot(aes(x = Segment, y = income, fill = ownHome, group = ownHome)) + 
+  geom_point(position = position_jitter(width = 0.1),
+             shape = 21) + 
+  geom_line(data = mean_Segment_ownHome,
+            aes(x = Segment, y = mean, color = ownHome)) +
+  stat_summary(geom = "point", fun = 'mean',
+               size = 3,
+               shape = 21, fill = '#E31A1C', color = 'black') + 
+  scale_color_manual(values = c("#18BC9C", "#CCBE93")) + 
+  scale_fill_manual(values = c("#18BC9C", "#CCBE93")) + 
+  theme(legend.position = "bottom")
+
+(g1 / g2) | g3
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\footnotesize
+
+$$\begin{split}
+  income_{ijk} =  & \mu + \alpha_i + \beta_j + (\alpha\beta)_{ij} + \epsilon_{ijk} \\ 
+  & \text{ where } + \epsilon_i \sim \mathcal{N}(0, \sigma^2) \\ 
+  & \text{ and } i = 1, 2, 3, 4 \\
+  & j = 1, 2 \\
+  & k = 1, \ldots n_{ij} \\
+  & \mu = \mu_{11} \\
+  & \alpha_1 = \beta_1 = 0 \\
+  & (\alpha\beta)_{11} = (\alpha\beta)_{12} = 0 \\ 
+  & (\alpha\beta)_{21} = (\alpha\beta)_{31} = (\alpha\beta)_{41} = 0 \\  
+  \end{split}$$
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\footnotesize
+
+$$\begin{split}
+  \widehat{income}_{ijk} =  & \widehat{\mu} + \widehat{\alpha}_i + \widehat{\beta}_j + (\widehat{\alpha\beta})_{ij} + \widehat{\epsilon}_{ijk} \\ 
+  & \text{ and } i = 1, 2, 3, 4 \\
+  & j = 1, 2 \\
+  & k = 1, \ldots n_{ij} \\
+  & \widehat{\mu} = \widehat{\mu}_{11} \\
+  & \widehat{\alpha}_2, \widehat{\alpha}_3, \widehat{\alpha}_4 \\
+  & \widehat{\beta}_2 \\ 
+  & (\widehat{\alpha\beta})_{22}, (\widehat{\alpha\beta})_{32}, (\widehat{\alpha\beta})_{42}
+  \end{split}$$
+
+$$income_{ijk} - \widehat{income}_{ijk} = \widehat{\epsilon}_{ijk}$$
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\tiny
+
+::: columns
+::: {.column width="40%"}
+```{r}
+segmentation |> 
+  select(income, Segment, ownHome) |> 
+  head(n=2) |> 
+  glimpse()
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+framed <- model_frame(formula = income ~ 
+                                Segment + 
+                                ownHome + 
+                                Segment:ownHome,
+            data = segmentation)
+
+model_matrix(terms = framed$terms,
+             data = framed$data) |> 
+  head(n = 2) |> 
+  glimpse()
+```
+:::
+:::
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+    -   Model
+
+\footnotesize
+
+$$\begin{bmatrix}
+  49482.81 \\
+  35546.29 \\
+  \vdots
+  \end{bmatrix} =
+  \begin{bmatrix}
+  1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+  1 & 1 & 0 & 0 & 1 & 1 & 0 & 0 \\
+  \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots
+  \end{bmatrix} 
+  \begin{bmatrix}
+  \mu \\
+  \alpha_2 \\
+  \beta_2 \\
+  (\alpha\beta)_{13} \\
+  (\alpha\beta)_{14} \\
+  (\alpha\beta)_{22} \\
+  (\alpha\beta)_{32} \\
+  (\alpha\beta)_{42} \\
+  \end{bmatrix}$$
+
+\normalsize
+
+-   Coefficients to estimate using `aov`
+
+\footnotesize
+
+$$\widehat{\mu} = \widehat{\mu}_{11}, \widehat{\alpha}_2, \widehat{\alpha}_3, \widehat{\alpha}_4, \widehat{\beta}_2, (\widehat{\alpha\beta})_{22}, (\widehat{\alpha\beta})_{32}, (\widehat{\alpha\beta})_{42}$$
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\tiny
+
+```{r}
+#| echo: true
+model_aov <- aov(formula = income ~ Segment + ownHome + Segment:ownHome,
+                 data = segmentation)
+coef(model_aov) |> enframe(name = "coef")
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\footnotesize
+
+-   Segment
+
+\tiny
+
+$H_0: \mu_{Moving\;up} = \mu_{Suburb\;mix} = \mu_{Travelers} = \mu_{Urban\;hip}$
+
+$H_1: \text{At least one group mean is different from the rest}$
+
+\footnotesize
+
+-   ownHome
+
+\tiny
+
+$H_0: \mu_{ownNo} = \mu_{ownYes}$
+
+$H_1: \text{At least one group mean is different from the rest}$
+
+\footnotesize
+
+-   Segment, ownHome
+
+\tiny
+
+$H_0: \mu_{Moving\;up,\;ownNo} - \mu_{Moving\;up,\;ownYes} = \mu_{Suburb\;mix,\;ownNo} - \mu_{Suburb\;mix,\;ownYes} =$
+
+$\;\;\;\;\;\;\;\;\;\mu_{Travelers,\;ownNo} - \mu_{Travelers,\;ownYes} = \mu_{Urban\;hip,\;ownNo} - \mu_{Urban\;hip,\;ownYes}$
+
+$H_1: \text{At least one difference group mean is different from the rest}$
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\tiny
+
+```{r}
+model_aov |> 
+  anova()
+```
+
+##
+
+-   Testing Multiple Group Means: Analysis of Variance (ANOVA)
+
+\tiny
+
+```{r}
+model_aov <- lm(formula = income ~ -1 + Segment,
+                 data = segmentation) |> 
+  tidy(conf.int = TRUE)
+```
+
+```{r}
+#| echo: false
+
+model_aov  |> 
+  mutate(term = as_factor(term) |> fct_rev()) |> 
+  ggplot() +
+  geom_segment(aes(x = conf.low, xend = conf.high,  
+                   y = term, yend = term)) +
+  geom_point(aes(x = estimate, y = term),
+             shape = 21, 
+             color = "black", fill = "#E31A1C") +
+  labs(x="Income",
+       y=NULL,
+       title="Average income by segment",
+       subtitle = "95% confidence interval")
+```
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+-   To the [**Linux kernel community**](https://www.kernel.org/category/about.html) for allowing me the possibility to use some [**Linux distributions**](https://static.lwn.net/Distributions/) as my main [**OS**](https://en.wikipedia.org/wiki/Operating_system) without paying for a license
+
+# References {.allowframebreaks}
