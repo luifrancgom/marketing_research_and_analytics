@@ -77,7 +77,8 @@ bike_sales |>
          order.id, order.line, 
          quantity, price,
          customer.id, bikeshop.name,
-         model)
+         model) |> 
+  datatable()
 ```
 
 You can use the following command inside RStudio IDE to inspect all the columns as a spreadsheet:
