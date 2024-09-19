@@ -58,9 +58,13 @@ The `bike_sales` data set contains 17 variables and a total of 15644 observation
 ```{r}
 library(sweep)
 library(tidyverse)
+library(DT)
+
 dim(bike_sales)
+
 bike_sales |> 
-  head()
+  head() |> 
+  datatable()
 ```
 
 Each observation corresponds to a closed order. A closed order is a completed transaction where all items have been shipped and invoiced to a bicycle shop. A closed order, represented in the `order.id`, can be associated to 1 or more transactions and are capture by the `order.line` variable.
@@ -73,7 +77,8 @@ bike_sales |>
          order.id, order.line, 
          quantity, price,
          customer.id, bikeshop.name,
-         model)
+         model) |> 
+  datatable()
 ```
 
 You can use the following command inside RStudio IDE to inspect all the columns as a spreadsheet:
