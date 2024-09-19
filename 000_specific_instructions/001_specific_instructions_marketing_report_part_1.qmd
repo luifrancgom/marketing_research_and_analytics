@@ -15,7 +15,7 @@ editor: visual
 
 # Business Case
 
-<span style="color: red;">Disclaimer:</span> This business case was taken from the course [Data Science for Business Part 1](https://university.business-science.io/p/ds4b-101-r-business-analysis-r) offered by the company [Business Science](https://www.business-science.io/) and adapted to be in line with the topics covered in [@chapman_r_2019]. 
+[Disclaimer:]{style="color: red;"} This business case was taken from the course [Data Science for Business Part 1](https://university.business-science.io/p/ds4b-101-r-business-analysis-r) offered by the company [Business Science](https://www.business-science.io/) and adapted to be in line with the topics covered in [@chapman_r_2019].
 
 You and your team work for a corporation located in Wilton, Connecticut, United States that supplies bicycle frames and other components related to bicycles to different bicycle shops through the United States.
 
@@ -25,13 +25,13 @@ Your team is assigned to complete 2 tasks:
 
 -   Support the marketing team in the creation of a marketing segmentation clustering model by using data collected from to the bicycle shops to offer more personalized products and messaging them.
 
-# Packages 
+# Packages
 
 You will need to install a set of packages that are going to be used along the course to extend the functionality of R. You can find the packages that are going to be used in 2 locations. Choose the option of your preference:
 
--   [https://github.com/luifrancgom/marketing_research_and_analytics/](https://github.com/luifrancgom/marketing_research_and_analytics/) > 000_packages_for_the_course > 001_script_install_packages.R
+-   <https://github.com/luifrancgom/marketing_research_and_analytics/> \> 000_packages_for_the_course \> 001_script_install_packages.R
 
--   Primer Corte 30% > Learning Resources > Support material > Packages for the course > 001_script_install_packages.R
+-   Primer Corte 30% \> Learning Resources \> Support material \> Packages for the course \> 001_script_install_packages.R
 
 Run the full script using RStudio IDE to install the packages. If you get the following message: **Do you want to install from source the packages which need compilation?**, just say no and keep going.
 
@@ -39,33 +39,37 @@ Run the full script using RStudio IDE to install the packages. If you get the fo
 
 -   If you understand what is the meaning of **built from source locally** and you want to do this just install the following tools:
 
-    -   For **Windows Users**: [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/) > *Choose the RTools version according to your R version* (type `R.version` in the RStudio console if you don't remember the R version you have installed)
-    
-    -   For **Mac Users**: [https://mac.r-project.org/tools/](https://mac.r-project.org/tools/) > Tools > Mandatory tools > *Install the tools that are pointed out in this page*
-    
-    -   For **Linux Users**: probably you know what you are doing where with high probability you will need to always **built from source locally**. If you need help I can assist you if you have installed Ubuntu and are stuck 
+    -   For **Windows Users**: <https://cran.r-project.org/bin/windows/Rtools/> \> *Choose the RTools version according to your R version* (type `R.version` in the RStudio console if you don't remember the R version you have installed)
+
+    -   For **Mac Users**: <https://mac.r-project.org/tools/> \> Tools \> Mandatory tools \> *Install the tools that are pointed out in this page*
+
+    -   For **Linux Users**: probably you know what you are doing where with high probability you will need to always **built from source locally**. If you need help I can assist you if you have installed Ubuntu and are stuck
 
 # Data
 
 The data collected by the corporation is available in the `sweep` package
 
-  -   Load the library: `library(sweep)`
-  -   Type `bike_sales` to access the data
-  -   If you want information about this data set type `?bike_sales`
-  
+-   Load the library: `library(sweep)`
+-   Type `bike_sales` to access the data
+-   If you want information about this data set type `?bike_sales`
+
 The `bike_sales` data set contains 17 variables and a total of 15644 observations relate to transactional data:
 
 ```{r}
 library(sweep)
 library(tidyverse)
+library(DT)
+
 dim(bike_sales)
+
 bike_sales |> 
-  head()
+  head() |> 
+  datatable()
 ```
 
 Each observation corresponds to a closed order. A closed order is a completed transaction where all items have been shipped and invoiced to a bicycle shop. A closed order, represented in the `order.id`, can be associated to 1 or more transactions and are capture by the `order.line` variable.
 
-For example, the first 2 rows corresponds to a closed order where a bike shop named **Ithaca Mountain Climbers** bought 2 models: **Jekyll Carbon 2** and **Trigger Carbon 2**. The `order.id` is identify as `1` and the `order.line` variable has a value of `1` and `2` taking into account that `1` (see the `quantity` variable) **Jekyll Carbon 2** and `1` (see the `quantity` variable) **Trigger Carbon 2** model were acquired at a price of `6070` and `5970`.    
+For example, the first 2 rows corresponds to a closed order where a bike shop named **Ithaca Mountain Climbers** bought 2 models: **Jekyll Carbon 2** and **Trigger Carbon 2**. The `order.id` is identify as `1` and the `order.line` variable has a value of `1` and `2` taking into account that `1` (see the `quantity` variable) **Jekyll Carbon 2** and `1` (see the `quantity` variable) **Trigger Carbon 2** model were acquired at a price of `6070` and `5970`.
 
 ```{r}
 bike_sales |> 
@@ -90,8 +94,8 @@ In this first report you are going to describe the `bike_sales` data as a first 
 
 Use the template `001_marketing_report_part-1.qmd` to build the marketing report. You can find the template to use in 2 locations. Choose the option of your preference:
 
--   [https://github.com/luifrancgom/marketing_research_and_analytics/](https://github.com/luifrancgom/marketing_research_and_analytics/) > 000_templates > 001_marketing_report_part-1.qmd
+-   <https://github.com/luifrancgom/marketing_research_and_analytics/> \> 000_templates \> 001_marketing_report_part-1.qmd
 
--   Primer Corte 30% > Learning Resources > Support material > Templates > 001_marketing_report_part-1.qmd
+-   Primer Corte 30% \> Learning Resources \> Support material \> Templates \> 001_marketing_report_part-1.qmd
 
 # References
