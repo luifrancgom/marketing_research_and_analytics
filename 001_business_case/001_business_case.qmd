@@ -1,0 +1,28 @@
+---
+title: "Business Case"
+author: 
+  - "Luis Francisco Gomez"
+  - "Juan Perez"
+  - "Sofia Gomez"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(sweep)
+library(DT)
+```
+
+# Import data
+
+We are going to import data related to bikes from the Canandole Bikes Corporation.
+
+```{r}
+bike_sales <- bike_sales
+bike_sales |> datatable()
+```
+
+
