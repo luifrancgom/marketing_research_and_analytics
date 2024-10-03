@@ -1,0 +1,50 @@
+---
+title: "An on overview of the R language"
+author: 
+  - Luis Francisco Gomez
+  - Juan Perez
+  - Juana de Heredia
+format: 
+  html:
+    embed-resources: true
+    code-fold: true
+editor: visual
+---
+
+```{r}
+#| message: false
+library(tidyverse)
+library(skimr)
+library(DT)
+```
+
+# Importing data
+
+This is a data set related to the satisfaction of a group of clients and also its corresponding segment.
+
+```{r}
+#| message: false
+# satisfaction_data <- read_csv(file = "http://goo.gl/UDv12g")
+satisfaction_data <- read_csv(file = "../000_data/002_data_chapter2.csv")
+satisfaction_data |> 
+  head(n = 5) |> 
+  datatable()
+```
+
+# Tranforming data
+
+Taking into account that the Segment variable is nominal we need to transform this column in the data.
+
+```{r}
+satisfaction_data <-  satisfaction_data |> 
+  mutate(Segment = factor(x = Segment,
+                          ordered = FALSE))
+```
+
+# Summarizing data
+
+```{r}
+satisfaction_data |> skim()
+```
+
+
