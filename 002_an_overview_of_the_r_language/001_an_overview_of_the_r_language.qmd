@@ -16,6 +16,7 @@ editor: visual
 library(tidyverse)
 library(skimr)
 library(DT)
+library(sweep)
 ```
 
 # Importing data
@@ -47,4 +48,27 @@ satisfaction_data <-  satisfaction_data |>
 satisfaction_data |> skim()
 ```
 
+# Project practice
+
+## Import data
+
+```{r}
+bike_sales <- bike_sales
+```
+
+## Answering questions
+
+-   Question 1: ¿What are the bike shops that generate more revenue?
+
+```{r}
+revenue_by_bikeshop <- bike_sales |> 
+  select(customer.id, bikeshop.name,
+         quantity, price) |> 
+  mutate(revenue = quantity * price) |> 
+  group_by(bikeshop.name) |> 
+  summarise(total_revenue = sum(revenue))
+
+revenue_by_bikeshop |> 
+  datatable()
+```
 
