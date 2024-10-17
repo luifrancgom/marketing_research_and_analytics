@@ -1,0 +1,56 @@
+---
+title: "Describing data"
+author: 
+  - Juan Perez
+  - Luis Francisco Gomez
+date: 2024-10-16
+format: 
+  html:
+    embed-resources: true
+    code-fold: true
+    toc: true
+    number-sections: true
+editor: visual
+---
+
+```{r}
+#| message: false
+
+library(tidyverse)
+library(skimr)
+```
+
+# Import data
+
+```{r}
+#| message: false
+
+weekly_store <- read_csv(file = "../000_data/003_data_chapter3.csv")
+```
+
+# Inspect data
+
+```{r}
+weekly_store |> glimpse()
+```
+
+# Transform data
+
+```{r}
+weekly_store <- weekly_store |> 
+  mutate(storeNum = factor(x = storeNum, 
+                           ordered = FALSE),
+         Year     = factor(x = Year,
+                           ordered = TRUE),
+         Week     = factor(x = Week,
+                           ordered = TRUE),
+         p1prom   = as.logical(x = p1prom),
+         p2prom   = as.logical(x = p2prom))
+```
+
+# Summary data
+
+```{r}
+weekly_store |> skim()
+```
+
