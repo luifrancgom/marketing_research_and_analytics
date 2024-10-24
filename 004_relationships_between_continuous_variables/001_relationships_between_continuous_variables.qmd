@@ -1,0 +1,94 @@
+---
+title: "Relationships Between Continuous Variables"
+author: 
+  - Luis Francisco Gomez
+  - Juan Perez
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    code-fold: true
+    number-sections: true
+editor: visual
+---
+
+```{r}
+#| label: libraries
+#| message: false
+
+library(tidyverse)
+library(skimr)
+```
+
+# Import data
+
+```{r}
+#| message: false
+
+customer <- read_csv(file = "../000_data/004_data_chapter4.csv")
+```
+
+# Inspect data
+
+```{r}
+customer |> glimpse()
+```
+
+# Transform data
+
+```{r}
+customer <- customer |>
+  mutate(cust.id = factor(x = cust.id,
+                          ordered = FALSE),
+         email = factor(x = email,
+                        ordered = FALSE),
+         online.visits = as.integer(x = online.visits),
+         online.trans = as.integer(x = online.trans),
+         store.trans = as.integer(x = store.trans),
+         sat.service = factor(x = sat.service,
+                              ordered = TRUE),
+         sat.selection = factor(x = sat.selection,
+                                ordered = TRUE))
+```
+
+# Summarize data
+
+```{r}
+customer |> skim()
+```
+
+# Visualize data
+
+## Physical stores vs online: spending
+
+```{r}
+customer |> 
+  ggplot() +
+  geom_point(aes(x = store.spend,
+                 y = online.spend,
+                 color = email)) +
+  scale_color_manual(values = c("#ea5545",
+                                "#b33dc6"), 
+                     labels = c("Email in file: no",
+                                "Email in file: yes")) +
+  scale_x_continuous(transform = "log1p", 
+                     breaks = c(1, 2, 5, 10, 20, 50, 100, 500)) +
+  scale_y_continuous(transform = "log1p",
+                     breaks = c(1, 5, 50, 500, 5000)) +
+  labs(x = "Sales in the physical store (US dollars)",
+       y = "Sales online store (US dollars)",
+       title = "Yearly sales: physical store vs online",
+       color = "Email")
+```
+
+# Summary statistics between continuous variables
+
+## Pearson correlation
+
+```{r}
+coef_pearson <- cor(x = customer$store.spend, 
+                    y = customer$online.spend,
+                    method = "pearson")
+
+coef_pearson
+```
