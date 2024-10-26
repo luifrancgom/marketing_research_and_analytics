@@ -1,6 +1,7 @@
 # Libraries ----
 library(tidyverse)
 library(skimr)
+library(corrr)
 
 # Import data ----
 customer <- read_csv(file = "000_data/004_data_chapter4.csv")
@@ -56,10 +57,85 @@ numerator <- sum((customer$store.spend - mean_store_spend) * (customer$online.sp
 denominator <- sqrt(sum((customer$store.spend - mean_store_spend)^2)) * sqrt(sum((customer$online.spend - mean_online_spend)^2))
 
 coef_pearson <- numerator / denominator
-  
+
 cor(x = customer$store.spend, 
     y = customer$online.spend, 
     method = "pearson")
+
+## Correlation matrices ----
+is.numeric(customer$age)
+is.numeric(customer$email)
+
+correlation_matrix <- customer |> 
+  select(where(is.numeric)) |> 
+  correlate(use = "pairwise.complete.obs",
+            method = "pearson",
+            diagonal = 1)
+
+### Visualizing correlation matrix ---- 
+correlation_matrix |> 
+  autoplot(triangular = "lower")
+
+
+## Transforming and visualizing data ----
+customer |> 
+  ggplot() +
+  geom_histogram(aes(x = distance.to.store),
+                 color = "black")
+
+customer |> 
+  ggplot() +
+  geom_histogram(aes(x = distance.to.store_trans),
+                 color = "black")
+
+customer |> 
+  ggplot() +
+  geom_point(aes(x = distance.to.store,
+                 y = store.spend))
+
+### Prepare data
+customer <- customer |> 
+  mutate(distance.to.store_trans = 1/distance.to.store,
+         distance.to.store_log = log(distance.to.store))
+
+customer |> 
+  ggplot() + 
+  geom_point(aes(x = distance.to.store_trans,
+                 y = store.spend))
+
+customer |> 
+  ggplot() + 
+  geom_point(aes(x = distance.to.store_log,
+                 y = store.spend))
+
+cor(customer$distance.to.store,
+    customer$store.spend)
+
+cor(customer$distance.to.store_trans,
+    customer$store.spend)
+
+cor(customer$distance.to.store_log,
+    customer$store.spend)
+
+## visualizing categorical values
+customer |> 
+  ggplot() + 
+  geom_point(aes(x = sat.service,
+                 y = sat.selection),
+             position = position_jitter(width = 0.2,
+                                        height = 0.2))
+
+customer_satisfaction <- customer |> 
+  count(sat.service, sat.selection)
+
+customer_satisfaction |> 
+  ggplot() +
+  geom_label(aes(x = sat.service,
+                 y = sat.selection,
+                 label = n))
+
+  
+
 
 
 

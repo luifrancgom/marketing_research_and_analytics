@@ -18,6 +18,8 @@ editor: visual
 
 library(tidyverse)
 library(skimr)
+library(corrr)
+library(DT)
 ```
 
 # Import data
@@ -91,4 +93,84 @@ coef_pearson <- cor(x = customer$store.spend,
                     method = "pearson")
 
 coef_pearson
+```
+
+## Correlation matrices
+
+```{r}
+#| message: false
+
+correlation_matrix <- customer |> 
+  select(where(is.numeric)) |> 
+  correlate(use = "pairwise.complete.obs",
+            method = "pearson",
+            diagonal = 1)
+
+correlation_matrix |> 
+  datatable()
+```
+
+### Visualizing correlation matrix
+
+```{r}
+correlation_matrix |> 
+  autoplot(triangular = "lower")
+```
+
+## Transforming and visualizing data
+
+### Preparing data
+
+```{r}
+customer <- customer |> 
+  mutate(distance.to.store_trans = 1/distance.to.store,
+         distance.to.store_log = log(distance.to.store))
+```
+
+### Visualizing transformed data
+
+```{r}
+customer |> 
+  ggplot() + 
+  geom_point(aes(x = distance.to.store_log,
+                 y = store.spend))
+```
+
+### Calculating correlation
+
+```{r}
+cor(customer$distance.to.store_log,
+    customer$store.spend)
+```
+
+## visualizing categorical values
+
+### Using a scatterplot
+
+```{r}
+customer |> 
+  ggplot() + 
+  geom_point(aes(x = sat.service,
+                 y = sat.selection),
+             position = position_jitter(width = 0.2,
+                                        height = 0.2))
+```
+
+### Using text
+
+#### Prepare data
+
+```{r}
+customer_satisfaction <- customer |> 
+  count(sat.service, sat.selection)
+```
+
+#### Creating the plot
+
+```{r}
+customer_satisfaction |> 
+  ggplot() +
+  geom_label(aes(x = sat.service,
+                 y = sat.selection,
+                 label = n))
 ```
