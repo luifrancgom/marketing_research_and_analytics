@@ -1,0 +1,106 @@
+---
+title: "Comparing Groups: Tables and Visualizations"
+author: 
+  - Luis Francisco Gomez
+  - Sara Perez
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    number-sections: true
+    code-fold: true
+editor: visual
+---
+
+```{r}
+#| message: false
+library(tidyverse)
+library(skimr)
+library(DT)
+```
+
+# Import data
+
+```{r}
+#| message: false
+
+segmentation <- read_csv(file = "../000_data/005_data_chapter5.csv")
+```
+
+# Transform
+
+```{r}
+segmentation <- segmentation |> 
+  mutate(gender = factor(x = gender,
+                         ordered = FALSE),
+         kids = as.integer(kids),
+         ownHome = factor(x = ownHome,
+                          ordered = FALSE),
+         subscribe = factor(x = subscribe,
+                            ordered = FALSE),
+         Segment = factor(x = Segment,
+                          ordered = FALSE))
+```
+
+# Summarize data
+
+Check out the `income` variable because it has negative values
+
+```{r}
+segmentation |> 
+  skim()
+```
+
+# Summary statistics by groups
+
+Question 1: Are there differences between segments in relation to income?
+
+```{r}
+segmentation |> 
+  select(Segment, income) |> 
+  group_by(Segment) |> 
+  summarise(mean_income = mean(income)) |> 
+  arrange(desc(mean_income)) |> 
+  datatable()
+```
+
+Question 2: Are there differences between segments in relation to the number of kids?
+
+```{r}
+#| message: false
+
+segmentation |> 
+  group_by(ownHome, Segment) |> 
+  summarise(number_kids = sum(kids)) |> 
+  ungroup() |> 
+  arrange(desc(number_kids)) |> 
+  datatable()
+```
+
+Question 3: What are the percentage of subscribers by Segment and by the status of owning a house?
+
+```{r}
+subscriber_by_segment_home_ownership <- segmentation |> 
+  count(subscribe, ownHome, Segment) |> 
+  group_by(ownHome, Segment) |> 
+  mutate(number_percentage = (n / sum(n))*100) |> 
+  ungroup() |> 
+  arrange(Segment, ownHome)
+
+subscriber_by_segment_home_ownership |> 
+  datatable()
+```
+
+## Visualization by groups
+
+When grouping by ownership house status and segment the percentage of subscribers of my product is low.
+
+```{r}
+subscriber_by_segment_home_ownership |> 
+  ggplot() +
+  geom_col(aes(x = subscribe, 
+               y = number_percentage)) +
+  facet_wrap(facets = vars(ownHome, 
+                           Segment), 
+             nrow = 2, ncol = 4)
+```
