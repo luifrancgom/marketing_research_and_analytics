@@ -62,14 +62,14 @@ segmentation |>
 ##             of subscribers by Segment
 ##             and by the status of owning
 ##             a house
-subscriber_by_segment_home_ownersh <- segmentation |> 
+subscriber_by_segment_home_ownership <- segmentation |> 
   count(subscribe, ownHome, Segment) |> 
   group_by(ownHome, Segment) |> 
   mutate(number_percentage = (n / sum(n))*100) |> 
   ungroup() |> 
   arrange(Segment, ownHome)
 
-subscriber_by_segment_home_ownersh
+subscriber_by_segment_home_ownership
 
 ### Example how to arrange ----
 df <- tibble(
@@ -81,4 +81,10 @@ df_sorted <- df |>
   arrange(age)
 
 ## Visualization by groups ----
-
+subscriber_by_segment_home_ownership |> 
+  ggplot() +
+  geom_col(aes(x = subscribe, 
+               y = number_percentage)) +
+  facet_wrap(facets = vars(ownHome, 
+                           Segment), 
+             nrow = 2, ncol = 4)
