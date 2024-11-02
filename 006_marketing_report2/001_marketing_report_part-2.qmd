@@ -1,9 +1,9 @@
 ---
 title: "Marketing report part 2"
-date: 1900-01-01
+date: 2024-11-09
 author: 
-  - Norah Jones   
-  - Bill Gates
+  - Luis Francisco Gómez  
+  - Sara Perez
 format: 
   html:
     toc: true
@@ -16,6 +16,7 @@ editor: visual
 ```{r }
 #| label: libraries
 #| echo: false
+#| message: false
 
 # Check out https://quarto.org/docs/output-formats/html-basics.html
 ## to get started with html documents
@@ -29,6 +30,8 @@ editor: visual
 ### https://quarto.org/docs/computations/execution-options.html
 # You can include the libraries you are going to use here
 library(sweep)
+library(tidyverse)
+library(scales)
 ```
 
 # Exploring data, visualizing it and applying statistical tests
@@ -44,13 +47,32 @@ Add some text if your group consider to be necessary.
 ```{r}
 # Import the data from the sweep package
 bike_sales <- bike_sales
+
+# Transforming data
+bike_sales <- bike_sales |> 
+  mutate(order.id = factor(x = order.id, 
+                           ordered = FALSE),
+         order.line = factor(x = order.id, 
+                             ordered = TRUE),
+         customer.id = factor(x = customer.id, 
+                              ordered = FALSE),
+         bikeshop.name = factor(x = bikeshop.name, 
+                                ordered = FALSE),
+         bikeshop.city = factor(x = bikeshop.city, 
+                                ordered = FALSE),
+         product.id = factor(x = product.id, 
+                                ordered = FALSE),
+         category.primary = factor(x = category.primary , 
+                                   ordered = FALSE),
+         category.secondary = factor(x = category.secondary, 
+                                     ordered = FALSE),
+         frame = factor(x = frame, 
+                        ordered = FALSE))
 ```
 
 ## Relation between continuous variables
 
 Add some text pointing out the principal findings as a result of generating the following scatterplots:
-
-Use the available functions from base R or the `tidyverse` to create a simple scatterplot between `price` and `quantity` colored by `frame`
 
 ```{r}
 # You can use plot and legend from base R 
@@ -59,6 +81,20 @@ Use the available functions from base R or the `tidyverse` to create a simple sc
 ## the library in the first code chunk: library(tidyverse)
 ### For more information about using geom_point and some examples check out
 #### https://ggplot2.tidyverse.org/reference/geom_point.html
+
+## Prepare data ----
+bike_sales_p_q_frame <- bike_sales |> 
+  select(price, quantity, frame)
+
+bike_sales_p_q_frame |> 
+  ggplot() + 
+  geom_point(aes(x = price, y = quantity,
+                 color = frame)) +
+  scale_x_continuous(labels = label_dollar()) +
+  labs(x = "Price (US Dollars)",
+       y = "Quantity (units)",
+       color = "Frame",
+       title = "Relation between price and units sale")
 ```
 
 Generate the same scatter plot but applying a logarithmic transformation to `price` and `quantity`
@@ -71,6 +107,17 @@ Generate the same scatter plot but applying a logarithmic transformation to `pri
 # the argument transform (nowdays trans is deprecated) where you can try the option "log10"
 ## Check out https://ggplot2.tidyverse.org/reference/scale_continuous.html for more information
 ## and some examples
+bike_sales_p_q_frame |> 
+  ggplot() + 
+  geom_point(aes(x = price, y = quantity,
+                 color = frame)) +
+  scale_x_continuous(labels = label_dollar(), 
+                     transform = "log10") +
+  scale_y_continuous(transform = "log10") +
+  labs(x = "Price (US Dollars) - Logarithmic Base 10 scale",
+       y = "Quantity (units)  - Logarithmic Base 10 scale",
+       color = "Frame",
+       title = "Relation between price and units sale")
 ```
 
 ## Relation between categorical variables
@@ -86,6 +133,18 @@ Also with this kind of plot you can identify the [product gap](https://en.wikipe
 ## position_jitter
 ### Check out https://ggplot2.tidyverse.org/reference/position_jitter.html  for more information
 ## and some examples
+
+bike_sales_frame_cat2 <- bike_sales |> 
+  select(frame, category.secondary)
+
+bike_sales_frame_cat2 |> 
+  ggplot() +
+  geom_point(aes(x = frame, y = category.secondary),
+             position = position_jitter(width = 0.2,
+                                        height = 0.2)) +
+  labs(x = "Frame material",
+       y = "Secondary Category",
+       title = "Identifying product gap")
 ```
 
 ## Descriptive statistics by group
