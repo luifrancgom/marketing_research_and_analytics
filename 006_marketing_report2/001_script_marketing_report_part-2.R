@@ -90,6 +90,54 @@ bike_sales_frame_cat2 |>
        title = "Identifying product gaps")
 
 # Descriptive statistics by group ----
+## Mean, median, sd by frame and secondary category ----
+bike_sales_frame_cat2_revenue <- bike_sales |> 
+  select(frame, category.secondary, price.ext)
+
+mean_median_sd <- bike_sales_frame_cat2_revenue |> 
+  group_by(frame, category.secondary) |> 
+  summarise(mean_revenue = mean(price.ext),
+            median_revenue = median(price.ext),
+            sd_revenue = sd(price.ext)) |> 
+  ungroup() |> 
+  arrange(desc(median_revenue))
+
+mean_median_sd
+
+## Percentage of revenue by frame and secondary category ----
+pct_revenue <- bike_sales_frame_cat2_revenue |> 
+  group_by(frame, category.secondary) |> 
+  summarise(total_revenue = sum(price.ext)) |> 
+  ungroup() |> 
+  mutate(pct_total_revenue = (total_revenue / sum(total_revenue))*100) |> 
+  arrange(desc(pct_total_revenue))
+  
+pct_revenue
+
+## Mean, median, sd by bike shop ----  
+bike_sales_bikeshop_revenue <- bike_sales |> 
+  select(bikeshop.name, price.ext)
+
+mean_median_sd_bikeshop <- bike_sales_bikeshop_revenue |> 
+  group_by(bikeshop.name) |> 
+  summarise(mean_revenue = mean(price.ext),
+            median_revenue = median(price.ext),
+            sd_revenue = sd(price.ext)) |> 
+  ungroup() |> 
+  arrange(desc(median_revenue))
+
+mean_median_sd_bikeshop
+
+## Percentage of revenue by bike shop ----
+pct_revenue_bikeshop <- bike_sales_bikeshop_revenue |> 
+  group_by(bikeshop.name) |> 
+  summarise(total_revenue = sum(price.ext)) |> 
+  ungroup() |> 
+  mutate(pct_total_revenue = (total_revenue / sum(total_revenue))*100) |> 
+  arrange(desc(pct_total_revenue))
+
+pct_revenue_bikeshop
+
 
   
 
