@@ -89,5 +89,7 @@ bike_sales_frame_cat2 |>
        y = "Secondary Category",
        title = "Identifying product gaps")
 
+# Descriptive statistics by group ----
+
   
 
