@@ -2,6 +2,7 @@
 library(sweep)
 library(tidyverse)
 library(scales)
+library(tidymodels)
 
 # Import data ----
 bike_sales <- bike_sales
@@ -138,6 +139,28 @@ pct_revenue_bikeshop <- bike_sales_bikeshop_revenue |>
 
 pct_revenue_bikeshop
 
+# Statistical tests ----
+## Frame - Category Secondary ----
+table_models <- pct_revenue |> 
+  mutate(model = str_c(frame, category.secondary, 
+                       sep = " ")) |> 
+  select(model, total_revenue)
 
-  
+chiq_test_proportion_model <- table_models |> 
+  deframe() |> 
+  chisq.test(p = rep.int(x = 1/13, times = 13),
+             correct = FALSE) |> 
+  tidy()
 
+chiq_test_proportion_model
+
+## Bikeshops ----
+table_bikeshops <- pct_revenue_bikeshop |> 
+  select(bikeshop.name, total_revenue)
+
+chiq_test_proportion_bikeshop <- table_bikeshops |> 
+  deframe() |> 
+  chisq.test(correct = FALSE) |> 
+  tidy()
+
+chiq_test_proportion_bikeshop

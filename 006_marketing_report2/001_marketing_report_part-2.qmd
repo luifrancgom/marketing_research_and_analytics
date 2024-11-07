@@ -33,6 +33,7 @@ library(sweep)
 library(tidyverse)
 library(scales)
 library(DT)
+library(tidymodels)
 ```
 
 # Exploring data, visualizing it and applying statistical tests
@@ -343,6 +344,19 @@ Once you apply the test point out your conclusion taking into account the p-valu
 ##### deframe(table_models) |> 
 #####  chisq.test(p = rep.int(x = 1/13, times = 13)) |> 
 #####  tidy()
+table_models <- pct_revenue |> 
+  mutate(model = str_c(frame, category.secondary, 
+                       sep = " ")) |> 
+  select(model, total_revenue)
+
+chiq_test_proportion_model <- table_models |> 
+  deframe() |> 
+  chisq.test(p = rep.int(x = 1/13, times = 13),
+             correct = FALSE) |> 
+  tidy()
+
+chiq_test_proportion_model |> 
+  datatable()
 ```
 
 Inspect, using an statistical test, if the total revenue is distributed in a homogeneous way by `bikeshop.name` using a $\chi^2$ test for a given vector of probabilities.
@@ -358,6 +372,16 @@ Once you apply the test point out your conclusion taking into account the p-valu
 # the total revenue
 ## See the comments in that section for more 
 ## information about how to apply the test
+table_bikeshops <- pct_revenue_bikeshop |> 
+  select(bikeshop.name, total_revenue)
+
+chiq_test_proportion_bikeshop <- table_bikeshops |> 
+  deframe() |> 
+  chisq.test(correct = FALSE) |> 
+  tidy()
+
+chiq_test_proportion_bikeshop |> 
+  datatable()
 ```
 
 ### Testing group means: `t.test()`
