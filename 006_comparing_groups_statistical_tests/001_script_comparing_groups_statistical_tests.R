@@ -72,3 +72,66 @@ segmentation |>
              correct = FALSE) |> 
   datatable()
 
+## t_test means ----
+### Visualization
+segmentation |> 
+  ggplot() + 
+  geom_histogram(aes(x = income),
+                 color = "black",
+                 bins = 30) + 
+  facet_wrap(facets = vars(ownHome))
+
+segmentation |> 
+  group_by(ownHome) |> 
+  summarise(mean = mean(income),
+            var  = var(income),
+            # To count data
+            n    = n())
+
+t_test_income_ownHome <- segmentation |> 
+  t_test(formula = income ~ ownHome, 
+         alternative = "two-sided", 
+         mu = 0, 
+         order = c("ownNo", "ownYes"),
+         # alpha = 0.05
+         conf_level = 1 - 0.05)
+
+pt(q = t_test_income_ownHome$statistic,
+   df = t_test_income_ownHome$t_df,
+   lower.tail = TRUE)*2  
+
+t_test_income_ownHome$p_value
+
+## anova test ----
+segmentation |> 
+  group_by(Segment) |> 
+  summarise(mean = mean(income),
+            var  = mean(income),
+            n    = n()) |> 
+  ungroup() |> 
+  mutate(grand_mean = mean(segmentation$income))
+
+anova_table <- aov(formula = income ~ Segment, 
+                   data = segmentation) |> 
+  tidy()
+
+anova_table
+
+### model selection ----
+model_1_anova <- aov(formula = income ~ Segment,
+                     data = segmentation)
+
+model_1_anova |> tidy()
+
+model_2_anova <- aov(formula = income ~ Segment + ownHome,
+                     data = segmentation)
+
+model_2_anova |> 
+  anova()
+
+model_3_anova <- aov(formula = income ~ Segment + ownHome + Segment:ownHome,
+                     data = segmentation)
+
+model_3_anova |> 
+  anova()
+  

@@ -38,7 +38,7 @@ segmentation <- segmentation |>
          Segment = factor(x = Segment, ordered = FALSE))
 ```
 
-# Count data 
+# Count data
 
 ## Segment
 

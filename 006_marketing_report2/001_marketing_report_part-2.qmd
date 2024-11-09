@@ -398,6 +398,17 @@ Once you apply the test point out your conclusion taking into account the p-valu
 # use t_test from tidymodels
 ## For more information check out 
 ### https://infer.tidymodels.org/reference/t_test.html
+t_test_revenue_frame <- bike_sales |> 
+  t_test(formula = price.ext ~ frame, 
+         # H0: mean(Aluminum) - mean(Carbon) = 0 
+         order = c("Aluminum", "Carbon"), 
+         mu = 0, 
+         alternative = "two-sided",
+         # 1 - alpha = 1 - 0.05
+         conf_level = 1 - 0.05)
+
+t_test_revenue_frame |> 
+  datatable()
 ```
 
 ### Analysis of Variance (ANOVA)
@@ -430,6 +441,13 @@ Apply an analysis of variance (ANOVA) using `price` as a response variable
 
 ## Then change the formula argument with the 
 ## different alternative models
+model_5 <- aov(formula = price ~ category.secondary*frame*bikeshop.city,
+               data = bike_sales) |> 
+  anova()
+
+model_5 |> 
+  tidy() |> 
+  datatable()
 ```
 
 Taking into account the analysis of variance, point out if it make sense to add `category.secondary`, `frame` and its interaction to the model.

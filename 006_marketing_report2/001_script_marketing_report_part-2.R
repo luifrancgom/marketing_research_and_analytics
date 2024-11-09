@@ -164,3 +164,69 @@ chiq_test_proportion_bikeshop <- table_bikeshops |>
   tidy()
 
 chiq_test_proportion_bikeshop
+
+
+## T-test
+bike_sales |> 
+  count(frame)
+
+t_test_revenue_frame <- bike_sales |> 
+  t_test(formula = price.ext ~ frame, 
+         # H0: mean(Aluminum) - mean(Carbon) = 0 
+         order = c("Aluminum", "Carbon"), 
+         mu = 0, 
+         alternative = "two-sided",
+         # 1 - alpha = 1 - 0.05
+         conf_level = 1 - 0.05)
+
+# Conclusion: There is a difference between
+#             the revenue per transaction between
+#             Aluminum and Carbon frame
+
+t_test_revenue_frame
+
+bike_sales |> 
+  ggplot(aes(x = frame, y = price.ext)) + 
+  geom_point() +
+  stat_summary(fun = "median",
+               color = "red") + 
+  scale_y_continuous(labels = dollar_format(), 
+                     transform = "log10")
+
+## Anova test ----
+model_1 <- aov(formula = price ~ category.secondary,
+               data = bike_sales) |>
+  anova()
+
+model_1
+
+model_2 <- aov(formula = price ~ category.secondary + frame,
+               data = bike_sales) |> 
+  anova()
+
+model_2
+
+model_3 <- aov(formula = price ~ category.secondary + frame + category.secondary:frame,
+               data = bike_sales) |> 
+  anova()
+
+model_3
+
+model_3_easy <- aov(formula = price ~ category.secondary*frame,
+                    data = bike_sales) |> 
+  anova()
+
+model_3_easy
+
+model_4 <- aov(formula = price ~ category.secondary*frame*bikeshop.state,
+               data = bike_sales) |> 
+  anova()
+
+model_4
+
+model_5 <- aov(formula = price ~ category.secondary*frame*bikeshop.city,
+               data = bike_sales) |> 
+  anova()
+
+model_5
+  
