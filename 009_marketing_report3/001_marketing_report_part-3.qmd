@@ -31,6 +31,9 @@ editor: visual
 # You can include the libraries you are going to use here
 library(sweep)
 library(tidyverse)
+library(scales)
+library(tidymodels)
+library(DT)
 ```
 
 # Modeling
@@ -46,28 +49,28 @@ Add some text if your group consider to be necessary.
 ```{r}
 # Import the data from the sweep package
 bike_sales <- bike_sales |> 
-  mutate(order.id = factor(x = order.id, 
-                           ordered = FALSE),
-         order.line = factor(x = order.id, 
-                             ordered = TRUE),
-         customer.id = factor(x = customer.id, 
-                              ordered = FALSE),
-         bikeshop.name = factor(x = bikeshop.name, 
+  mutate(order.id           = factor(x = order.id, 
+                                     ordered = FALSE),
+         order.line         = factor(x = order.id, 
+                                     ordered = TRUE),
+         customer.id        = factor(x = customer.id, 
+                                     ordered = FALSE),
+         bikeshop.name      = factor(x = bikeshop.name, 
+                                     ordered = FALSE),
+         bikeshop.city      = factor(x = bikeshop.city, 
                                 ordered = FALSE),
-         bikeshop.city = factor(x = bikeshop.city, 
-                                ordered = FALSE),
-         bikeshop.state = factor(x = bikeshop.state, 
-                                ordered = FALSE),
-         product.id = factor(x = product.id, 
-                             ordered = FALSE),
-         model      = factor(x = model, 
-                             ordered = FALSE),
-         category.primary = factor(x = category.primary , 
-                                   ordered = FALSE),
+         bikeshop.state     = factor(x = bikeshop.state, 
+                                     ordered = FALSE),
+         product.id         = factor(x = product.id, 
+                                     ordered = FALSE),
+         model              = factor(x = model, 
+                                     ordered = FALSE),
+         category.primary   = factor(x = category.primary , 
+                                     ordered = FALSE),
          category.secondary = factor(x = category.secondary, 
                                      ordered = FALSE),
-         frame = factor(x = frame, 
-                        ordered = FALSE))
+         frame              = factor(x = frame, 
+                                     ordered = FALSE))
 ```
 
 ## The product gap
@@ -83,6 +86,8 @@ Brake the process in 2 steps:
     -   You can use `select`, `group_by`, `summarise`, `ungroup`, `arrange`, `mutate` and `fct_reorder`
 
 ```{r}
+#| message: false
+
 # Use bike_sales to calculate the total revenue
 # grouped by model, category.secondary and frame
 
@@ -102,6 +107,15 @@ Brake the process in 2 steps:
 #                                           .x = total_revenue))
 # 
 # total_sales_by_model_second_category_frame
+
+## Prepare data ----
+total_sales_by_cat2_frame_model <- bike_sales |> 
+  group_by(model, category.secondary, frame) |> 
+  summarize(total_sales = sum(price.ext)) |> 
+  ungroup() |> 
+  arrange(desc(total_sales)) |> 
+  mutate(category.secondary = fct_reorder(.f = category.secondary,
+                                          .x = total_sales))
 ```
 
 -   Generate an informative plot
@@ -132,6 +146,19 @@ Also check out the combinations that you reported in the first marketing report 
 #                                         height = 0.2)) +
 #   scale_y_continuous(labels = scales::label_dollar()) +
 #   facet_wrap(facets = vars(category.secondary))
+
+## Creating the plot ----
+total_sales_by_cat2_frame_model |> 
+  ggplot() + 
+  geom_point(aes(x = frame, y = total_sales),
+             position = position_jitter(width  = 0.2,
+                                        height = 0.2)) +
+  scale_y_continuous(labels = label_dollar()) + 
+  facet_wrap(facets = vars(category.secondary)) +
+  labs(x = "Frame type",
+       y = "Total sales (US Dollars)",
+       title = "Producto gap and total sales", 
+       subtitle = "Period: 2011-01-07 - 2015-12-25")
 ```
 
 ## Determine the price of a new product
@@ -185,6 +212,18 @@ One you have choose the model, fit it using the function `lm` and explore the re
 #             data = bike_sales)
 # 
 # model |> tidy()
+model2 <- lm(formula = price ~ category.secondary*frame,
+             data = bike_sales)
+
+model2_tidy <- model2 |> tidy()
+
+model2_tidy |> 
+  datatable() |> 
+  formatRound(columns = c("estimate", 
+                          "std.error",
+                          "statistic",
+                          "p.value"), 
+              digits = 4)
 ```
 
 #### Predict the price of the new product
@@ -196,6 +235,8 @@ Remember to create a tibble or data frame with the new data you want to predict
 In this part you can use the functions `predict`, `enframe` and `bind_cols` to present your results in an organized way
 
 ```{r}
+#| warning: false
+
 # For example if you choose the model
 # price ~ category.secondary*frame*bikeshop.state
 # and the new product to develop as Cyclocross Aluminium
@@ -232,6 +273,20 @@ In this part you can use the functions `predict`, `enframe` and `bind_cols` to p
 #### In this case it only make sense to offer this product in California (CA)
 #### In the remaining states, the product is not worth offering. In such cases 
 #### you would have to give it free to the public.
+
+## Price predictions ----
+new_data <- tibble(category.secondary = c("Fat Bike", "Over Mountain"),
+                   frame              = c("Carbon"  , "Aluminum"))
+
+predictions <- predict(object = model2,
+                       newdata = new_data) |> 
+  enframe(name = "observation", value = "price_prediction") |> 
+  bind_cols(new_data) |> 
+  arrange(desc(price_prediction))
+
+predictions |> 
+  datatable() |> 
+  formatRound(columns = c("price_prediction"))
 ```
 
 ## Segment bike shops with k-means clustering
