@@ -3,6 +3,7 @@ library(sweep)
 library(tidyverse)
 library(skimr)
 library(scales)
+library(tidymodels)
 
 # Import data -----
 bike_sales <- bike_sales |> 
@@ -63,6 +64,45 @@ total_sales_by_cat2_frame_model |>
        title = "Producto gap and total sales", 
        subtitle = "Period: 2011-01-07 - 2015-12-25")
   
-  
+# Modeling to predict price ----
+bike_sales |> 
+  count(bikeshop.state)
 
+          # lm: linear model
+model1 <- lm(formula = price ~ category.secondary*frame*bikeshop.state,
+             data = bike_sales)
+
+model1_tidy <- model1 |> tidy()
+
+
+### Checking model assumptions
+plot(model1)
+
+alpha <- 0.05
+
+model1_tidy |> 
+  filter(p.value >= 0.05)
+
+# lm: linear model
+model2 <- lm(formula = price ~ category.secondary*frame,
+             data = bike_sales)
+
+### Checking assumptions
+plot(model2)
+
+model2_tidy <- model2 |> tidy()
+model2_tidy |> 
+  filter(p.value < 0.05)
+
+## Price predictions ----
+new_data <- tibble(category.secondary = c("Fat Bike", "Over Mountain"),
+                   frame              = c("Carbon"  , "Aluminum"))
+
+predictions <- predict(object = model2,
+                       newdata = new_data) |> 
+  enframe(name = "observation", value = "price_prediction") |> 
+  bind_cols(new_data) |> 
+  arrange(desc(price_prediction))
+
+predictions
 
