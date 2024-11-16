@@ -22,6 +22,7 @@ library(skimr)
 library(corrr)
 library(tidymodels)
 library(DT)
+library(coefplot)
 ```
 
 # Import data
@@ -58,6 +59,8 @@ correlation_matrix |>
 # Data visualization
 
 ```{r}
+#| message: false
+
 amusement_park |> 
   ggplot(aes(x = rides, y = overall)) +
   geom_point() +
@@ -80,7 +83,13 @@ model1 <- lm(formula = overall ~ rides,
 
 model1_tidy <- model1 |> tidy()
 
-model1_tidy |> datatable() 
+model1_tidy |> 
+  datatable() |> 
+  formatRound(c("estimate", 
+                "std.error",
+                "statistic",
+                "p.value"), 
+              digits = 3) 
 ```
 
 ## Coefficients
@@ -106,3 +115,50 @@ coef$estimate[1] + coef$estimate[2]*95
 ```{r}
 coef$estimate[1] + coef$estimate[2]*50
 ```
+
+## Linear models with multiple variables
+
+```{r}
+model2 <- lm(formula = overall ~ rides + games + wait + clean,
+             data = amusement_park)
+
+model2_tidy <- model2 |> 
+  tidy()
+
+model2_tidy |> 
+  datatable() |> 
+  formatRound(columns = c("estimate",
+                          "std.error",
+                          "statistic",
+                          "p.value"),
+              digits = 4)
+```
+
+### Visualizing t-test
+
+```{r}
+coefplot(model = model2,
+         intercept = FALSE,
+         lwdOuter = 1.5)
+```
+
+### Predicting with multiple variables
+
+```{r}
+new_data <- tibble(rides = c(30, 70),
+                   games = c(10, 80),
+                   wait  = c(57, 60),
+                   clean = c(90, 93))
+
+prediction <- predict(object = model2,
+        newdata = new_data) |> 
+  enframe(name = "observation",
+          value = "overall_predict") |> 
+  bind_cols(new_data)
+
+prediction |> 
+  datatable() |> 
+  formatRound(columns = c("overall_predict"),
+              digits = 2)
+```
+
