@@ -3,6 +3,8 @@ library(tidyverse)
 library(skimr)
 library(corrr)
 library(tidyheatmaps)
+library(tidymodels)
+library(ggbiplot)
 
 # Import data ----
 consumer_brand <- read_csv(file = "000_data/008_data_chapter8.csv")
@@ -86,4 +88,84 @@ brand_mean_longer |>
               display_numbers = TRUE, 
               border_color = "black")
 
+# Principal component analysis ----
+## A small example ----
+set.seed(seed = 1234)
+consumer_brand_sample <- consumer_brand |> 
+  slice_sample(n = 1, by = brand) |> 
+  select(brand, perform, leader)
+
+consumer_brand_sample
+
+consumer_brand_sample |> 
+  summarise(mean_leader  = mean(leader),
+            sdv_leader   = sd(leader),
+            mean_perform = mean(perform),
+            sdv_perform  = sd(perform))
+
+## An image as an example ----
+library(imager)
+
+boat_grey <- load.image(file = "000_images/008_boat_gray_512_x_512.tiff")
+
+boat_grey_tbl <- boat_grey |> 
+  as.data.frame() |> 
+  as_tibble()
+
+boat_grey_tbl_wide <- boat_grey_tbl |> 
+  pivot_wider(id_cols = x, 
+              names_from = y, 
+              values_from = value)
+  
+boat_grey_tbl_wide
+
+## Applying PCA small sample ----
+consumer_brand_sample_matrix <- consumer_brand_sample |> 
+  select(-brand) |> 
+  as.matrix()
+
+consumer_brand_sample_pca <- consumer_brand_sample_matrix |> 
+  prcomp(center = TRUE, 
+         scale. = TRUE)
+
+consumer_brand_sample_pca
+
+
+scores <- consumer_brand_sample_pca$x
+
+scores_tbl <- scores |> 
+  as_tibble()
+
+scores_tbl$PC1  
+
+### Measuring how god is the approximation ----
+eingevalues <- consumer_brand_sample_pca |> 
+  tidy(matrix = "eigenvalues")
+
+eingevalues |> 
+  mutate(variance = std.dev^2,
+         .after = std.dev)
+  
+## Visualizing pca ----
+ggplot_pca <- consumer_brand_sample_pca |> 
+  ggscreeplot() + 
+  scale_x_continuous(breaks = 1:2)
+
+ggplot_pca
+
+ggbiplot(pcobj = consumer_brand_sample_pca,
+         groups = consumer_brand_sample$brand, 
+         scale = 1, 
+         pc.biplot = FALSE)
+
+## Applying PCA full sample ----
+consumer_brand_pca <- consumer_brand |> 
+  select(-brand) |> 
+  prcomp(center = TRUE, 
+         scale. = TRUE)
+  
+consumer_brand_pca |> 
+  ggbiplot(groups = consumer_brand$brand,
+           scale = 1,
+           pc.biplot = FALSE)
 

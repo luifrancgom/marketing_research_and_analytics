@@ -22,6 +22,8 @@ library(skimr)
 library(corrr)
 library(DT)
 library(tidyheatmaps)
+library(tidymodels)
+library(ggbiplot)
 ```
 
 # Import data
@@ -112,4 +114,34 @@ brand_mean_longer |>
               display_numbers = TRUE, 
               border_color = "black", 
               fontsize = 12)
+```
+
+## Principal component analysis
+
+### Full sample
+
+```{r}
+consumer_brand_pca <- consumer_brand |> 
+  select(-brand) |> 
+  prcomp(center = TRUE, 
+         scale. = TRUE)
+
+eigenvalues <- consumer_brand_pca |> 
+  tidy(matrix = "eigenvalues")  |> 
+  mutate(variance = std.dev^2,
+         .after = std.dev)
+
+eigenvalues |> 
+  datatable() |> 
+  formatRound(columns = names(eigenvalues)[2:5],
+              digits = 2)
+```
+
+### Biplot
+
+```{r}
+consumer_brand_pca |> 
+  ggbiplot(groups = consumer_brand$brand,
+           scale = 1,
+           pc.biplot = FALSE)
 ```
