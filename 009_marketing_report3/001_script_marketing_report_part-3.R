@@ -106,3 +106,39 @@ predictions <- predict(object = model2,
 
 predictions
 
+# Data complexity reduction and segmentation ----
+## Prepare data ----
+bikeshop_sales_total_revenue <- bike_sales |> 
+  select(bikeshop.name, 
+         price.ext, 
+         model, 
+         category.primary, 
+         category.secondary, 
+         frame) |> 
+  group_by(bikeshop.name, 
+           model, 
+           category.primary, 
+           category.secondary, 
+           frame) |> 
+  summarise(total_revenue = sum(price.ext)) |> 
+  ungroup()
+
+bikeshop_sales_total_revenue
+
+### Normalization ----
+bikeshop_sales_total_revenue_pct <- bikeshop_sales_total_revenue |> 
+  group_by(bikeshop.name) |> 
+  mutate(total_revenue_pct = total_revenue / sum(total_revenue)) |> 
+  ungroup() 
+
+### Consumer-product table ----
+customer_product_table <- bikeshop_sales_total_revenue_pct |> 
+  select(bikeshop.name, model, total_revenue_pct) |> 
+  pivot_wider(id_cols = bikeshop.name, 
+              names_from = model,
+              values_from = total_revenue_pct,
+              values_fill = 0)
+
+customer_product_table
+
+
