@@ -141,4 +141,66 @@ customer_product_table <- bikeshop_sales_total_revenue_pct |>
 
 customer_product_table
 
+# Visualizing clusterings using kmeans ----
+## Kmeans ----
+set.seed(seed = 1234)
+kmeans_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  kmeans(centers = 5,
+         algorithm = "Hartigan-Wong")
+
+kmeans_object
+
+clusters <- kmeans_object$cluster
+
+## Principal components analysis ----
+pca_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  prcomp(center = TRUE,
+         scale. = FALSE)
+
+pca_object$x |> 
+  as_tibble()
+
+pca_1_2 <- pca_object$x |> 
+  as_tibble() |> 
+  select(PC1, PC2)
+
+## Prepare data ----
+clusters
+pca_1_2
+customer_product_table 
+
+clusters_pca_1_2 <- customer_product_table |> 
+  select(bikeshop.name) |> 
+  bind_cols(pca_1_2) |> 
+  mutate(cluster = clusters) |> 
+  mutate(cluster = factor(x = cluster, 
+                          ordered = FALSE))
+
+clusters_pca_1_2 |> 
+  ggplot() +
+  geom_point(aes(x = PC1, 
+                 y = PC2,
+                 color = cluster))
+
+
+clusters_pca_1_2 |> 
+  count(cluster)
+
+clusters_pca_1_2 |> 
+  filter(cluster == 1)
+
+
+customer_product_table |> 
+  filter(bikeshop.name == "Los Angeles Cycles") |> 
+  View()
+
+clusters_pca_1_2 |> 
+  filter(cluster == 3)
+
+customer_product_table |> 
+  filter(bikeshop.name == "Philadelphia Bike Shop" |
+         bikeshop.name == "San Antonio Bike Shop") |> 
+  View()
 

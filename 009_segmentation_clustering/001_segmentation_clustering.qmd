@@ -92,4 +92,3 @@ segmentation_dist_gower |>
   formatRound(columns = c("1", "2", "3", "4", "5"),
               digits = 4)
 ```
-
