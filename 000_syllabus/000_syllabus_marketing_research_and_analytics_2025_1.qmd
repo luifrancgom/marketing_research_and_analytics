@@ -21,12 +21,26 @@ params:
     value:
       phone: +57 3124541536
       days: [Monday, Wednesday, Friday]
-      start_hour: 16:00
-      end_hour: 17:00
+      start_hour: 14:00
+      end_hour: 15:00
   block:
     value:
       start_date: 2025-03-24
       end_date: 2025-05-31
+  schedule:
+    value:
+      meeting_dates: [3, 5, 6]
+      dates_recess: [2025-04-14, 2025-04-20]
+      start_presentation_hour: 19:00
+      end_presentation_hour: 21:00
+      start_syllabus_hour: 20:00
+      end_syllabus_hour: 20:45  
+      start_virtual_meeting_hour: 08:00
+      end_virtual_meeting_hour: 09:55
+      start_activity_hour: 00:00
+      end_activity_hour: 22:00
+      start_exam_hour: 18:00
+      end_exam_hour: 21:20
 bibliography: ../000_references/marketing_research_and_analytics.bib
 editor: visual
 ---
@@ -135,6 +149,8 @@ Develop skills in programming, statistics, and data analysis to solve business p
 ## Reading schedule
 
 ```{r}
+#| label: tbl-reading-schedule
+#| tbl-cap: Reading schedule
 
 # Possible solution using kableExtra
 ## Include references
@@ -169,268 +185,307 @@ tibble(Week = c(1:9),
   # cat()
 ```
 
+## Detailed schedule
+
+```{r}
+#| label: detailed-schedule
+
+source(file = "../000_scripts/000_tbl_schedule.R")
+
+tbl_schedule <- tbl_schedule(start_date   = params$block$start_date, 
+                             end_date     = params$block$end_date,
+                             dates_recess = params$schedule$dates_recess,
+                             meeting_days = params$schedule$meeting_dates)
+
+virtual_meeting <- tbl_schedule |> 
+  filter(virtual_meeting == 1) |> 
+  pull(index)
+
+activity <-  tbl_schedule |> 
+  filter(activity == 1) |> 
+  pull(index)
+
+exam <-  tbl_schedule |> 
+  filter(exam == 1) |> 
+  pull(index)
+```
+
 ### Primer corte 30%
 
--   September 23
-
-    -   Start Block 2
+-   `r format(x = ymd(params$block$start_date), format = "%B %e")`
 
     -   **Virtual meeting Presentation Syllabus**
-
-        -   **Meeting time**: 20:00 - 20:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_syllabus_hour, params$schedule$end_syllabus_hour, sep = " - ")` hours
         -   **Prerequisites**:
-            -   Review the course program in advance, which can be downloaded by following the route: **Primer corte 30% \> Learning Resources \> Support material \> Presentations \> 000_syllabus_marketing_rearch_and_analytics**
+            -   Review the course program in advance, which can be downloaded by following the route *Primer corte 30% \> Learning Resources \> Support material \> Presentations \> 000_syllabus_marketing_research_and_analytics\_...*
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   September 25
+-   `r format(x = virtual_meeting[[1]], format = "%B %e")`
 
     -   **Welcome to R**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 1]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   September 27
+-   `r format(x = virtual_meeting[[2]], format = "%B %e")`
 
     -   **Business Case**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
-
--   September 28
+            
+-   `r format(x = virtual_meeting[[3]], format = "%B %e")`
 
     -   **Progress marketing report 1**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
-
--   October 2
+            
+-   `r format(x = virtual_meeting[[4]], format = "%B %e")`
 
     -   **An overview of the R language**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 2]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   October 4
+-   `r format(x = virtual_meeting[[5]], format = "%B %e")`
 
     -   **An overview of the R language**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 2]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   October 5
+-   `r format(x = virtual_meeting[[6]], format = "%B %e")`
 
     -   **Progress marketing report 1**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
-
--   October 16
+            
+-   `r format(x = virtual_meeting[[7]], format = "%B %e")`
 
     -   **Describing data**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
+        -   **Prerequisites**:
+            -   Read and review [@chapman_r_2019, Chapter 3]
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+            
+-   `r format(x = virtual_meeting[[8]], format = "%B %e")`
+
+    -   **Describing data**
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 3]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   October 18
-
-    -   **Describing data**
-        -   **Meeting time**: 19:00 - 20:30 hours
-        -   **Prerequisites**:
-            -   Read and review [@chapman_r_2019, Chapter 3]
-            -   Have a headset with a built-in microphone to isolate noise from the environment
-
--   October 19
+-   `r format(x = virtual_meeting[[9]], format = "%B %e")`
 
     -   **Progress marketing report 1**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
+            
+-   `r format(x = exam[[1]], format = "%B %e")`
+
     -   **Oral presentation marketing report part 1**
-        -   **Opening time**: 18:00 hours
-        -   **Closing time**: 20:05 hours
+        -   **Opening time**: `r paste(params$schedule$start_exam_hour)` hours
+        -   **Closing time**: `r paste(params$schedule$end_exam_hour)` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
 ### Segundo corte 30%
 
--   October 23
+-   `r format(x = ymd(params$schedule$dates_recess[[1]]), format = "%B %e")`
+
+    -   **Begin Holy Week**
+
+-   `r format(x = ymd(params$schedule$dates_recess[[2]]), format = "%B %e")`
+
+    -   **End Holy Week**
+
+-   `r format(x = virtual_meeting[[10]], format = "%B %e")`
 
     -   **Relationship between continuous variables**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
+        -   **Prerequisites**:
+            -   Read and review [@chapman_r_2019, Chapter 4]
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+            
+-   `r format(x = virtual_meeting[[11]], format = "%B %e")`
+
+    -   **Relationship between continuous variables**
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 4]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   October 25
-
-    -   **Relationship between continuous variables**
-        -   **Meeting time**: 19:00 - 20:30 hours
-        -   **Prerequisites**:
-            -   Read and review [@chapman_r_2019, Chapter 4]
-            -   Have a headset with a built-in microphone to isolate noise from the environment
-
--   October 26
+-   `r format(x = virtual_meeting[[12]], format = "%B %e")`
 
     -   **Progress marketing report 2**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
-
--   October 30
+            
+-   `r format(x = virtual_meeting[[13]], format = "%B %e")`
 
     -   **Comparing groups: tables and visualizations**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 5]
             -   Have a headset with a built-in microphone to isolate noise from the environment
-
--   November 1
+            
+-   `r format(x = virtual_meeting[[14]], format = "%B %e")`
 
     -   **Comparing groups: tables and visualizations**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 5]
             -   Have a headset with a built-in microphone to isolate noise from the environment
-
--   November 2
+            
+-   `r format(x = virtual_meeting[[15]], format = "%B %e")`
 
     -   **Progress marketing report 2**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
-
--   November 6
+            
+-   `r format(x = virtual_meeting[[16]], format = "%B %e")`
 
     -   **Comparing groups: statistical tests**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 6]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   November 8
+-   `r format(x = virtual_meeting[[17]], format = "%B %e")`
 
     -   **Comparing groups: statistical tests**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 6]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   November 9
+-   `r format(x = virtual_meeting[[18]], format = "%B %e")`
 
     -   **Progress marketing report 2**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
+            
+-   `r format(x = exam[[2]], format = "%B %e")`
+
     -   **Oral presentation marketing report part 2**
-        -   **Opening time**: 18:00 hours
-        -   **Closing time**: 20:05 hours
+        -   **Opening time**: `r paste(params$schedule$start_exam_hour)` hours
+        -   **Closing time**: `r paste(params$schedule$end_exam_hour)` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
 ### Tercer corte 40%
 
--   November 13
+-   `r format(x = virtual_meeting[[19]], format = "%B %e")`
 
     -   **Identifying drivers of outcomes: linear models**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
+        -   **Prerequisites**:
+            -   Read and review [@chapman_r_2019, Chapter 7]
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+            
+-   `r format(x = virtual_meeting[[20]], format = "%B %e")`
+
+    -   **Identifying drivers of outcomes: linear models**
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 7]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   November 15
-
-    -   **Identifying drivers of outcomes: linear models**
-        -   **Meeting time**: 19:00 - 20:30 hours
-        -   **Prerequisites**:
-            -   Read and review [@chapman_r_2019, Chapter 7]
-            -   Have a headset with a built-in microphone to isolate noise from the environment
-
--   November 16
+-   `r format(x = virtual_meeting[[21]], format = "%B %e")`
 
     -   **Progress marketing report 3**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
 
--   November 20
+-   `r format(x = virtual_meeting[[22]], format = "%B %e")`
 
     -   **Reducing data complexity**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
+        -   **Prerequisites**:
+            -   Read and review [@chapman_r_2019, Chapter 8]
+            -   Have a headset with a built-in microphone to isolate noise from the environment
+            
+-   `r format(x = virtual_meeting[[23]], format = "%B %e")`
+
+    -   **Reducing data complexity**
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Read and review [@chapman_r_2019, Chapter 8]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   November 22
-
-    -   **Reducing data complexity**
-        -   **Meeting time**: 19:00 - 20:30 hours
-        -   **Prerequisites**:
-            -   Read and review [@chapman_r_2019, Chapter 8]
-            -   Have a headset with a built-in microphone to isolate noise from the environment
-
--   November 23
+-   `r format(x = virtual_meeting[[24]], format = "%B %e")`
 
     -   **Progress marketing report 3**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
 
--   November 27
+-   `r format(x = virtual_meeting[[25]], format = "%B %e")`
 
     -   **Segmentation: Clustering**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
-            -   Read and review [@chapman_r_2019, Chapter 11]
+            -   Read and review [@chapman_r_2019, Chapter 9]
             -   Have a headset with a built-in microphone to isolate noise from the environment
-
--   November 29
+            
+-   `r format(x = virtual_meeting[[26]], format = "%B %e")`
 
     -   **Segmentation: Clustering**
-        -   **Meeting time**: 19:00 - 20:30 hours
+        -   **Meeting time**: `r paste(params$schedule$start_presentation_hour, params$schedule$end_presentation_hour, sep = " - ")` hours
         -   **Prerequisites**:
-            -   Read and review [@chapman_r_2019, Chapter 11]
+            -   Read and review [@chapman_r_2019, Chapter 9]
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
--   November 30
+-   `r format(x = virtual_meeting[[27]], format = "%B %e")`
 
     -   **Progress marketing report 3**
-        -   **Meeting time**: 08:00 - 09:45 hours
+        -   **Meeting time**: `r paste(params$schedule$start_virtual_meeting_hour, params$schedule$end_virtual_meeting_hour, sep = " - ")` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
         -   **Observations**:
             -   At least 1 member of the group must attend
             -   The meeting will last 10 minutes per group, no more and no less
+
+-   `r format(x = exam[[3]], format = "%B %e")`
+
     -   **Oral presentation marketing report part 3**
-        -   **Opening time**: 18:00 hours
-        -   **Closing time**: 20:05 hours
+        -   **Opening time**: `r paste(params$schedule$start_exam_hour)` hours
+        -   **Closing time**: `r paste(params$schedule$end_exam_hour)` hours
         -   **Prerequisites**:
             -   Have a headset with a built-in microphone to isolate noise from the environment
 
@@ -492,20 +547,17 @@ tibble(Week = c(1:9),
 
     -   If you use this option after opening the account check out <https://posit.cloud/learn/guide> for getting started and using it
 
-# Use of Chat GPT-3, Gemini 1.5, LLaMA 2 and its friends
+# Use of Chat GPT-4, Gemini 1.5, Copilot and its friends
 
-You can use any artificial intelligence tool and in particular any Large Language Model where this practice is encourage when learning R or another programming language like Python or Julia. However, please use them in a responsible way by taking into account its capabilities and limitations and always pointing out to the instructor and your colleges that you have use them.
+In this course, the use of generative artificial intelligence tools is allowed as long as you follow the following good practices [@equipo_proyecto_ia-uniandes_lineamientos_2024, pp. 20-21]:
 
-If you have not used any Large Language Model you can try opening an account, for example in:
+-   **Informed use**: learn beforehand how the tool works, its limitations, and risks
+-   **Transparent use**: report which tool you used and how it was used it
+-   **Ethical use**: do not present material generated by the tool as your own and follow the corresponding citation rules (see [@mcadoo_how_2024]).
+-   **Critical evaluation**: always contrast and compare any response obtained through the tool with reliable or primary sources of information
+-   **Responsible use**: do not include personal or confidential information (own or others) when entering instructions (prompts)
 
--   <https://chat.openai.com>
--   [https://gemini.google.com/](https://chat.openai.com)
-
-Or you can run a Large Language Model locally, like CodeLlama 7B, using:
-
--   <https://lmstudio.ai/>
-
-If you use the last option remember that you are using your personal computer so depending on the specifications of your machine you will or not will be able to use the chosen model
+For more detailed guidance on good practices and recommended uses, check out [@equipo_proyecto_ia-uniandes_lineamientos_2024, Section 3.2]
 
 # Study material
 
