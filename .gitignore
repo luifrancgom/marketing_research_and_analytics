@@ -51,3 +51,6 @@ rsconnect/
 # Quarto files
 .quarto/
 */.quarto/
+
+# Course files
+_000_files
