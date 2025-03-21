@@ -54,13 +54,13 @@ bibliography: ../000_references/marketing_research_and_analytics.bib
 
 -   **Learning and forgetting curves** [@posit_pbc_learning_2023]
 
-![Learning and forgetting curves](../000_images/002_forgetting_curves.png){width="350px" height="350px"}
+![Learning and forgetting curves](../000_images/002_forgetting_curves.png){width="350px" height="250px"}
 
 ## 
 
 -   **Practicing and forgetting curves** [@posit_pbc_learning_2023]
 
-![Practicing and forgetting curves](../000_images/002_forgetting_curves_practice.png){width="350px" height="350px"}
+![Practicing and forgetting curves](../000_images/002_forgetting_curves_practice.png){width="350px" height="250px"}
 
 # Installing R, RStudio IDE and Quarto
 
@@ -69,9 +69,9 @@ bibliography: ../000_references/marketing_research_and_analytics.bib
 -   **What are R and RStudio IDE?** [@ismay_statistical_2020, Chapter 1]
 
 ::: {#fig-r_vs_rstudio_ide_1 layout-ncol="2"}
-![R: Engine](../000_images/002_car_engine.jpg){#fig-r-1 width="200px" height="200px"}
+![R: Engine](../000_images/002_car_engine.jpg){#fig-r-1 width="200px" height="150px"}
 
-![RStudio IDE: Dashboard](../000_images/002_dashboard_car.jpg){#fig-rstudio-ide-1 width="200px" height="200px"}
+![RStudio IDE: Dashboard](../000_images/002_dashboard_car.jpg){#fig-rstudio-ide-1 width="200px" height="150px"}
 
 Analogy of difference between R and RStudio
 :::
@@ -83,7 +83,7 @@ Analogy of difference between R and RStudio
     -   Open-source scientific and technical publishing system
     -   It is possible to integrate prose, code and results via Rstudio IDE [@wickham_r_2023, Chapter 29]
 
-![Quarto workflow](../000_images/002_quarto_flow.png){#fig-quarto fig-alt="Quarto workflow" fig-align="center" width="400px" height="400px"}
+![Quarto workflow](../000_images/002_quarto_flow.png){#fig-quarto fig-alt="Quarto workflow" fig-align="center" width="400px" height="100px"}
 
 ## 
 
@@ -123,7 +123,7 @@ Analogy of difference between R and RStudio
         -   If you are using posit Cloud don't worry about anything!!!
 
 ::: {#fig-r_vs_rstudio_ide_2 layout-ncol="2"}
-![R: Do not open this](../000_images/002_R_logo.png){#fig-r-2 width="100px" height="100px"}
+![R: Do not open this](../000_images/002_R_logo.png){#fig-r-2 width="80px" height="80px"}
 
 ![RStudio IDE: Open this](../000_images/002_RStudio_ide_logo.png){#fig-rstudio-ide-2 width="80px" height="80px"}
 
@@ -139,7 +139,7 @@ R versus RStudio IDE icons on your computer
 ::: {#fig-r_packages layout-ncol="2"}
 ![R: A new phone](../000_images/002_cell_phone.png){#fig-package-base width="100px" height="100px"}
 
-![R packages: Apps you can download](../000_images/002_apps.jpg){#fig-package width="140px" height="80px"}
+![R packages: Apps you can download](../000_images/002_apps.jpg){#fig-package width="140px" height="100px"}
 
 Analogy of R vs R packages
 :::
