@@ -15,7 +15,6 @@ format:
     toc: true
     slide-level: 2
     section-titles: false
-    keep-tex: true
     include-in-header:
       file: ../000_tex/preamble.tex
 fig-cap-location: bottom
@@ -80,7 +79,7 @@ library(kableExtra)
 //| label: fig-distribution-channel
 //| fig-cap: Distribution channel
 //| fig-width: 4
-//| fig-height: 2
+//| fig-height: 1.5
 
 digraph boxes_and_circles {
 
@@ -204,7 +203,7 @@ bike_shops_map |>
 
 ##
 
-![Database Entity Relationship Diagram (ERD)[^1]](../000_images/001_database_er_diagram_foot_crow_notation.png){width="350px" height="350px"}
+![Database Entity Relationship Diagram (ERD)[^1]](../000_images/001_database_er_diagram_foot_crow_notation.png){width="350px" height="250px"}
 
 [^1]: See [@abba_crows_2022]  
 
