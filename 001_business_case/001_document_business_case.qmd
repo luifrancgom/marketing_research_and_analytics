@@ -1,0 +1,46 @@
+---
+title: "Business Case"
+author: 
+  - Luisa Parra
+  - Gloria Serna
+  - Julio Cesar
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    number-sections: true
+    code-fold: true
+editor: visual
+---
+
+```{r}
+#| label: libraries
+#| message: false
+
+library(tidyverse)
+library(sweep)
+```
+
+# Import data
+
+In this section the data is imported.
+
+```{r}
+bike_sales <- bike_sales
+```
+
+# Counting
+
+## Frame
+
+```{r}
+bike_sales |> 
+  count(frame)
+```
+
+## Bikeshops
+
+```{r}
+bike_sales |> 
+  count(customer.id, bikeshop.name)
+```
