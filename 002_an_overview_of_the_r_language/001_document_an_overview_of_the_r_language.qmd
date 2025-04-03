@@ -1,0 +1,51 @@
+---
+title: "Analysis Satisfaction data"
+author: 
+  - Maria Alberto
+  - Maria Obando
+  - Luis Parra
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    number-sections: true
+    code-fold: true
+editor: visual
+---
+
+```{r}
+#| message: false
+
+# Libraries -----
+library(tidyverse)
+library(skimr)
+library(DT)
+```
+
+# Import
+
+This is a data set about the satisfaction of different aspects in relation to some consumers
+
+```{r}
+#| message: false
+
+satisfaction_data <- read_csv(file = "../000_data/002_data_chapter2.csv")
+```
+
+# Transforming data
+
+```{r}
+satisfaction_data <- satisfaction_data |> 
+  mutate(Segment = factor(x = Segment, ordered = FALSE))
+
+satisfaction_data |> 
+  datatable()
+```
+
+# Summary statistics
+
+```{r}
+satisfaction_data |> 
+  skim()
+```
+
