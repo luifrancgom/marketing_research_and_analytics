@@ -15,7 +15,6 @@ format:
     toc: true
     slide-level: 2
     section-titles: false
-    keep-tex: true
     include-in-header:
       file: ../000_tex/preamble.tex
 fig-cap-location: bottom
@@ -160,7 +159,7 @@ weekly_store |> count(p1price)
 
 -   **Data visualization**
 
-![Analogy of data visualization as painting step by step (Watercolor portrait - Step by Step by Hector Trunnec (Valencia, Spain) 2015-03-03)](../000_images/004_visualization_step_by_step.jpg){#fig-r-visualization-step-by-step width="350px" height="350px"}
+![Analogy of data visualization as painting step by step (Watercolor portrait - Step by Step by Hector Trunnec (Valencia, Spain) 2015-03-03)](../000_images/004_visualization_step_by_step.jpg){#fig-r-visualization-step-by-step width="400px" height="250px"}
 
 ##
 
