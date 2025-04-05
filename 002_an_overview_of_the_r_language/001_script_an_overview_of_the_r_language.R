@@ -1,6 +1,7 @@
 # Libraries -----
 library(tidyverse)
 library(skimr)
+library(DT)
 
 # Import ----
 ## Connecting to the cloud
@@ -57,3 +58,18 @@ satisfaction_data
 satisfaction_data |> 
   select(customer, Segment)
 
+# Summary statistics ----
+mean_median_iprodsat <- satisfaction_data |> 
+  summarise(mean_iprodsat = mean(x = iProdSAT), 
+            median_iprodsat = median(x = iProdSAT))
+
+# Analyzing data step by step ----
+satisfaction_data
+
+satisfaction_data |> 
+  group_by(Segment)
+
+group_by_mean <- satisfaction_data |> 
+  group_by(Segment) |> 
+  summarise(mean_iprodsat = mean(iProdSAT), 
+            mean_isalessat = mean(iSalesSAT))

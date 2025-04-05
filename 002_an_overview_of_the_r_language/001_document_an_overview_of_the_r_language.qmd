@@ -49,3 +49,27 @@ satisfaction_data |>
   skim()
 ```
 
+## Calculating the mean and the median
+
+```{r}
+mean_median_iprodsat <- satisfaction_data |> 
+  summarise(mean_iprodsat = mean(x = iProdSAT), 
+            median_iprodsat = median(x = iProdSAT))
+
+mean_median_iprodsat |> 
+  datatable()
+```
+
+## Analyzing data step by step
+
+```{r}
+group_by_mean <- satisfaction_data |> 
+  group_by(Segment) |> 
+  summarise(mean_iprodsat = mean(iProdSAT), 
+            mean_isalessat = mean(iSalesSAT))
+
+group_by_mean |> 
+  datatable()
+```
+
+
