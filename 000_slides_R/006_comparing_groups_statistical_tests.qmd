@@ -15,7 +15,6 @@ format:
     toc: true
     slide-level: 2
     section-titles: false
-    keep-tex: true
     include-in-header:
       file: ../000_tex/preamble.tex
 fig-cap-location: bottom
@@ -93,7 +92,7 @@ $H_0: p_1 = \frac{1}{4} \land p_2 = \frac{1}{4} \land p_3 = \frac{1}{4} \land p_
 
 $H_1: p_1 \neq \frac{1}{4} \lor p_2 \neq \frac{1}{4} \lor p_3 = \frac{1}{4} \lor p_4 \neq \frac{1}{4}$
 
-$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{70 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{100 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{80 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{50 - 300\frac{1}{4}}{300\frac{1}{4}}$
+$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{(70 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(100 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(80 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(50 - 300\frac{1}{4})^2}{300\frac{1}{4}}$
 
 -   **Base R way**
 
@@ -158,7 +157,7 @@ $H_0: p_1 = \frac{1}{4} \land p_2 = \frac{1}{4} \land p_3 = \frac{1}{4} \land p_
 
 $H_1: p_1 \neq \frac{1}{4} \lor p_2 \neq \frac{1}{4} \lor p_3 = \frac{1}{4} \lor p_4 \neq \frac{1}{4}$
 
-$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{70 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{100 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{80 - 300\frac{1}{4}}{300\frac{1}{4}} + \frac{50 - 300\frac{1}{4}}{300\frac{1}{4}}$
+$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{(70 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(100 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(80 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(50 - 300\frac{1}{4})^2}{300\frac{1}{4}}$
 
 -   **tidymodels way**
 
