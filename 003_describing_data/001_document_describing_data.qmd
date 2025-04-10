@@ -1,26 +1,92 @@
 ---
-title: "Untitled"
-format: html
+title: "Describing data"
+author: 
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gómez
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    number-sections: true
+    code-fold: true
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+#| label: libraries
+#| message: false
+
+library(tidyverse)
+library(skimr)
+library(DT)
 ```
 
-You can add options to executable code like this
+# Introduction
+
+In @fig-plot-weekly-store-by-country you can see the Germany is the country with the greatest sales of product 2.
+
+# Import
+
+The data used is from a set of stores in different parts of the world.
 
 ```{r}
-#| echo: false
-2 * 2
+#| message: false
+
+weekly_store <- read_csv(file = "../000_data/003_data_chapter3.csv")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+# Transform data
+
+```{r}
+weekly_store <- weekly_store |> 
+  mutate(storeNum = factor(x = storeNum, ordered = FALSE),
+         Year = factor(x = Year, levels = 1:2, ordered = TRUE),
+         Week = factor(x = Week, levels = 1:52, ordered = TRUE),
+         p1prom = as.logical(x = p1prom),
+         p2prom = as.logical(x = p2prom))
+```
+
+# Summarize data
+
+```{r}
+weekly_store |> 
+  skim()
+```
+
+# Answering questions with data
+
+## Prepare data
+
+In @tbl-weekly-store-by-country you can see the different sales by country of product 2 
+
+```{r}
+#| label: tbl-weekly-store-by-country
+#| tbl-cap: "Total sales by country of product 2"
+
+weekly_store_by_country <- weekly_store |> 
+  group_by(country) |> 
+  summarise(sum_p2sales = sum(p2sales)) |> 
+  mutate(country = fct_reorder(.f = country, 
+                               .x = sum_p2sales))
+
+weekly_store_by_country |> 
+  datatable()
+```
+
+## Data visualization
+
+```{r}
+#| label: fig-plot-weekly-store-by-country
+#| fig-cap: "Total sales by country of product 2"
+
+weekly_store_by_country |> 
+  ggplot() +
+  geom_col(aes(x = country, 
+               y = sum_p2sales,
+               fill = country),
+           color = "black") + 
+  labs(x = "Country",
+       y = "Total sales",
+       title = "Total sales of product 2 by country")
+```
