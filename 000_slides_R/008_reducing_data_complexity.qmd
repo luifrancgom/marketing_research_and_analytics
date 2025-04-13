@@ -1,0 +1,962 @@
+---
+title: "Reducing Data Complexity"
+author: Luis Francisco Gomez Lopez
+institute: FAEDIS
+date: 2024-02-25 11:43:13
+format:
+  beamer:
+    colortheme: dolphin
+    fonttheme: structurebold
+    theme: AnnArbor
+    link-citations: true
+    linkcolor: blue
+    include-in-header:
+      - text: |
+          \usepackage{booktabs}
+          \usepackage{longtable}
+          \usepackage{array}
+          \usepackage{multirow}
+          \usepackage{wrapfig}
+          \usepackage{float}
+          \usepackage{colortbl}
+          \usepackage{pdflscape}
+          \usepackage{tabu}
+          \usepackage{threeparttable}
+          \usepackage{threeparttablex}
+          \usepackage[normalem]{ulem}
+          \usepackage{makecell}
+          \usepackage{xcolor}
+editor: visual
+bibliography: r_for_marketing_research_and_analytics.bib
+---
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+library(skimr)
+library(corrr)
+library(tidymodels)
+library(ggforce)
+library(imager)
+```
+
+# Contents
+
+-   Please Read Me
+-   Purpose
+-   Consumer brand perception survey
+-   Understanding the reduction of data complexity
+-   Consumer brand perception survey
+-   References
+
+# Please Read Me
+
+-   This presentation is based on [@chapman_r_2019, Chapter 8]
+
+# Purpose
+
+-   Apply data complexity reduction by using the principal component analysis technique
+
+# Consumer brand perception survey
+
+-   On a scale from 1 to 10, where 1 is least and 10 is most, how `<perceptual adjective>` is `<brand>`?
+
+-   100 respondents rate 10 brands on 9 perceptual adjectives
+
+    -   **perform**: has strong performance $(1, 2, \ldots, 10)$
+    -   **leader**: is a leader in the field $(1, 2, \ldots, 10)$
+    -   **latest**: has the latest products $(1, 2, \ldots, 10)$
+    -   **fun**: is fun $(1, 2, \ldots, 10)$
+    -   **serious**: is serious $(1, 2, \ldots, 10)$
+    -   **bargain**: products are a bargain $(1, 2, \ldots, 10)$
+    -   **value**: products are a good value $(1, 2, \ldots, 10)$
+    -   **trendy**: is trendy $(1, 2, \ldots, 10)$
+    -   **rebuy**: I would buy from `<brand>` again $(1, 2, \ldots, 10)$
+    -   **brand**: coffee brand rated by a consumer $(a, b, \ldots, j)$
+
+# Consumer brand perception survey
+
+-   Import data
+
+\tiny
+
+```{r}
+#| echo: true
+consumer_brand <- read_csv("http://goo.gl/IQl8nc")
+consumer_brand |> head(n = 5)
+```
+
+# Consumer brand perception survey
+
+-   Transform data
+
+\tiny
+
+```{r}
+#| echo: true
+consumer_brand_scale <- consumer_brand |> 
+  mutate(across(perform:rebuy, 
+                .fns = ~ scale(x = .x,
+                               center = TRUE,
+                               scale = TRUE)[,1]))
+consumer_brand_scale |> head()
+```
+
+# Consumer brand perception survey
+
+-   Summarize data
+
+    -   Ups the table is really big!!! Try it in your console to see the complete table
+
+\tiny
+
+```{r}
+#| echo: true
+consumer_brand_scale |> skim()
+```
+
+# Consumer brand perception survey
+
+-   Correlation matrices
+
+    -   Pearson correlation coefficients for samples in a tibble
+
+\tiny
+
+```{r}
+#| echo: true
+correlation_matrix <- consumer_brand_scale |> 
+  select(perform:rebuy) |> 
+  corrr::correlate(use = "pairwise.complete.obs", # There are NA values
+                   method = "pearson",
+                   diagonal = NA)
+correlation_matrix # Ups!!! The tibble is wide. Check out the tibble in your console
+```
+
+# Consumer brand perception survey
+
+-   Correlation matrices
+
+    -   Pearson correlation coefficients for samples in a tibble
+
+\tiny
+
+```{r}
+#| echo: true
+#| out-width: 50%
+#| fig-align: center
+correlation_matrix |> 
+  autoplot(method = "HC", # Hierarchical clustering: More details in Chapter 11 
+           triangular = "lower")
+```
+
+# Consumer brand perception survey
+
+-   Mean ratings by brand
+
+\tiny
+
+```{r}
+#| echo: true
+brand_mean <- consumer_brand_scale |> 
+  group_by(brand) |> 
+  summarise(across(everything(), .fns = mean))
+brand_mean
+```
+
+# Consumer brand perception survey
+
+-   Mean ratings by brand
+
+\tiny
+
+```{r}
+#| echo: true
+brand_mean_longer <- brand_mean |> 
+  pivot_longer(cols = perform:rebuy,
+               names_to = "perceptual_adjectives",
+               values_to = "value_mean") |> 
+  mutate(brand = fct_reorder(.f = brand, .x = value_mean),
+         perceptual_adjectives = fct_reorder(.f = perceptual_adjectives, .x = value_mean))
+brand_mean_longer
+```
+
+# Consumer brand perception survey
+
+-   Heat map mean ratings by brand
+
+\tiny
+
+```{r}
+#| echo: true
+#| out-width: 55%
+#| fig-align: center
+library(tidyheatmaps)
+tidyheatmap(df = brand_mean_longer, 
+            rows = brand, columns = perceptual_adjectives, values = value_mean,
+            cluster_rows = TRUE, cluster_cols = TRUE,
+            clustering_method = "complete", # See ?hclust and chapter 11
+            display_numbers = TRUE, border_color = "black", fontsize = 12)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   PCA reduced example
+
+\tiny
+
+```{r}
+#| echo: true
+set.seed(seed = 1234)
+consumer_brand_sample <- consumer_brand |>
+  slice_sample(n = 1, by = brand) |> 
+  select(brand, perform, leader)
+consumer_brand_sample
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Visualizing original data
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+mean_leader <- mean(consumer_brand_sample$leader)
+mean_perform <- mean(consumer_brand_sample$perform)
+
+consumer_brand_sample |> 
+  ggplot() + 
+  geom_vline(xintercept = mean_leader,
+             color = "black") +
+  geom_hline(yintercept = mean_perform,
+             color = "black") +
+  geom_point(aes(x = leader, y = perform, color = brand)) +
+  geom_point(data = tibble(x = mean(consumer_brand_sample$leader),
+                           y = mean(consumer_brand_sample$perform)),
+             aes(x = x, y = y), color = "#E31A1C") +
+  scale_x_continuous(breaks = 0:8, limits = c(0, 8)) +
+  scale_y_continuous(breaks = 0:11, limits = c(0, 11)) +
+  labs(title = "Calculate means") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Centering data using the mean
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+consumer_brand_sample_center <- consumer_brand_sample |>
+  mutate(perform = perform - mean_perform,
+         leader = leader - mean_leader) 
+
+consumer_brand_sample_center |> 
+  ggplot() + 
+  geom_vline(xintercept = 0,
+             color = "black") +
+  geom_hline(yintercept = 0,
+             color = "black") +
+  geom_point(aes(x = leader, y = perform, color = brand)) +
+  geom_point(data = tibble(x = 0, y = 0),
+             aes(x = x, y = y), color = "#E31A1C") +
+  labs(title = "Center data") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Scaling data using the standard deviation
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+sd_leader <- sd(consumer_brand_sample$leader)
+sd_perform <- sd(consumer_brand_sample$perform)
+
+consumer_brand_sample_center_scale <- consumer_brand_sample_center |>
+  mutate(perform = perform / sd_perform,
+         leader = leader / sd_leader)
+
+consumer_brand_sample_center_scale |> 
+  ggplot() + 
+  geom_vline(xintercept = 0,
+             color = "black") +
+  geom_hline(yintercept = 0,
+             color = "black") +
+  geom_point(aes(x = leader, y = perform, color = brand)) +
+  geom_point(data = tibble(x = 0, y = 0),
+             aes(x = x, y = y), color = "#E31A1C") +
+  labs(title = "Calculate standard deviations and scale data") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Fitting a line by performing an orthogonal regression
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+# Fit 
+v <- prcomp(as.matrix(select(consumer_brand_sample_center_scale, -brand)),
+            center = TRUE, scale. = TRUE) |> 
+  _$rotation
+beta <- v[2,1] / v[1,1]
+
+# Find fit data
+## perform = beta*leader
+### perform - perform1 = -beta(leader - leader1)
+### perform = -beta*(leader - leader1) + perform1
+#### beta*leader_end = -beta*(leader_end - leader1) + perform1
+#### beta*leader_end = -beta*leader_end + beta*leader1 + perform1
+#### 2beta*leader_end = beta*leader1 + perform1
+#### leader_end = beta*leader1 + perform1 / 2beta
+##### perform_end = beta*(beta*leader1 + perform1 / 2beta) 
+##### perform_end = beta*leader1 + perform1 / 2 
+consumer_brand_sample_center_scale_fit <- consumer_brand_sample_center_scale |> 
+  mutate(perform_end = (beta*leader + perform) / 2,
+         leader_end = (beta*leader + perform) / (2*beta))
+
+consumer_brand_sample_center_scale_fit |> 
+  ggplot(aes(x = leader, y = perform)) + 
+  geom_vline(xintercept = 0,
+             color = "black") +
+  geom_hline(yintercept = 0,
+             color = "black") +
+  geom_abline(slope = beta, intercept = 0, color = "#18BC9C") +
+  geom_point(aes(color = brand)) +
+  geom_segment(aes(xend = leader_end, yend = perform_end),
+               color = "#CCBE93") +
+  geom_point(data = tibble(x = 0, y = 0),
+             aes(x = x, y = y), color = "#E31A1C") +
+  labs(title = "Fit orthogonal line") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Find a line orthogonal to the fitted line
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+consumer_brand_sample_center_scale_fit |> 
+  ggplot(aes(x = leader, y = perform)) + 
+  geom_vline(xintercept = 0,
+             color = "black") +
+  geom_hline(yintercept = 0,
+             color = "black") +
+  geom_abline(slope = beta, intercept = 0, color = "#18BC9C") +
+  geom_abline(slope = -beta, intercept = 0, color = "#18BC9C") +
+  geom_point(aes(color = brand)) +
+  geom_segment(aes(xend = leader_end, yend = perform_end),
+               color = "#CCBE93") +
+  geom_point(data = tibble(x = 0, y = 0),
+             aes(x = x, y = y), color = "#E31A1C") +
+  labs(title = "Fit orthogonal line") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Find the orthogonal distances between the points and the new line
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+#### leader_end2 = -beta*leader1 + perform1 / 2*-beta
+##### perform_end2 = -beta*(-beta*leader1 + perform1 / 2*-beta) 
+##### perform_end2 = -beta*leader1 + perform1 / 2
+consumer_brand_sample_center_scale_fit <- consumer_brand_sample_center_scale_fit |> 
+  mutate(perform_end2 = ((-beta)*leader + perform) / 2,
+         leader_end2 = ((-beta)*leader + perform) / (2*(-beta)))
+
+consumer_brand_sample_center_scale_fit |> 
+  ggplot(aes(x = leader, y = perform)) + 
+  geom_vline(xintercept = 0,
+             color = "black") +
+  geom_hline(yintercept = 0,
+             color = "black") +
+  geom_abline(slope = beta, intercept = 0, color = "#18BC9C") +
+  geom_abline(slope = -beta, intercept = 0, color = "#18BC9C") +
+  geom_point(aes(color = brand)) +
+  geom_segment(aes(xend = leader_end, yend = perform_end),
+               color = "#CCBE93") +
+  geom_segment(aes(xend = leader_end2, yend = perform_end2),
+               color = "#CCBE93") +
+  geom_point(data = tibble(x = 0, y = 0),
+             aes(x = x, y = y), color = "#E31A1C") +
+  labs(title = "Find the orthogonal distances to the new line") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Project the points onto each line
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+# Project the points
+consumer_brand_sample_center_scale_fit |> 
+  ggplot() + 
+  geom_vline(xintercept = 0,
+             color = "black") +
+  geom_hline(yintercept = 0,
+             color = "black") +
+  geom_abline(slope = beta, intercept = 0, color = "#18BC9C") +
+  geom_abline(slope = -beta, intercept = 0, color = "#18BC9C") +
+  geom_point(aes(x = leader_end, y = perform_end, color = brand)) +
+  geom_point(aes(x = leader_end2, y = perform_end2, color = brand)) +
+  labs(x = "leader",
+       y = "perform",
+       title = "Proyected points") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Rotate the fitted line and the projected points around $(0,0)$
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+# Rotate the points
+## arc-tangent
+angle_radians <- atan(beta)
+
+consumer_brand_sample_center_scale_fit_rotation <- consumer_brand_sample_center_scale_fit |>
+  mutate(perform_rotation = 0,
+         leader_rotation = cos(angle_radians)*leader_end + sin(angle_radians)*perform_end,
+         leader_rotation2 = 0,
+         perform_rotation2 = -sin(angle_radians)*leader_end2 + cos(angle_radians)*perform_end2) |> 
+  # Possible clusters
+  mutate(cluster = case_when(
+    leader_rotation <= 0 ~ "Cluster 1",
+    leader_rotation > 0 ~ "Cluster 2", 
+    .default = NULL))
+
+consumer_brand_sample_center_scale_fit_rotation |>
+  ggplot() +
+  geom_vline(xintercept = 0, color = "#18BC9C") +
+  geom_hline(yintercept = 0, color = "#18BC9C") +
+  geom_point(aes(x = leader_rotation2, y = perform_rotation2, color = brand)) +
+  geom_point(aes(x = leader_rotation, y = perform_rotation, color = brand)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  scale_y_continuous(limits = c(-2,2)) +
+  labs(x = "leader",
+       y = "perform",
+       title = "Rotated points") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Fix the new points based on the projected points
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+consumer_brand_sample_center_scale_fit_rotation |>
+  ggplot() +
+  geom_vline(xintercept = 0, color = "#18BC9C") +
+  geom_hline(yintercept = 0, color = "#18BC9C") +
+  geom_segment(aes(x = leader_rotation, xend = leader_rotation, 
+                   y = 0, yend = perform_rotation2),
+               color = "#CCBE93") +
+  geom_segment(aes(x = 0, xend = leader_rotation,
+                   y = perform_rotation2, yend = perform_rotation2),
+               color = "#CCBE93") +
+  geom_point(aes(x = leader_rotation2, y = perform_rotation2), color = "black") +
+  geom_point(aes(x = leader_rotation, y = perform_rotation), color = "black") +
+  geom_point(aes(x = leader_rotation, y = perform_rotation2, color = brand)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  scale_y_continuous(limits = c(-2,2)) +
+  labs(x = "leader",
+       y = "perform",
+       title = "New points based on the rotated points") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Apply data complexity reduction by focusing on the horizontal axis
+
+```{r}
+#| echo: false
+#| out-width: 50%
+#| fig-align: center
+
+consumer_brand_sample_center_scale_fit_rotation |>
+  ggplot(aes(x = leader_rotation, y = perform_rotation)) +
+  geom_mark_hull(aes(fill = cluster, label = cluster),
+                 show.legend = FALSE) +
+  geom_vline(xintercept = 0, color = "#18BC9C") +
+  geom_hline(yintercept = 0, color = "#18BC9C") +
+  geom_point(aes(color = brand)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  scale_y_continuous(limits = c(-1,1)) +
+  labs(x = "leader",
+       y = "perform",
+       title = "Data reduction focusing on the horizontal axis") +
+  theme(legend.position = "right", 
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Recover the data that was reduced when focusing in the horizontal axis
+
+```{r}
+#| echo: false
+#| out-width: 70%
+#| fig-align: center
+
+# Recover reduced data
+consumer_brand_sample_center_scale_fit_rotation_recover <- consumer_brand_sample_center_scale_fit_rotation |>  
+  mutate(perform_recover = (perform_end)*sd_perform + mean_perform,
+         leader_recover = (leader_end)*sd_leader + mean_leader)
+
+consumer_brand_sample_center_scale_fit_rotation_recover |>
+  ggplot(aes(x = leader_recover, y = perform_recover)) +
+  # geom_vline(xintercept = 0, color = "#18BC9C") +
+  # geom_hline(yintercept = 0, color = "#18BC9C") +
+  geom_point(aes(color = "Recover data")) +
+  geom_point(data = consumer_brand_sample,
+             aes(x = leader, y = perform, color = "Original data")) +
+  scale_x_continuous(breaks = 0:8, limits = c(0, 8)) +
+  scale_y_continuous(breaks = 0:11, limits = c(0, 11)) +
+  labs(x = "leader",
+       y = "perform",
+       title = "Recovered data vs Original data") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+```
+
+# Understanding the reduction of data complexity
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Using an image to understand data complexity reduction
+
+```{r}
+#| echo: false
+#| out-width: 60%
+#| fig-align: center
+
+boat_gray <- load.image(file = "images/008_boat_gray_512_x_512.tiff")
+plot(boat_gray)
+```
+
+# Understanding the reduction of data complexity
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Represent and image as data
+
+        -   `x,y`: position of a point in a cartesian plane $(x,y)$
+        -   `value`: a gray scale where $0$ is white, $1$ is black and $(0,1)$ is an intermediate color between white and black
+
+\tiny
+
+```{r}
+#| echo: false
+boat_gray_long <- boat_gray |> 
+  as.data.frame() |> 
+  as_tibble()
+boat_gray_long
+```
+
+# Understanding the reduction of data complexity
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Prepare data for PCA
+
+\tiny
+
+```{r}
+#| echo: false
+boat_gray_wider <- boat_gray_long |>
+  pivot_wider(id_cols = x, 
+              names_from = y, 
+              values_from = value)
+boat_gray_wider
+```
+
+# Understanding the reduction of data complexity
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Data complexity reduction
+
+```{r}
+#| echo: false
+#| fig-align: center
+#| out-width: 70%
+boat_gray_wider_pca <- boat_gray_wider |> 
+  select(-x) |> 
+  prcomp(retx = TRUE, center = TRUE, scale. = TRUE)
+
+n_pc <- c(1, 5, 10, 50, 100, 500)
+  
+pca_tidy_reconstruction <- tibble(pc = n_pc) |> 
+  mutate(x_hat = map(.x = n_pc, 
+                     .f = ~ boat_gray_wider_pca$x[, 1:.x] %*% 
+                            t(boat_gray_wider_pca$rotation[, 1:.x])),
+         x_hat = map(.x = x_hat,
+                     .f = ~ scale(x = .x, 
+                                  center = FALSE, 
+                                  scale = 1/boat_gray_wider_pca$scale)),
+         x_hat = map(.x = x_hat,
+                     .f = ~ scale(x = .x, 
+                                  center = -boat_gray_wider_pca$center, 
+                                  scale = FALSE)),
+         x_hat = map(.x = x_hat, 
+                     .f = ~ as_tibble(.x)),
+         x_hat = map(.x = x_hat, 
+                     .f = ~ bind_cols(select(boat_gray_wider, x), .x)),
+         x_hat = map(.x = x_hat, 
+                     .f = ~ pivot_longer(.x, 
+                                         cols = -x,
+                                         names_to = "y",
+                                         values_to = "value",
+                                         names_transform = list(y = as.integer)))) |> 
+  mutate(pc_label = str_glue("Number of components: {pc}"),
+         .after = pc) |>
+  mutate(pc_label = fct_reorder(.f = pc_label, .x = pc)) |>  
+  unnest(x_hat)
+
+pca_tidy_reconstruction |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_raster(aes(fill = value)) +
+  scale_y_reverse() +
+  scale_fill_gradient(low = "black", high = "white") +
+  facet_wrap(facets = vars(pc), 
+             nrow = 2, ncol = 3) +
+  theme(legend.position = "none",
+        aspect.ratio = 1)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Applying to the reduced example
+
+\tiny
+
+```{r}
+#| echo: true
+consumer_brand_sample_matrix <- consumer_brand_sample |> 
+  select(-brand) |>
+  as.matrix()
+consumer_brand_sample_matrix |> head()
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   `prcomp` output from R
+
+\tiny
+
+```{r}
+#| echo: true
+
+consumer_brand_sample_matrix_pca <- consumer_brand_sample_matrix |> 
+  prcomp(center = TRUE, scale. = TRUE)
+consumer_brand_sample_matrix_pca
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Structure of `prcomp`from R
+
+\tiny
+
+```{r}
+consumer_brand_sample_matrix_pca |> str()
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Extracting scores: principle components space
+
+\tiny
+
+```{r}
+#| echo: true
+
+scores <- consumer_brand_sample_matrix_pca$x
+scores
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Extracting loadings: map from principle components space back into the original space
+
+\tiny
+
+```{r}
+#| echo: true
+
+loadings <- consumer_brand_sample_matrix_pca$rotation
+loadings
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Extracting loadings: map from principle components space back into the original space
+
+\tiny
+
+```{r}
+#| echo: true
+consumer_brand_sample_matrix_center_scale <- consumer_brand_sample_matrix |> 
+  scale(center = TRUE, scale = TRUE)
+consumer_brand_sample_matrix_center_scale
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Using matrix multiplication, `%*%`, the original centered and scaled data, $X_{c, s}$, and the loadings, $L$, `loadings` to obtain the scores, $S$
+
+$$S = X_{c, s}L$$
+
+\tiny
+
+```{r}
+#| echo: true
+consumer_brand_sample_matrix_center_scale %*% loadings
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Recovering original centered and scaled data, $X$, using loadings, $L$,[^1] and scores, $S$
+
+[^1]: $L$ is an orthogonal matrix, which means that $L$ is a real square matrix such that $L^tL = LL^t = I$ where $I$ is the identity matrix.
+
+$$SL^t = X_{c, s}LL^t = X_{c, s}I= X_{c, s}$$
+
+\tiny
+
+```{r}
+#| echo: true
+(scores %*% t(loadings)) |> set_colnames(c("perform", "leader"))
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Reconstructing original centered and scaled data using the first principal component, $X_{c, s, p_1}$
+
+$$S_{p_1}L_{p_1}^t = X_{c, s, p_1}$$ \tiny
+
+```{r}
+#| echo: true
+scores[, 1] %*% t(loadings[, 1])
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Reconstructing original centered data using the first principal component, $X_{c, p_1}$
+
+\tiny
+
+```{r}
+#| echo: true
+scores[, 1] %*% t(loadings[, 1]) |> 
+  scale(center = FALSE, scale = 1/consumer_brand_sample_matrix_pca$scale)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Reconstructing original data using the first principal component, $X_{p_1}$
+
+\tiny
+
+```{r}
+#| echo: true
+scores[, 1] %*% t(loadings[, 1]) |> 
+  scale(center = FALSE, scale = 1/consumer_brand_sample_matrix_pca$scale) |> 
+  scale(center = -consumer_brand_sample_matrix_pca$center, scale = FALSE)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Eingevalues, in this case `variance`, represent the variance explained by each principal component
+
+\tiny
+
+```{r}
+#| echo: true
+eigenvalues <- consumer_brand_sample_matrix_pca |> 
+  tidy(matrix = "eigenvalues") |> 
+  mutate(variance = std.dev^2, .after = std.dev)
+eigenvalues
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Eingevalues, in this case `variance`, represent the variance explained by each principal component
+
+\tiny
+
+```{r}
+#| echo: true
+#| fig-align: center
+#| out-width: 40%
+library(ggbiplot)
+consumer_brand_sample_matrix_pca |> 
+  ggscreeplot() +
+  scale_x_continuous(breaks = 1:2)
+```
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   A **biplot** represents visually the scores of the first, x-axis, and second, y-axis, of the principal components and the corresponding loadings both **scaled by a factor**[^2]
+
+    -   In the case of principal component analysis there are many different ways to produce a biplot
+
+        -   For the differents ways to build a biplot check out [Positioning the arrows on a PCA biplot](https://stats.stackexchange.com/questions/141085/positioning-the-arrows-on-a-pca-biplot)
+
+[^2]: For specific details check out `?stats:::biplot.prcomp`, `?ggbiplot::ggbiplot` and `?ggbiplot::get_SVD`
+
+# Consumer brand perception survey
+
+-   Principal component analysis (PCA) and perceptual maps
+
+    -   Building a biplot using the package `ggbiplot`
+
+\tiny
+
+```{r}
+#| echo: true
+#| fig-align: center
+#| out-width: 45%
+ggbiplot(pcobj = consumer_brand_sample_matrix_pca,
+         groups = consumer_brand_sample$brand,
+         scale = 1, pc.biplot = FALSE) +
+  labs(color = "Brands")
+```
+
+# Consumer brand perception survey
+
+-   Bibplot for all the consumer brand perception survey
+
+\tiny
+
+```{r}
+#| echo: true
+#| fig-align: center
+#| out-width: 50%
+consumer_brand_pca <- consumer_brand |>
+  select(-brand) |> 
+  prcomp(center = TRUE, scale. = TRUE)
+consumer_brand_pca |> 
+  ggbiplot(groups = consumer_brand$brand, scale = 1, pc.biplot = FALSE)
+```
+
+# Consumer brand perception survey
+
+-   A biplot is a generalization of a scatterplot of 2 variables for the case of many variables [@greenacre_biplots_2010, pp. 9]
+
+-   Variables of the brands that are grouped together are positively correlated to each other
+
+    -   For example `serious`, `leader` and `perform` or `trendy` and `latest`
+
+-   Variables of the brands that are displayed to the opposite sides of the biplot origin are negatively correlated to each other
+
+    -   For example `fun` in relation to `serious`, `leader` and `perform` or `trendy` and `latest` in relation to `value` and `bargain`
+
+# Consumer brand perception survey
+
+-   A biplot is an **approximated** representation of a data table ordered by rows which represents some observations and columns which represents some variables
+
+    -   By the term **approximated** it means that the representation is not exact
+
+    -   In our case the last biplot was used to represent the data table `consumer_brand_sample` by reducing its complexity
+
+-   In a biplot the distance between points represent some measure of similarity
+
+    -   In the case of the last biplot for example brand `g`, that is colored in blue, tend to be spatially grouped in the plot
+
+# References
