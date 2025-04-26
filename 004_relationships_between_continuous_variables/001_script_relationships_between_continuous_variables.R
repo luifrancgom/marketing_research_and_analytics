@@ -1,6 +1,7 @@
 # Libraries ----
 library(tidyverse)
 library(skimr)
+library(corrr)
 
 # Import ----
 # customer <- read_csv(file = "http://goo.gl/PmPkaG")
@@ -73,3 +74,71 @@ customer |>
                  y = sat.selection,
                  label = n))
   
+# Transforming the axes
+customer |> 
+  ggplot() +
+  geom_point(aes(x = online.spend, 
+                 y = store.spend,
+                 color = email)) +
+  # https://www.color-hex.com/color-palettes/
+  scale_color_manual(values = c("#8e0c14", "#2c98af"),
+                     labels = c("No", "Yes")) +
+  # https://en.wikipedia.org/wiki/Natural_logarithm
+  ## Understanding logarithms
+  ### log1p: online.spend (take 0 values)
+  scale_x_continuous(transform = "log1p", 
+                     breaks = c(1, 2, 5, 10, 
+                                20, 50, 100, 500,
+                                5000)) +
+  scale_y_continuous(transform = "log1p",
+                     breaks = c(1, 5, 50, 500)) +
+  labs(x = "Online spending (US Dollars)",
+       y = "Store physical spending (US Dollars)",
+       color = "Email",
+       title = "Online vs store physical spending")
+
+# Summary statistic ----
+## Relation between variables ----
+x <- 1:10
+x
+y <- 3*x
+y
+x_2 <- x^2 
+
+tibble(x = x,
+       y = y) |> 
+  ggplot() +
+  geom_point(aes(x = x, y = y))
+
+w <- -100:100
+w_2 <- w^2
+
+tibble(x = w,
+       y = w_2) |> 
+  ggplot() +
+  geom_point(aes(x = x, y = y))
+
+## Pearson correlation
+# https://en.wikipedia.org/wiki/Correlation
+cor(x, y)
+cor(w, w_2)
+cor(w_2, w)
+
+customer |> 
+  summarise(cor = cor(store.spend, online.spend))
+
+## Matrix correlation ----
+customer |> glimpse()
+
+customer |> 
+  select(where(is.factor))
+
+correlation_matrix <- customer |> 
+  select(where(is.numeric)) |> 
+  correlate(use = "pairwise.complete.obs", 
+            method = "pearson")
+
+correlation_matrix |> 
+  autoplot(triangular = "lower")
+
+

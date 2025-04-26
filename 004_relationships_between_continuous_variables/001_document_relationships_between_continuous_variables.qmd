@@ -19,6 +19,8 @@ editor: visual
 
 library(tidyverse)
 library(skimr)
+library(corrr)
+library(DT)
 ```
 
 # Import
@@ -52,7 +54,7 @@ customer |>
   skim()
 ```
 
-# visualization
+# Visualization
 
 ## Spending
 
@@ -89,3 +91,49 @@ customer |>
                  label = n))
 ```
 
+## Logarithmic transformation: Spending
+
+```{r}
+customer |> 
+  ggplot() +
+  geom_point(aes(x = online.spend, 
+                 y = store.spend,
+                 color = email)) +
+  # https://www.color-hex.com/color-palettes/
+  scale_color_manual(values = c("#8e0c14", "#2c98af"),
+                     labels = c("No", "Yes")) +
+  # https://en.wikipedia.org/wiki/Natural_logarithm
+  ## Understanding logarithms
+  ### log1p: online.spend (take 0 values)
+  scale_x_continuous(transform = "log1p", 
+                     breaks = c(1, 2, 5, 10, 
+                                20, 50, 100, 500,
+                                5000)) +
+  scale_y_continuous(transform = "log1p",
+                     breaks = c(1, 5, 50, 500)) +
+  labs(x = "Online spending (US Dollars)",
+       y = "Store physical spending (US Dollars)",
+       color = "Email",
+       title = "Online vs store physical spending")
+```
+
+# Summary statiscs
+
+## Correlation
+
+```{r}
+#| message: false
+
+correlation_matrix <- customer |> 
+  select(where(is.numeric)) |> 
+  correlate(use = "pairwise.complete.obs", 
+            method = "pearson")
+
+correlation_matrix |> 
+  datatable()
+```
+
+```{r}
+correlation_matrix |> 
+  autoplot(triangular = "lower")
+```
