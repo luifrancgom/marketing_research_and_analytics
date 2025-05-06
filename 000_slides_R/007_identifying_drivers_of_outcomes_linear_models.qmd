@@ -262,7 +262,6 @@ confint(model1, level = 0.95)
 \tiny
 
 ```{r}
-#| echo: true
 par(mfrow=c(2,2))
 plot(model1)
 par(mfrow=c(1,1))
@@ -810,6 +809,7 @@ tibble(formula = c("y $\\sim$ x",
 
 ```{r}
 #| eval: false
+
 lm(formula = overall ~ rides, data = amusement_park_std) |> tidy()
 lm(formula = overall ~ -1 + rides, data = amusement_park_std) |> tidy()
 lm(formula = overall ~ rides + has.child, data = amusement_park_std) |> tidy()
