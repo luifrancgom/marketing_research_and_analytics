@@ -896,5 +896,22 @@ consumer_brand_pca |>
 -   In a biplot the distance between points represent some measure of similarity
 
     -   In the case of the last biplot for example brand `g`, that is colored in blue, tend to be spatially grouped in the plot
+    
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**skimr**](https://CRAN.R-project.org/package=skimr), 
+[**corrr**](https://CRAN.R-project.org/package=corrr),
+[**tidymodels**](https://CRAN.R-project.org/package=tidymodels), [**ggforce**](https://CRAN.R-project.org/package=ggforce),
+[**imager**](https://CRAN.R-project.org/package=ggforce) and [**tinytex**](https://CRAN.R-project.org/package=imager) for allowing me to access these tools without paying for a license
+
+-   To the [**Linux kernel community**](https://www.kernel.org/category/about.html) for allowing me the possibility to use some [**Linux distributions**](https://static.lwn.net/Distributions/) as my main [**OS**](https://en.wikipedia.org/wiki/Operating_system) without paying for a license
 
 # References
