@@ -91,6 +91,29 @@ pt(q = -3.2731,
    lower.tail = TRUE) * 2
 
 ## Anova ----
+segmentation |> 
+  group_by(Segment) |> 
+  summarise(mean_income = mean(income),
+            var_income  = var(income),
+            n           = n())
 
+anova_table <- aov(data = segmentation,
+                   formula = income ~ Segment) |> 
+  anova()
 
+anova_table
 
+# 0.1, 0.05, 0.01
+alpha <- 0.05
+
+?df
+
+qf(p = alpha, 
+   df1 = 3, 
+   df2 = 296,
+   lower.tail = FALSE)
+
+pf(q = 81.828, 
+   df1 = 3,
+   df2 = 296,
+   lower.tail = FALSE)
