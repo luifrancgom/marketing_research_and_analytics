@@ -91,6 +91,7 @@ pt(q = -3.2731,
    lower.tail = TRUE) * 2
 
 ## Anova ----
+## Segment ----
 segmentation |> 
   group_by(Segment) |> 
   summarise(mean_income = mean(income),
@@ -102,6 +103,9 @@ anova_table <- aov(data = segmentation,
   anova()
 
 anova_table
+
+anova_table |> 
+  tidy()
 
 # 0.1, 0.05, 0.01
 alpha <- 0.05
@@ -117,3 +121,26 @@ pf(q = 81.828,
    df1 = 3,
    df2 = 296,
    lower.tail = FALSE)
+
+## Segment, ownHome
+anova_table2 <- aov(formula = income ~ Segment + ownHome,
+                    data = segmentation) |> 
+  anova()
+
+anova_table2 |> 
+  tidy()
+
+anova_table3 <- aov(formula = income ~ Segment + ownHome + Segment:ownHome,
+                    data = segmentation) |> 
+  anova()
+
+anova_table3 |> 
+  tidy()
+
+anova_table3
+
+aov(formula = income ~ Segment*ownHome,
+    data = segmentation) |> 
+  anova()
+
+

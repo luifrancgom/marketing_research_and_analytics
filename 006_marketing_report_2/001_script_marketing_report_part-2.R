@@ -2,6 +2,7 @@
 library(tidyverse)
 library(sweep)
 library(DT)
+library(tidymodels)
 
 # Import data ----
 bike_sales <- bike_sales
@@ -163,3 +164,88 @@ revenue_by_bike_shop |>
   formatRound(columns = c("Percentage of revenue"), 
               digits = 2)
 
+# Statistical tests ----
+## Chiq test given probabilities ----
+### Category secondary, frame ----
+bike_sales |> 
+  count(category.secondary, frame)
+
+table_cat2_frame <- bike_sales |> 
+  group_by(category.secondary, frame) |> 
+  summarise(revenue = sum(price.ext)) |> 
+  ungroup() |> 
+  mutate(pct_revenue = revenue / sum(revenue)) |> 
+  arrange(desc(pct_revenue))
+
+table_models_cat2_frame <- table_cat2_frame |> 
+  mutate(model = str_c(category.secondary,
+                       frame, 
+                       sep = " ")) |> 
+  select(model, revenue)
+
+table_models_cat2_frame
+
+chi2_test_cat2_frame <- deframe(table_models_cat2_frame) |>
+  chisq.test(p = rep.int(x = 1/13, times = 13))
+
+chi2_test_cat2_frame |> 
+  tidy()
+
+### Bike shops ----
+bike_sales |> count(bikeshop.name)
+
+table_bikeshops <- bike_sales |> 
+  group_by(bikeshop.name) |> 
+  summarise(revenue = sum(price.ext)) |> 
+  mutate(pct_revenue = revenue / sum(revenue)) |> 
+  arrange(desc(pct_revenue))
+
+table_models_bikeshops <- table_bikeshops |> 
+  select(bikeshop.name, revenue)
+
+chi2_test_bikeshops <- table_models_bikeshops |> 
+  deframe() |> 
+  chisq.test(p = rep.int(x = 1/30, times = 30))
+  
+chi2_test_bikeshops |> 
+  tidy()
+
+## T-test ----
+### frame ----
+alpha <- 0.05 # 0.1, 0.05, 0.01
+t_test_revenue_frame <- t.test(price.ext ~ frame,
+                               data = bike_sales,
+                               alternative = "two.sided",
+                               mu = 0,
+                               conf.level = 1 - alpha)
+
+t_test_revenue_frame |> 
+  tidy()
+
+## Anova ----
+model1 <- aov(formula = price ~ category.secondary,
+              data = bike_sales) |> 
+  anova() |> 
+  tidy()
+
+model2 <- aov(formula = price ~ category.secondary + frame,
+              data = bike_sales) |> 
+  anova() |> 
+  tidy()
+
+model3 <- aov(formula = price ~ category.secondary*frame,
+              data = bike_sales) |> 
+  anova() |> 
+  tidy()
+
+model4 <- aov(formula = price ~ category.secondary*frame*bikeshop.city,
+              data = bike_sales) |> 
+  anova() |> 
+  tidy()
+
+
+
+
+
+
+  

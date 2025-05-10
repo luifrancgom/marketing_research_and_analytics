@@ -27,4 +27,3 @@ library(tidyverse)
 
 segmentation <- read_csv(file = "../000_data/005_data_chapter5.csv")
 ```
-

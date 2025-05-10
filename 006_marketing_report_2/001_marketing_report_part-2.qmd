@@ -20,6 +20,7 @@ editor: visual
 library(tidyverse)
 library(sweep)
 library(DT)
+library(tidymodels)
 ```
 
 # Exploring data, visualizing it and applying statistical tests
@@ -253,51 +254,25 @@ Taking into account that there are 13 available models offer by the corporation 
 Once you apply the test point out your conclusion taking into account the p-value of the test
 
 ```{r}
-# To attack the problem you need to really understand 
-# the chi squared test for given probabilities
+table_cat2_frame <- bike_sales |> 
+  group_by(category.secondary, frame) |> 
+  summarise(revenue = sum(price.ext)) |> 
+  ungroup() |> 
+  mutate(pct_revenue = revenue / sum(revenue)) |> 
+  arrange(desc(pct_revenue))
 
-## First, prepare the data in a similar or in the following
-## way
-### table_category_secondary_frame <- bike_sales |>
-###   group_by(category.secondary, frame) |>
-###   summarise(total_revenue = sum(price.ext),
-###             .groups = "drop") |>
-###   mutate(total_revenue_pct = (total_revenue / sum(total_revenue))*100) |>
-###   arrange(desc(total_revenue_pct))
+table_models_cat2_frame <- table_cat2_frame |> 
+  mutate(model = str_c(category.secondary,
+                       frame, 
+                       sep = " ")) |> 
+  select(model, revenue)
 
-## Second, create a new variable to identify
-## the models in a similar or in the following way
-### table_models <- table_category_secondary_frame |> 
-###  mutate(model = str_c(category.secondary, frame, sep = " ")) |> 
-###  select(model, total_revenue)
-#### For more information about str_c check out the examples in
-#### https://stringr.tidyverse.org/reference/str_c.html
+chi2_test_cat2_frame <- deframe(table_models_cat2_frame) |>
+  chisq.test(p = rep.int(x = 1/13, times = 13))
 
-## Third, create a named vector to apply the chi test
-## taking into account what is mention in ?chisq.test
-## in the section related to the Examples and the part
-## about Testing for population probabilities
-### To create a named vector check out the deframe
-### function from the tidyverse
-#### https://tibble.tidyverse.org/reference/enframe.html
-##### deframe(table_models)
-
-## Fourth, apply the chi squared test
-### deframe(table_models) |> 
-###  chisq.test(p = rep.int(x = 1/13, times = 13))
-#### rep.int(x = 1/13, times = 13) is just a way
-#### to repeat 1/13 thirteen times
-##### Check out ?rep.int to understand it
-
-## Fifth, use the tidymodels library:
-## library(tidymodels) using tidy
-### Remember to load the library in the first code 
-### chunk: library(tidymodels)
-#### For more information check out
-#### https://broom.tidymodels.org/reference/tidy.htest.html
-##### deframe(table_models) |> 
-#####  chisq.test(p = rep.int(x = 1/13, times = 13)) |> 
-#####  tidy()
+chi2_test_cat2_frame |> 
+  tidy() |> 
+  datatable()
 ```
 
 Inspect, using an statistical test, if the total revenue is distributed in a homogeneous way by `bikeshop.name` using a $\chi^2$ test for a given vector of probabilities.
@@ -307,12 +282,22 @@ Taking into account that there are 30 bike shops offer use $p_i = \frac{1}{30}$ 
 Once you apply the test point out your conclusion taking into account the p-value of the test
 
 ```{r}
-# Apply a similar process as in the case of
-# applying the chi squared test for 
-# category.secondary and frame in relation to
-# the total revenue
-## See the comments in that section for more 
-## information about how to apply the test
+table_bikeshops <- bike_sales |> 
+  group_by(bikeshop.name) |> 
+  summarise(revenue = sum(price.ext)) |> 
+  mutate(pct_revenue = revenue / sum(revenue)) |> 
+  arrange(desc(pct_revenue))
+
+table_models_bikeshops <- table_bikeshops |> 
+  select(bikeshop.name, revenue)
+
+chi2_test_bikeshops <- table_models_bikeshops |> 
+  deframe() |> 
+  chisq.test(p = rep.int(x = 1/30, times = 30))
+  
+chi2_test_bikeshops |> 
+  tidy() |> 
+  datatable()
 ```
 
 ### Testing group means: `t.test()`
@@ -322,13 +307,16 @@ Inspect, using a two sample t-tests, if the mean revenue between the `Aluminum` 
 Once you apply the test point out your conclusion taking into account the p-value of the test
 
 ```{r}
-# If you use base R you can apply t.test
-## Check out more information in ?t.test
-### 
-# If you use the tidyverse framework you can 
-# use t_test from tidymodels
-## For more information check out 
-### https://infer.tidymodels.org/reference/t_test.html
+alpha <- 0.05 # 0.1, 0.05, 0.01
+t_test_revenue_frame <- t.test(price.ext ~ frame,
+                               data = bike_sales,
+                               alternative = "two.sided",
+                               mu = 0,
+                               conf.level = 1 - alpha)
+
+t_test_revenue_frame |> 
+  tidy() |> 
+  datatable()
 ```
 
 ### Analysis of Variance (ANOVA)
@@ -351,16 +339,13 @@ Apply an analysis of variance (ANOVA) using `price` as a response variable
 [^1]: `category.secondary*frame` is a short way to specify all the possible interactions between these 2 categorical variables which is equivalent to `category.secondary + frame + category.secondary:frame`
 
 ```{r}
-# Use the functions aov and anova from base R
-# to apply the analysis of variance (ANOVA)
-## As an example you can begin with a simple model
-### aov(formula = price ~ category.secondary, 
-###    data = bike_sales) |> 
-###  anova() |> 
-###  tidy()
+model4 <- aov(formula = price ~ category.secondary*frame*bikeshop.city,
+              data = bike_sales) |> 
+  anova() |> 
+  tidy()
 
-## Then change the formula argument with the 
-## different alternative models
+model4 |> 
+  datatable()
 ```
 
 Taking into account the analysis of variance, point out if it make sense to add `category.secondary`, `frame` and its interaction to the model.
