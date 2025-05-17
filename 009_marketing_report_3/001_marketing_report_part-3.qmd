@@ -1,0 +1,382 @@
+---
+title: "Marketing report part 3"
+date: 2025-05-31
+author: 
+  - Norah Jones   
+  - Bill Gates
+  - Luis Francisco Gomez
+format: 
+  html:
+    toc: true
+    code-fold: true
+    number-sections: true
+    embed-resources: true
+editor: visual
+---
+
+```{r }
+#| label: libraries
+#| echo: false
+#| message: false
+
+library(tidyverse)
+library(sweep)
+library(DT)
+library(tidymodels)
+```
+
+# Modeling
+
+## Introduction
+
+Pending
+
+## Import data
+
+Pending
+
+```{r}
+# Import data ----
+bike_sales <- bike_sales
+
+# Transform data ----
+bike_sales <- bike_sales |> 
+  mutate(order.id = factor(x = order.id, 
+                           ordered = FALSE),
+         order.line = factor(x = order.line, 
+                             ordered = TRUE),
+         customer.id = factor(x = customer.id, 
+                              ordered = FALSE),
+         bikeshop.name = factor(x = bikeshop.name, 
+                                ordered = FALSE),
+         bikeshop.city = factor(x = bikeshop.city, 
+                                ordered = FALSE),
+         bikeshop.state = factor(x = bikeshop.state, 
+                                 ordered = FALSE),
+         product.id = factor(x = product.id, 
+                             ordered = FALSE),
+         model = factor(x = model, 
+                        ordered = FALSE),
+         category.primary = factor(x = category.primary, 
+                                   ordered = FALSE),
+         category.secondary = factor(x = category.secondary, 
+                                     ordered = FALSE),
+         frame = factor(x = frame, 
+                        ordered = FALSE))
+```
+
+## The product gap
+
+Pending
+
+@tbl-total-revenue-by-cat2-frame
+
+```{r}
+#| label: tbl-total-revenue-by-cat2-frame
+#| tbl-cap: Total revenue by category secondary and frame
+#| message: false
+
+total_revenue_by_cat2_frame <- bike_sales |> 
+  group_by(category.secondary, frame) |> 
+  summarise(revenue = sum(price.ext)) |> 
+  ungroup() |> 
+  arrange(desc(revenue)) |> 
+  mutate(category.secondary = fct_reorder(.f = category.secondary,
+                                          .x = revenue))
+
+total_revenue_by_cat2_frame |> 
+  datatable(colnames = c("Category secondary",
+                         "Frame",
+                         "Revenue")) 
+```
+
+Pending
+
+@fig-total-revenue-by-cat2-frame
+
+```{r}
+#| label: fig-total-revenue-by-cat2-frame
+#| fig-cap: Total revenue by category secondary and frame
+
+## Visualization ----
+total_revenue_by_cat2_frame |> 
+  ggplot() + 
+  geom_point(aes(x = frame,
+                 y = revenue),
+             position = position_jitter(width = 0.2,
+                                        height = 0.2)) +
+  scale_y_continuous(labels = scales::label_currency()) + 
+  facet_wrap(facets = vars(category.secondary)) +
+  labs(x = "Frame",
+       y = "Revenue (US Dollars)")
+```
+
+## Determine the price of a new product
+
+Pending
+
+### Selecting a new potential product
+
+Pending
+
+-   Cyclocross Aluminum
+-   Fat Bike Carbon
+-   Over Mountain Aluminum
+-   Sport Carbon
+-   Triathalon Aluminum
+
+Pending
+
+### Building a model to price a new product
+
+Pending
+
+#### Choosing a model
+
+Pending
+
+-   `price ~ category.secondary + frame`
+
+**Note 1**: If the model is to complex like `price ~ category.secondary*frame*bikeshop.state` you will obtain a considerable parameters but if the model is to simple like `price ~ category.secondary` you will not be able to obtain good predictions. Choose the level of complexity that you consider appropriate to help the Research and Development (R & D) division and to determine the new price of the new product
+
+**Note 2**: If you find that the model generates silly results, like for example negative or 0 values for the price, abandon the choosen model and use another model or change the product gap combination or discard particular locations where the product will going to be offer.
+
+#### Fit the model
+
+Pending
+
+@tbl-model-2
+
+```{r}
+#| label: tbl-model-2
+#| tbl-cap: Linear model for price prediction of new products
+
+## Model 2 ----
+model2 <- lm(formula = price ~ category.secondary + frame,
+             data = bike_sales)
+
+model_tidy2 <- model2 |> 
+  tidy()
+
+model_tidy2 |> 
+  datatable(colnames = c("Term",
+                         "Estimation",
+                         "Standard Error",
+                         "T-statistic",
+                         "P-value")) |> 
+  formatRound(c("estimate", 
+                "std.error", 
+                "statistic", 
+                "p.value"))
+```
+
+#### Predict the price of the new product
+
+Pending
+
+```{r}
+#| label: tbl-model2-price-pred
+#| tbl-cap: Price prediction of new products
+
+## Predictions ----
+new_data <- tibble(category.secondary = c("Cyclocross",
+                                          "Fat Bike",
+                                          "Over Mountain",
+                                          "Sport",
+                                          "Triathalon"),
+                   frame = c("Aluminum",
+                             "Carbon",
+                             "Aluminum",
+                             "Carbon",
+                             "Aluminum"))
+
+predict_prices_model2 <- predict(object = model2, 
+        newdata = new_data) |> 
+  enframe(name = "observations",
+          value = "pred_price") |> 
+  bind_cols(new_data) |> 
+  arrange(desc(pred_price))
+
+predict_prices_model2 |> 
+  select(-c(observations)) |> 
+  datatable(colnames = c("Price prediction",
+                         "Category secondary",
+                         "Frame")) |> 
+  formatRound(c("pred_price"))
+```
+
+## Segment bike shops with k-means clustering
+
+Add some text pointing out the principal findings as a result of applying a k-means clustering model to segment the bike shops
+
+### Bike shop revenue trends
+
+In this section the objective is to group and aggregate data to calculate the total revenue using the variable `price.ext`
+
+-   Select the variables `bikeshop.name`, `price.ext`, `model`, `category.primary`, `category.secondary` and `frame`
+
+-   Group the data by `bikeshop.name`, `model`, `category.primary`, `category.secondary` and `frame`
+
+-   Calculate the total revenue and ungroup the data using the `ungroup` function or the `.groups = "drop"` argument from `summarise`
+
+```{r}
+# In this part you can use the functions
+# select, group_by and summarise
+## You can use at the end ungroup of 
+## the argument .groups = "drop" to 
+## ungroup the data
+### If you name the variable as total_revenue the first 5 rows 
+### and the first and last column of the  final data will be:
+
+# # A tibble: 5 × 2
+#   bikeshop.name      total_revenue
+#   <chr>                      <dbl>
+# 1 Albuquerque Cycles         92800
+# 2 Albuquerque Cycles          5320
+# 3 Albuquerque Cycles          8310
+# 4 Albuquerque Cycles         19170
+# 5 Albuquerque Cycles          1620
+
+### Remember that you will get 6 columns but I am only showing
+### 2 columns of the data
+```
+
+### Prepare data
+
+The objective of this part is to:
+
+-   Normalize the data so you can apply latter the **principal component analysis** dimensionality reduction technique
+
+-   Create a customer-product table with a column that includes all the bikeshops and the rest of the columns with information about the percentage of total revenue of the **97** models offered by the corporation and described in the variable `model`
+
+#### Normalization
+
+```{r}
+# Follow this template to normalize the data
+
+# bike_sales_total_revenue_pct <- bike_sales_total_revenue |> 
+#   group_by(bikeshop.name) |> 
+#   mutate(total_revenue_pct = total_revenue / sum(total_revenue)) |> 
+#   ungroup()
+
+## You can check the data using
+### bike_sales_total_revenue_pct |> glimpse()
+```
+
+#### Customer-product table
+
+In this part you are going to use the function `pivot_wider` to create the customer-product table. For more information checkout `?pivot_wider`
+
+Also check out the argument `values_fill` from this function and try this function with and without this argument so you can understand why it is important to use `values_fill = 0`
+
+```{r}
+# Follow this template to create a customer-product table
+
+# customer_product_table <- bike_sales_total_revenue_pct |> 
+#   select(bikeshop.name,
+#          model,
+#          total_revenue_pct) |> 
+#   pivot_wider(id_cols = bikeshop.name, 
+#               names_from = model, 
+#               values_from = total_revenue_pct, 
+#               values_fill = 0)
+
+## You can check the data using
+### bike_sales_total_revenue_pct |> glimpse()
+
+#### A particular cell of the data will correspond to 
+#### the percentage revenue generated by a model and a 
+#### bike shop
+#### For example if the row and the column corresponds to
+##### bikeshop.name = Albuquerque Cycles
+##### `Bad Habit 1` = 0.00571
+#### It will mean that this model has a participation 
+#### in the total revenue generated by Albuquerque 
+#### Cycles of 0.571 %
+```
+
+### Performing k-means clustering
+
+The objective of this section is to apply the k-means clustering technique by grouping the bike shops in **5** clusters
+
+-   If you want you can try with a different number of clusters but first it is important that you at least be able to complete the task with **5** clusters
+
+Use the `kmeans` function with the argument `centers = 5` and applying it to the customer product table
+
+-   Remember that `kmeans` only works with numerical data so you will need to drop the `bikeshop.name` from the customer product table
+
+    -   Checkout `?kmeans` and the argument `x` in relation to this aspect
+
+-   Once you have apply the k-means clustering technique save this object as `kmeans_object`
+
+#### Extracting the cluster assignment
+
+Now that you have apply the k-means clustering technique you are going to extract the clusters and assign them to each bike shop
+
+You are going to use the `glance` function from the `tidymodels` library to extract the cluster assignment and select the bike shop names and the clusters to obtain the information required by the marketing team
+
+```{r}
+# Follow this template to obtain the relevant information
+# required by the marketing team
+
+# clusters <- kmeans_object |> 
+#   augment(data = customer_product_table) |> 
+#   select(bikeshop.name, .cluster)
+
+## You can check the data using
+### clusters |> glimpse()
+### clusters |> count(.cluster)
+```
+
+### Data visualization with k-means clustering and principal component analysis
+
+It is difficult to visualize the clusters that are identified using `kmeans` taking into account that in our case we use **97** variables (the participation of the total revenue of the **97** models) and a human being can not visualize a plot 97 dimensional plot
+
+In this section you are going to reduce the data complexity by generating a 2 dimensional projection of the **97** variables by applying the principal component analysis technique
+
+Use the `prcomp` function with the argument `center = TRUE` and applying it to the customer product table
+
+-   Remember that `prcomp` only works with numerical data so you will need to drop the `bikeshop.name` from the customer product table
+
+    -   Checkout `?prcomp` and the argument `x` in relation to this aspect
+
+-   Also take into account that you don't need to scale the data using the argument `scale. = TRUE` because each data point from the customer product table corresponds to the participation of the total revenue of each model generated by each bike shop
+
+-   Once you have apply the principal component analysis technique save this object as `pca_object`
+
+#### Extracting the first 2 principal components
+
+In this section you are going to extract the first 2 principal components so you can use them to visualize the clusters in a 2 dimensional plot
+
+```{r}
+# Follow this template to obtain the first 2 
+# principal components
+
+# pca_1_2 <- pca_object$x |> 
+#   as_tibble() |> 
+#   select(PC1, PC2)
+
+## Name this object as pca_1_2 so you will remember
+## that it contains the first 2 principal components
+
+## You can check the data using
+### pca_1_2 |> glimpse()
+```
+
+#### Cluster visualization using k-means and principal component analysis
+
+Using the information about the cluster assignment and the 2 principal components consolidate these parts into a tibble to generate a plot and visualize the clusters using the 2 dimensional projection
+
+```{r}
+# Follow this template to visualize the fill clusters
+
+# clusters_pca_1_2 |> 
+#   ggplot() + 
+#   geom_point(aes(x = PC1, 
+#                  y = PC2,
+#                  color = .cluster))
+
+## Improve the plot by adding labels to the x, y axis 
+## and a title to explain the visualization to the
+## marketing team
+```
