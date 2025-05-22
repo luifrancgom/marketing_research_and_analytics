@@ -1,0 +1,30 @@
+---
+title: "Reducing Data Complexity"
+author: 
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    number-sections: true
+    code-fold: true
+editor: visual
+---
+
+```{r}
+#| label: libraries
+#| message: false
+
+
+```
+
+# Import 
+
+```{r}
+#| message: false
+
+
+```
+
