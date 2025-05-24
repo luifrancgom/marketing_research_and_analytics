@@ -4,6 +4,7 @@ library(sweep)
 library(skimr)
 library(DT)
 library(tidymodels)
+library(tidyheatmaps)
 
 # Import data ----
 bike_sales <- bike_sales
@@ -139,3 +140,75 @@ predict_prices_model2 <- predict(object = model2,
   arrange(desc(pred_price))
 
 predict_prices_model2
+
+# PCA & clustering ----
+## Revenue trends ----
+bike_sales |> 
+  count(bikeshop.name)
+
+bike_sales |> 
+  count(model,
+        category.primary,
+        category.secondary,
+        frame)
+
+bike_sales_total_revenue <- bike_sales |> 
+  group_by(bikeshop.name,
+           model,
+           category.primary,
+           category.secondary,
+           frame) |> 
+  summarise(total_revenue = sum(price.ext)) |> 
+  ungroup()
+
+bike_sales_total_revenue
+  
+## Prepare data ----
+### Normalization ----
+bike_sales_total_revenue_pct <- bike_sales_total_revenue |> 
+  group_by(bikeshop.name) |> 
+  mutate(total_revenue_pct = total_revenue / sum(total_revenue)) |> 
+  ungroup()
+
+bike_sales_total_revenue_pct
+
+### Customer-product table ----
+heat_map_revenue <- bike_sales_total_revenue_pct |> 
+  select(bikeshop.name, 
+         model, total_revenue_pct)
+
+heat_map_revenue |> 
+  tidyheatmap(rows = bikeshop.name,
+              columns = model, 
+              values = total_revenue_pct, 
+              border_color = "black",
+              cluster_rows = TRUE,
+              cluster_cols = TRUE,
+              clustering_method = "complete")
+
+customer_product_table <- bike_sales_total_revenue_pct |> 
+  select(bikeshop.name, 
+         model, total_revenue_pct) |> 
+  pivot_wider(id_cols = bikeshop.name, 
+              names_from = model, 
+              values_from = total_revenue_pct, 
+              values_fill = 0)
+
+customer_product_table
+
+### K-means clustering ----
+
+#### Extracting 2 principal components ----
+customer_product_table$`Bad Habit 1` |> 
+  mean()
+
+pca_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  prcomp(center = TRUE, 
+         scale. = FALSE)
+
+pc_1_2 <- pca_object$x |> 
+  as_tibble() |> 
+  select(PC1, PC2)
+
+pc_1_2
