@@ -148,7 +148,7 @@ segmentation_cluster2 <- segmentation |>
 
 segmentation_cluster2
 
-segmentation_cluster |> 
+segmentation_cluster2 |> 
   count(cluster)
 
 #### Clusters: 4 ----
@@ -162,7 +162,7 @@ segmentation_hc |>
               border = "red")
 
 segmentation_cluster4 <- segmentation |> 
-  mutate(cluster = segmentation_cluster4)
+  mutate(cluster = segmentation_hc_cluster4)
 
 segmentation_cluster4 |> 
   count(cluster)
