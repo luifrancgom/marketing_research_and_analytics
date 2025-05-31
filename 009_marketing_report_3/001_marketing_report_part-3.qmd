@@ -253,35 +253,30 @@ customer_product_table <- bike_sales_total_revenue_pct |>
 
 ### Performing k-means clustering
 
-The objective of this section is to apply the k-means clustering technique by grouping the bike shops in **5** clusters
+Pending
 
--   If you want you can try with a different number of clusters but first it is important that you at least be able to complete the task with **5** clusters
-
-Use the `kmeans` function with the argument `centers = 5` and applying it to the customer product table
-
--   Remember that `kmeans` only works with numerical data so you will need to drop the `bikeshop.name` from the customer product table
-
-    -   Checkout `?kmeans` and the argument `x` in relation to this aspect
-
--   Once you have apply the k-means clustering technique save this object as `kmeans_object`
+```{r}
+kmeans_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  kmeans(centers = 5, 
+         algorithm = "Hartigan-Wong")
+```
 
 #### Extracting the cluster assignment
 
-Now that you have apply the k-means clustering technique you are going to extract the clusters and assign them to each bike shop
-
-You are going to use the `glance` function from the `tidymodels` library to extract the cluster assignment and select the bike shop names and the clusters to obtain the information required by the marketing team
+Pending
 
 ```{r}
-# Follow this template to obtain the relevant information
-# required by the marketing team
+#| label: tbl-clusters
+#| tbl-cap: Bikeshop clusters
 
-# clusters <- kmeans_object |> 
-#   augment(data = customer_product_table) |> 
-#   select(bikeshop.name, .cluster)
+clusters <- kmeans_object |> 
+  augment(data = customer_product_table) |> 
+  select(bikeshop.name, .cluster)
 
-## You can check the data using
-### clusters |> glimpse()
-### clusters |> count(.cluster)
+clusters |> 
+  arrange(desc(.cluster)) |> 
+  datatable(colnames = c("Bikeshop", "Cluster"))
 ```
 
 ### Data visualization with k-means clustering and principal component analysis
@@ -305,18 +300,20 @@ pc_1_2 <- pca_object$x |>
 
 #### Cluster visualization using k-means and principal component analysis
 
-Using the information about the cluster assignment and the 2 principal components consolidate these parts into a tibble to generate a plot and visualize the clusters using the 2 dimensional projection
+Pending
 
 ```{r}
-# Follow this template to visualize the fill clusters
+#| label: fig-clusters-pc-1-2
+#| fig-cap: Bikeshop segmentation visualization using principal component analysis
 
-# clusters_pca_1_2 |> 
-#   ggplot() + 
-#   geom_point(aes(x = PC1, 
-#                  y = PC2,
-#                  color = .cluster))
+clusters_pc_1_2 <- clusters |> 
+  bind_cols(pc_1_2)
 
-## Improve the plot by adding labels to the x, y axis 
-## and a title to explain the visualization to the
-## marketing team
+clusters_pc_1_2 |> 
+  ggplot() +
+  geom_point(aes(x = PC1, y = PC2,
+                 color = .cluster)) +
+  labs(x = "Principal component 1",
+       y = "Principal component 2",
+       color = "Cluster")
 ```

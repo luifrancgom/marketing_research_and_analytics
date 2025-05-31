@@ -212,3 +212,39 @@ pc_1_2 <- pca_object$x |>
   select(PC1, PC2)
 
 pc_1_2
+
+# Kmeans ----
+kmeans_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  kmeans(centers = 5, 
+         algorithm = "Hartigan-Wong")
+
+kmeans_object$cluster
+
+customer_product_table |> 
+  select(bikeshop.name) |> 
+  mutate(cluster = kmeans_object$cluster)
+
+clusters <- kmeans_object |> 
+  augment(data = customer_product_table) |> 
+  select(bikeshop.name, .cluster)
+
+clusters |> 
+  arrange(desc(.cluster))
+
+# Cluster visualization ----
+pc_1_2
+
+clusters_pc_1_2 <- clusters |> 
+  bind_cols(pc_1_2)
+
+clusters_pc_1_2 |> 
+  ggplot() +
+  geom_point(aes(x = PC1, y = PC2,
+                 color = .cluster)) +
+  labs(x = "Principal component 1",
+       y = "Principal component 2",
+       color = "Cluster")
+  
+  
+

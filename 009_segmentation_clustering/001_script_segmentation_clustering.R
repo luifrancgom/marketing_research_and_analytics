@@ -167,6 +167,61 @@ segmentation_cluster4 <- segmentation |>
 segmentation_cluster4 |> 
   count(cluster)
 
+## K-means ----
+### Kaufamn example ----
+kaufman_example <- tibble(name = c("Ilan", "Jacqueline", "Kim", 
+                                   "Lieve", "Leon", "Peter", 
+                                   "Talia", "Tina"),
+                          weight_kg = c(15, 49, 13, 45, 
+                                        85, 66, 12, 10),
+                          height_cm = c(95, 156, 95, 160, 
+                                        178, 176, 90, 78))
+kaufman_example
+
+kaufman_example |> 
+  ggplot() + 
+  geom_point(aes(x = weight_kg,
+                 y = height_cm))
+
+kaufman_example_kmean <- kaufman_example |> 
+  select(-name) |> 
+  kmeans(centers = 2, 
+         algorithm = "Hartigan-Wong")
   
+kaufman_example_kmean$cluster
+
+kaufman_example_kmean_clusters <- kaufman_example |> 
+  mutate(cluster = kaufman_example_kmean$cluster)
+
+kaufman_example_kmean_clusters
+
+### Segmentation numeric ----
+segmentation_numeric <- segmentation |> 
+  mutate(across(.cols = c(gender,
+                          ownHome,
+                          subscribe), 
+                .fns = as.integer))
+
+segmentation_number_scale <- segmentation_numeric |> 
+  mutate(across(.cols = age:subscribe, 
+                .fns = scales::rescale))
   
+segmentation_number_scale
+
+#### Re-scale variables ----
+1:10
+scales::rescale(x = 1:10)
+
+segmentation_number_scale_kmeans <- segmentation_number_scale |> 
+  kmeans(centers = 4, 
+         algorithm = "Hartigan-Wong")
+
+segmentation_number_scale_kmeans$cluster
+
+segmentation_number_scale_clusters <- segmentation |> 
+  mutate(cluster = segmentation_number_scale_kmeans$cluster)
+  
+segmentation_number_scale_clusters  
+
+
   
