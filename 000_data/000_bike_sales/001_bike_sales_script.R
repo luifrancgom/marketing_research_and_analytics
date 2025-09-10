@@ -2,6 +2,10 @@
 library(tidyverse)
 library(sweep)
 
+# Exporting data base to csv ----
+bike_sales |> 
+  write_csv(file = "bike_sales.csv")
+
 # Exploring data base ----
 ?bike_sales
 glimpse(bike_sales)

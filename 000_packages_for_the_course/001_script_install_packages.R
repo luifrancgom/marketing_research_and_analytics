@@ -16,7 +16,6 @@ packages <- c(
               "lattice",
               ### Chapter 6 ----
               "binom",
-              "multcomp",
               ### Chapter 7 ----
               "coefplot",
               ### Chapter 8 ----
@@ -28,6 +27,11 @@ packages <- c(
               ### Modeling and machine learning ----
               "tidymodels",
               "corrr",
+              #### For using n_clusters
+              "easystats",
+              "NbClust",
+              "mclust",
+              "factoextra",
               ### Visualization ----
               "dotwhisker",
               "tidyheatmaps",

@@ -1,0 +1,307 @@
+---
+title: "Case study: Cannondale Bicycle Corporation"
+date: last-modified
+format: 
+  docx:
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    link-citations: true
+    link-bibliography: true
+    mermaid-format: png
+    reference-doc: custom-reference-doc.docx
+knitr: 
+  opts_chunk: 
+    echo: false
+    warning: false
+    message: false
+engine: knitr
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+---
+
+```{r}
+#| label: libraries
+
+library(tigris)
+library(tidyverse)
+library(janitor)
+library(sweep)
+library(ggrepel)
+library(flextable)
+library(officer)
+```
+
+
+# Introduction
+
+This case study is based on a business example from the course
+[Data Science for Business Part 1](https://university.business-science.io/p/ds4b-101-r-business-analysis-r/) offered by [Business
+Science](https://www.business-science.io/). It has been adapted to align with the topics discussed in @chapman_r_2019 and implemented using the [R programming language](https://www.r-project.org/). The analysis uses the `bike_sales` database included in the [`sweep`](https://business-science.github.io/sweep/)[^1] package.
+
+[^1]: See @dancho_sweep_2017 for more details about this package
+
+# Case study description
+
+The purpose of this case study is to use data from the [Cannondale Bicycle Corporation](https://en.wikipedia.org/wiki/Cannondale) to apply marketing research and analytics tools. The analysis incorporates the following topics from @chapman_r_2019:
+
+- **Basics of R**
+
+    - The R programming language (Chapter 1)
+    - Exploring the R language (Chapter 2)
+
+- **Fundamentals of Data Analysis**
+
+    - Describing data (Chapter 3)
+    - Relationships between continuous variables (Chapter 4)
+    - Comparing groups: tables and visualizations (Chapter 5)
+    - Comparing groups: statistical tests (Chapter 6)
+
+- **Modeling**
+
+    - Identifying drivers of outcomes: linear models (Chapter 7)
+    - Reducing data complexity (Chapter 8)
+    - Segmentation: clustering (Chapter 11)
+
+## Instructions {#sec-instructions}
+
+Students enrolled in the course will be divided into teams and assigned to work for the [Cannondale Bicycle Corporation](https://en.wikipedia.org/wiki/Cannondale), a company located in Wilton, Connecticut, United States, that supplies bicycle frames and related components to bike shops across the country.
+
+Each team will be responsible for completing the same two tasks:
+
+- Support the Research and Development (R & D) division by identifying potential new products and determining appropriate pricing based on data collected from bicycle shops.
+
+- Support the marketing team by developing a segmentation and clustering model using data collected from bicycle shops.
+
+### Business unit, product and distribution channel
+
+The business unit in this case study is the [Cannondale Bicycle Corporation](https://en.wikipedia.org/wiki/Cannondale), which acts as a manufacturer and supplies bicycle shops across the United States.
+
+The products analyzed are bicycle frames, made of either carbon or aluminum, designed for mountain or road use. These frames are further divided into $9$ specialized secondary categories (see @sec-products for more details).
+
+The distribution channel considered in this case study is the Business-to-Business (B2B) subchannel (manufacturer to retailer), rather than the Business-to-Customer (B2C) subchannel (retailer to customer) (see @fig-distribution-channel).
+
+```{mermaid}
+%%| label: fig-distribution-channel
+%%| fig-cap: Distribution channel
+
+flowchart LR
+    subgraph Manufacturer to Retailer
+    A("Cannondale Bicycle Corporation (Manufacturer)")-->B("Bikeshops (Retailers)")
+    end
+    B --> C("Customers")
+
+```
+
+### Bikeshops (Retailers)
+
+The clients of the [Cannondale Bicycle Corporation](https://en.wikipedia.org/wiki/Cannondale) are 30 bicycle shops located across 21 states and 30 cities in the United States (see @fig-bike-shops-location and @tbl-bicycle-shops).
+
+```{r}
+#| results: hide
+
+# Import
+## Data map
+map_usa_states <- states() |> 
+  as_tibble() |>
+  clean_names() |> 
+  select(stusps, name, geometry) |> 
+  filter(!(stusps %in% c("AK", "HI", 
+                         "VI", "MP", "GU", "AS",
+                         "PR")))
+
+# Data bikes
+bike_sales <- bike_sales
+
+# Tidy
+bike_shops <- bike_sales |> 
+  distinct(pick(bikeshop.name:longitude)) |> 
+  clean_names()
+
+# Merge
+bike_shops_map <- map_usa_states |> 
+  left_join(y = bike_shops,
+            by = join_by(stusps == bikeshop_state)) |> 
+  rename(bikeshop_state = stusps)
+```
+
+```{r}
+#| label: fig-bike-shops-location
+#| fig-cap: Bikeshops locations throughout the United States
+#| fig-width: 8
+#| fig-height: 5
+
+bike_shops_map |> 
+  ggplot() + 
+  geom_sf(aes(geometry = geometry)) + 
+  geom_label_repel(aes(x = longitude, y = latitude,
+                       label = bikeshop_city,
+                       box.padding = 0.5, 
+                       max.overlaps = Inf,
+                       min.segment.length = 0,
+                       seed = 1234)) + 
+  geom_point(aes(x = longitude, y = latitude),
+             shape = 21, color = "black", fill = "#E31A1C") +
+  theme_void()
+```
+
+```{r}
+#| label: tbl-bicycle-shops
+#| tbl-cap: Bicycle shops
+
+# Tidy
+bike_shops <- bike_sales |> 
+  distinct(bikeshop.name, bikeshop.city)
+
+# Table
+bike_shops_tbl <- flextable(bike_shops) |> 
+  set_header_labels(
+    bikeshop.name = "Bike shop",
+    bikeshop.city = "City"
+  ) |> 
+  border_outer(border = fp_border(width = 0.5, 
+                                  style = "solid", 
+                                  color = "black")) |> 
+  border_inner(border = fp_border(width = 0.5, 
+                                  style = "solid", 
+                                  color = "black")) |> 
+  width(j = c(1,2),
+        unit = "in",
+        width = 2) |> 
+  bold(j = c(1,2), 
+       bold = TRUE,
+       part = "header")
+
+bike_shops_tbl
+```
+
+The segmentation model, related to the first task described in @sec-instructions, focuses on bike shops and uses their orders as the basis for analysis. Each shop offers a range of bicycle frame models, and the objective is to identify distinct segments and shop characteristics by analyzing the patterns and behaviors in their orders placed with the manufacturer, the [Cannondale Bicycle Corporation](https://en.wikipedia.org/wiki/Cannondale).
+
+### Products (Bicycle frames) {#sec-products}
+
+The [Cannondale Bicycle Corporation](https://en.wikipedia.org/wiki/Cannondale) manufactures 97 different models, which are sold to bicycle shops and subsequently offered to final customers.
+
+Each model belongs to a primary category with $2$ possible values: Mountain or Road. In addition, each model is assigned to a secondary category that provides a more detailed description of the product (see @tbl-secondary-category).
+
+```{r}
+#| label: tbl-secondary-category
+#| tbl-cap: Secondary category labels
+
+# Tidy
+category_secondary <- bike_sales |> 
+  distinct(category.secondary)
+
+# Table
+category_secondary_tbl <- flextable(category_secondary) |> 
+  set_header_labels(
+    category.secondary = "Category secondary"
+  ) |> 
+  border_outer(border = fp_border(width = 0.5, 
+                                  style = "solid", 
+                                  color = "black")) |> 
+  border_inner(border = fp_border(width = 0.5, 
+                                  style = "solid", 
+                                  color = "black")) |> 
+  width(j = 1,
+        unit = "in",
+        width = 2) |> 
+  bold(j = 1, 
+       bold = TRUE,
+       part = "header")
+               
+category_secondary_tbl
+```
+
+Considering the $2$ values of the frame material and the $9$ values of the secondary category, there are $2 \times 9 = 18$ possible combinations. However, not all these combinations are currently produced by the [Cannondale Bicycle Corporation](https://en.wikipedia.org/wiki/Cannondale). To address the first task described in @sec-instructions, the [product gap](https://en.wikipedia.org/wiki/Gap_analysis) must be identified in order to detect potential new products and determine their pricing using a statistical model.
+
+### Data {#sec-data}
+
+To carry out the $2$ tasks described in @sec-instructions, a transaction database is used. This database is built from invoice information and organized within a [Customer Management Relational System](https://en.wikipedia.org/wiki/Consumer_relationship_system) owned by the [Cannondale Bicycle Corporation](https://en.wikipedia.org/wiki/Cannondale).
+
+In @fig-invoice-example-transaction, an example invoice is shown representing the first 2 rows in the `bike_sales` data set (See @sec-consolidated-data). The order ID (*identity document*) is $1$, the transaction date is $2011$-$01$-$07$, and the bike shop is *Ithaca Mountain Climbers* located in Ithaca, New York (NY). The transaction includes $2$ order lines corresponding to $2$ products:
+
+- Jekyll Carbon 2 – Over Mountain (Carbon)
+- Trigger Carbon 2 – Over Mountain (Carbon)
+
+In the first order line, one bicycle frame is sold at a unit price of $6{,}070$ US dollars. In the second order line, one bicycle frame is sold at a unit price of $5{,}970$ US dollars. The total value of the invoice is therefore $12{,}040$ US dollars.
+
+![Invoice example representing a transaction](001_example_invoice_transaction.png){#fig-invoice-example-transaction fig-align="center"}
+
+The `bike_sales` database, available in the [`sweep`](https://business-science.github.io/sweep/) package, contains $15{,}644$ transactions and $2{,}000$ invoices. In @fig-database-erd, an Entity–Relationship Diagram[^2] provides a representation of the database structure.
+
+[^2]: See @abba_crows_2022
+
+![Database Entity Relationship Diagram (ERD)](001_database_er_diagram_foot_crow_notation.png){#fig-database-erd fig-align="center"}
+
+The database can be explored in two ways:
+
+- As separate tables, as represented in @fig-database-erd.
+
+- As a single consolidated table, accessible through the [`sweep`](https://business-science.github.io/sweep/) package as `bike_sales`.  
+
+In addition, @sec-annexes provides a set of files that allow the data to be accessed in [CSV (comma-separated values)](https://en.wikipedia.org/wiki/Comma-separated_values) format.
+
+#### Variable dictionary
+
+To understand the database as provided in the [`sweep`](https://business-science.github.io/sweep/) package (`bike_sales`) and represented in @fig-database-erd, the entities can be described as follows:
+
+- **Product**
+
+    - Product Id (`product.id`): unique product identification number 
+    - Model: model name of the bicycle
+    - Category primary (`category.primary`): main bicycle category (Mountain, Road)
+    - Category secondary (`category.secondary`): more specific bicycle category (9 categories)
+    - Frame (`frame`): bicycle frame material (Carbon, Aluminum)
+
+- **Retailer**
+
+    - Bike shop Id (`customer.id`): unique bike shop identification number
+    - Bike shop name (`bikeshop.name`): the client name
+    - Bike shop state (`bikeshop.state`): state that the bike shop is located
+    - Bike shop city (`bikeshop.city`): city that the bike shop is located
+    - Latitude (`latitude`): geographic latitude of the bike shop location
+    - Longitude (`longitude`): geographic longitude of the bike shop location
+
+- **Closed order**
+
+    - Order Id (`order.id`): unique order identification number
+    - Order date (`order.date`): date the order was placed
+    - Order line (`order.line`): sequential identification number for products on an order
+    - Quantity (`quantity`): number of units purchased by the retailer 
+    - Price (`price`): unit price of the bicycle
+    - Bike shop Id (`customer.id`): unique bike shop identification number 
+    - Product Id (`product.id`): unique product identification number
+    
+In the consolidated dataset, an additional variable `price.ext` is included, which corresponds to $Price \times Quantity$ (`price * quantity`) and serves as a helper for calculating revenue per order line.
+
+# Classroom project
+
+The project developed throughout the course is carried out in $3$ stages over $9$ weeks. Teams generate marketing reports in [HTML format](https://quarto.org/docs/output-formats/html-basics.html) using the open-source scientific and technical publishing system [Quarto](https://quarto.org/) and primarily the [Tidyverse](https://www.tidyverse.org/) ecosystem[^3]:
+
+[^3]: See @wickham_welcome_2019-1 for more details about this set of packages
+
+- **Stage 1:** Each team learns to use the [R programming language](https://www.r-project.org/) by exploring the database described in @sec-data. This involves calculating summary statistics, visualizing variables, and answering questions with data.
+
+- **Stage 2:** Each team examines relationships between continuous variables, computes descriptive statistics by group, and applies statistical tests.
+
+- **Stage 3:** Each team identifies the [product gap](https://en.wikipedia.org/wiki/Gap_analysis), estimates the price of a new product based on this gap using a linear model, and segments the bike shops with a k-means clustering algorithm.  
+
+# Annexes {#sec-annexes}
+
+This section provides the files related to the data used in the case study.
+
+## Identity tables
+
+The following files contain the data described in @sec-data and illustrated in @fig-database-erd:
+
+- **Product**: `products.csv`
+- **Closed Order**: `closed_orders.csv`
+- **Retailer**: `customers.csv`
+
+## Consolidated data {#sec-consolidated-data}
+
+The following file contains the consolidated dataset, which can also be accessed through [`sweep`](https://business-science.github.io/sweep/) package as `bike_sales`:
+
+- **Bike sales**: `bike_sales.csv`
+
+# References

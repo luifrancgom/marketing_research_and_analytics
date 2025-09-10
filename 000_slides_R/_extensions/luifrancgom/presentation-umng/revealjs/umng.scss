@@ -1,0 +1,92 @@
+/*-- scss:defaults --*/
+
+// colors
+
+/// institutional
+$pantone-294c: #043074;
+$pantone-7406c: #fdc600;
+
+/// complementary
+$green-dark: #0d5e30;
+$red-bright: #ee2a24;
+$black: #000000;
+$white: #ffffff;
+
+/// secondary (areas)
+$ciencias-basicas-aplicadas: #000080;
+$derecho: #d72d29;
+$ciencias-economicas: #fc6700;
+$educacion-humanidades: #00b3f0;
+$ingenieria: #6e3c1a;
+$relaciones-internacionales-estrategia-seguridad: #f8941c;
+$medicina-ciencias-de-la-salud: #ffd400;
+
+/// quarto
+$body-bg: $white !default;
+$body-color: $pantone-294c !default;
+$text-muted: lighten($body-color, 10%) !default;
+$link-color: $green-dark !default;
+$link-color-hover: lighten($link-color, 15%) !default;
+$selection-bg: lighten($link-color, 25%) !default;
+$selection-color: $body-bg !default;
+
+// headings
+$presentation-h1-font-size: 2.0em !default;
+
+// code blocks
+$code-block-border-color: lighten($body-color, 10%) !default;
+
+// layout
+$presentation-title-slide-text-align: left !default;
+
+// callouts
+$callout-color-note: $educacion-humanidades !default; 
+$callout-color-tip: $green-dark !default; 
+$callout-color-caution: $ciencias-economicas !default;
+$callout-color-warning: $medicina-ciencias-de-la-salud !default;
+$callout-color-important: $red-bright !default;
+
+/*-- scss:rules --*/
+
+// title slide
+#title-slide-layout {
+  display: flex;
+  width: 100%;
+}
+
+#title-slide-text {
+  flex: 9;
+}
+
+#vertical-strip {
+  background-color: $pantone-294c;
+  box-sizing: border-box;
+  border-right: 0.4em solid $pantone-7406c;
+  justify-content: center;
+  flex: 1;
+  height: 100vh;
+}
+
+// footer
+.reveal div.footer {
+    background-color: $pantone-294c;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3.1em;
+    border-top: 0.4em solid $pantone-7406c;
+    color: $white;
+    text-align: center;
+    line-height: 50px;
+    z-index: 2;
+}
+
+// logo
+.reveal img.slide-logo {
+    z-index: 3;
+}
