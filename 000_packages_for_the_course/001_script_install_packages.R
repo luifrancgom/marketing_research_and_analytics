@@ -28,7 +28,7 @@ packages <- c(
               "tidymodels",
               "corrr",
               #### For using n_clusters
-              "easystats",
+              "easystats", # for checking linear model assumptions
               "NbClust",
               "mclust",
               "factoextra",
