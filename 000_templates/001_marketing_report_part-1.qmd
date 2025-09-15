@@ -10,7 +10,7 @@ format:
     code-fold: true
     number-sections: true
     embed-resources: true
-editor: visual
+editor: source
 ---
 
 ```{r }
@@ -33,13 +33,15 @@ library(sweep)
 
 # Describing data
 
+Please clean all the instructions in the different sections including this text and add the necessary text to present the report.  
+
 ## Introduction
 
 Once your group has finish filling all the sections, add some text here describing the principal findings. Be straightforward and concise taking into account that it is an executive report.
 
 ## Import data
 
-Add some text if your group consider to be necessary.
+Add some text related to importing the data.
 
 ```{r}
 # Import the data from the sweep package
@@ -47,6 +49,8 @@ bike_sales <- bike_sales
 ```
 
 ## Inspect data
+
+Add some text related to inspecting the data.
 
 Use the available functions from base R or the `tidyverse` to inspect the data
 
