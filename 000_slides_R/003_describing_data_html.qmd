@@ -1,0 +1,519 @@
+---
+title: Describing Data
+subtitle: Session 1
+author:
+  - name: 
+      given: Luis F.
+      family: Gómez L.
+    orcid: 0000-0002-2877-9015
+    email: luis.gomezl@unimilitar.edu.co
+    affiliations:
+      - name: Distance Learning Faculty
+toc: true
+toc-depth: 1
+slide-level: 2
+format:
+  presentation-umng-revealjs:
+    logo-vertical-strip: ../000_logos/logo-white-vertical.png 
+    embed-resources: true
+    mermaid-format: png
+    reference-location: document
+date: last-modified
+date-format: "D MMMM, YYYY"
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig.align: center
+    out.width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+csl: ../000_references/apa-7.csl
+editor: source
+---
+
+```{r}
+#| label: libraries
+#| echo: false
+
+library(tidyverse)
+library(skimr)
+```
+
+```{r}
+#| label: palette
+#| echo: false
+
+umng_palette <- c(
+  "#043074",
+  "#fdc600",
+  "#0d5e30",
+  "#ee2a24",
+  "#fc6700",
+  "#00b3f0",
+  "#6e3c1a",
+  "#f8941c",
+  "#8e44ad",
+  "#2c3e50",
+  "#16a085",
+  "#c0392b",
+  "#e91e63"
+)
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on [@chapman_r_2019, Chapter 3]
+
+## 
+
+- **Purpose**
+
+    - Utilize descriptive statistics and single variable visualization techniques for summarizing and exploring a data set
+    
+# Weekly store data
+
+## {.smaller}
+
+-   **storeNum**: store identifier
+-   **Year**: year identifier
+-   **Week**: week as it would appear in the ISO 8601 system (1-52)
+-   **p1sales**: units sold of product 1
+-   **p2sales**: units sold of product 2
+-   **p1price**: price of product 1
+-   **p2price**: price of product 2
+-   **p1prom**: whether product 1 was promoted (1) or not (0)
+-   **p2prom**: whether product 2 was promoted (1) or not (0)
+-   **country**: two-letter country codes defined in ISO 3166-1
+
+##
+
+-   **Import data**
+
+```{r}
+weekly_store <- read_csv(file = "http://goo.gl/QPDdMl")
+weekly_store |> head(n=5)
+```
+
+##
+
+-   **Transform data**
+
+```{r}
+weekly_store <- weekly_store |>
+  mutate(storeNum = factor(storeNum, ordered = FALSE),
+         Year = factor(Year, levels = 1:2, ordered = TRUE),
+         Week = factor(Week, levels = 1:52, ordered = TRUE),
+         p1prom = as.logical(p1prom),
+         p2prom = as.logical(p2prom))
+weekly_store |> head(n=5)
+```
+
+##
+
+-   **Inspect data: the base R way**
+
+```{r}
+as.data.frame(weekly_store) |> str()
+```
+
+##
+
+-   **Inspect data: the tidyverse way**
+
+```{r}
+weekly_store |> glimpse()
+```
+
+##
+
+-   **Summarize data: the R base way**
+
+```{r}
+weekly_store |> summary()
+```
+
+##
+
+-   **Summarize data: the skimr way**
+
+    -   Ups the table is really big!!! Try it in your console to see the complete table
+
+```{r}
+#| eval: false
+weekly_store |> skim()
+```
+
+##
+
+-   **Count data: the R base way**
+
+```{r}
+table(weekly_store$p1price)
+```
+
+-   **Count data: the tidyverse way**
+
+```{r}
+weekly_store |> count(p1price)
+```
+
+##
+
+-   **Data visualization**
+
+![Analogy of data visualization as painting step by step (Watercolor portrait - Step by Step by Hector Trunnec (Valencia, Spain) 2015-03-03)](../000_images/004_visualization_step_by_step.jpg){.nostretch #fig-r-visualization-step-by-step width=70% fig-align="center"}
+
+##
+
+-   **Histograms: the base R way**
+
+```{r}
+#| fig-height: 4
+weekly_store$p1sales |> hist()
+```
+
+##
+
+-   **Histograms: the base R way**
+
+```{r}
+#| fig-height: 4
+weekly_store$p1sales |> hist(main = "Product 1 Weekly Sales Frequencies, All Stores",
+                             xlab = "Product1 Sales (Units)",
+                             ylab = "Count")
+```
+
+##
+
+-   **Histograms: the base R way**
+
+```{r}
+#| fig-height: 3.5
+weekly_store$p1sales |> hist(main = "Product 1 Weekly Sales Frequencies, All Stores",
+                             xlab = "Product1 Sales (Units)" ,
+                             ylab = "Count", 
+                             breaks = 30, 
+                             col =  "lightblue")
+```
+
+##
+
+-   **Histograms: the base R way**
+
+```{r}
+#| fig-height: 3.5
+
+weekly_store$p1sales |> hist(main = "Product 1 Weekly Sales Frequencies, All Stores",
+                             xlab = "Product1 Sales (Units)" ,
+                             ylab = "Frequency", 
+                             breaks = 30, 
+                             col =  "lightblue", 
+                             freq = FALSE,
+                             xaxt = "n")
+```
+
+## {.smaller}
+
+-   **Histograms: the base R way**
+
+```{r}
+weekly_store$p1sales |> hist(main = "Product 1 Weekly Sales Frequencies, All Stores",
+                             xlab = "Product1 Sales (Units)" ,
+                             ylab = "Frequency", 
+                             breaks = 30, 
+                             col =  "lightblue", 
+                             freq = FALSE,
+                             xaxt = "n")
+axis(side=1 , at=seq(from = 60, to = 300, by = 20))
+```
+
+## {.smaller}
+
+-   **Histograms: the base R way**
+
+```{r}
+weekly_store$p1sales |> hist(main = "Product 1 Weekly Sales Frequencies, All Stores",
+                             xlab = "Product1 Sales (Units)" ,
+                             ylab = "Frequency", 
+                             breaks = 30, 
+                             col =  "lightblue", 
+                             freq = FALSE,
+                             xaxt = "n")
+axis(side=1 , at=seq(from = 60, to = 300, by = 20))
+lines(x = density(weekly_store$p1sales, bw=10), type="l", col="darkred", lwd=2)
+```
+
+##
+
+-   **Histograms: the tidyverse way**
+
+```{r}
+#| fig-height: 4
+
+weekly_store |> ggplot()
+```
+
+##
+
+-   **Histograms: the tidyverse way**
+
+```{r}
+#| fig-height: 4
+
+weekly_store |> ggplot() + 
+  geom_histogram(aes(x = p1sales, y = after_stat(density)),
+                 color = "black", fill = "lightblue", bins = 30)
+```
+
+##
+
+-   **Histograms: the tidyverse way**
+
+```{r}
+weekly_store |> ggplot() + 
+  geom_histogram(aes(x = p1sales, y = after_stat(density)),
+                 color = "black", fill = "lightblue", bins = 30) +
+  geom_density(aes(x=p1sales),
+               bw=10, color="darkred",
+               linetype = "solid", linewidth = 1)
+```
+
+##
+
+-   **Histograms: the tidyverse way**
+
+```{r}
+weekly_store |> ggplot() + 
+  geom_histogram(aes(x=p1sales, y = after_stat(density)),
+                 color = "black", fill = "lightblue", bins = 30) +
+  geom_density(aes(x=p1sales),
+               bw=10, color="darkred", linetype="solid", linewidth=1) + 
+  scale_x_continuous(breaks = seq(from = 60, to = 300, by = 20))
+```
+
+## {.smaller}
+
+-   **Histograms: the tidyverse way**
+
+```{r}
+weekly_store |> ggplot() + 
+  geom_histogram(aes(x = p1sales, y = after_stat(density)),
+                 color = "black", fill = "lightblue", bins = 30) +
+  geom_density(aes(x = p1sales),
+               bw = 10, color = "darkred", linetype = "solid", linewidth = 1) + 
+  scale_x_continuous(breaks = seq(from = 60, to = 300, by = 20)) +
+  labs(x = "Product1 Sales (Units)", y = "Frequency", 
+       title = "Product 1 Weekly Sales Frequencies, All Stores")
+```
+
+## {.smaller}
+
+-   **Boxplots: the base R way**
+
+    -   Boxplot product 2 sales by promotion
+
+```{r}
+boxplot(weekly_store$p2sales ~ weekly_store$p2prom,
+        main = "Weekly sales of P2 with and without promotion",
+        xlab = "Weekly unit sales", ylab = "P2 promoted in store?",
+        horizontal = TRUE, las = 1)
+```
+
+## {.smaller}
+
+-   **Boxplots: the base R way**
+
+    -   Boxplot product 2 sales by promotion
+
+```{r}
+boxplot(weekly_store$p2sales ~ weekly_store$p2prom,
+        main = "Weekly sales of P2 with and without promotion",
+        xlab = "Weekly unit sales", ylab = "P2 promoted in store?",
+        horizontal = TRUE, las = 1, yaxt = "n")
+axis(side = 2, at = c(1,2), labels = c("No", "Yes"))
+```
+
+##
+
+-   **Boxplots: the tidyverse way**
+
+    -   Boxplot product 2 sales by promotion
+
+```{r}
+#| fig-height: 4
+
+weekly_store |> ggplot()
+```
+
+## {.smaller} 
+
+-   **Boxplots: the tidyverse way**
+
+    -   Boxplot product 2 sales by promotion
+
+```{r}
+#| fig-height: 4
+weekly_store |> ggplot() + 
+  geom_boxplot(aes(x = p2sales, y = p2prom))
+```
+
+##
+
+-   **Boxplots: the tidyverse way**
+
+    -   Boxplot product 2 sales by promotion
+
+```{r}
+#| fig-height: 3.5
+
+weekly_store |> ggplot() + 
+  geom_boxplot(aes(x = p2sales, y = p2prom)) + 
+  scale_y_discrete(labels = c("No", "Yes"))
+```
+
+## {.smaller}
+
+-   **Boxplots: the tidyverse way**
+
+    -   Boxplot product 2 sales by promotion
+
+```{r}
+#| fig-height: 3.5
+
+weekly_store |> ggplot() + 
+  geom_boxplot(aes(x = p2sales, y = p2prom)) + 
+  scale_y_discrete(labels = c("No", "Yes")) +
+  labs(x = "Weekly unit sales", y = "P2 promoted in store?", 
+       title = "Weekly sales of P2 with and without promotion")
+```
+
+# Questions and answers with data
+
+## {.smaller}
+
+-   **In what countries the company sell more units of product 2?**
+
+    -   Preparing the data
+
+```{r}
+weekly_store_sales_by_country <- weekly_store |> 
+  group_by(country)
+weekly_store_sales_by_country
+```
+
+##
+
+-   **In what countries the company sell more units of product 2?**
+
+    -   Preparing the data
+
+```{r}
+weekly_store_sales_by_country <- weekly_store |> 
+  group_by(country) |>
+  summarise(sum_p2sales = sum(p2sales))
+weekly_store_sales_by_country
+```
+
+## {.smaller}
+
+-   **In what countries the company sell more units of product 2?**
+
+    -   Preparing the data
+
+```{r}
+weekly_store_sales_by_country <- weekly_store |> 
+  group_by(country) |>
+  summarise(sum_p2sales = sum(p2sales)) |>
+  mutate(country = fct_reorder(.f = country, .x = sum_p2sales))
+weekly_store_sales_by_country
+```
+
+## {.smaller}
+
+-   **In what countries the company sell more units of product 2?**
+
+    -   Visualizing data
+
+```{r}
+#| fig-height: 4
+
+weekly_store_sales_by_country |> ggplot()
+```
+
+## {.smaller}
+
+-   **In what countries the company sell more units of product 2?**
+
+    -   Visualizing data
+
+```{r}
+#| fig-height: 4
+
+weekly_store_sales_by_country |> ggplot() + 
+  geom_col(aes(x = country, y = sum_p2sales))
+```
+
+## {.smaller}
+
+-   **In what countries the company sell more units of product 2?**
+
+    -   Visualizing data
+    
+```{r}
+#| fig-height: 4
+
+weekly_store_sales_by_country |> ggplot() + 
+  geom_col(aes(x = country, y = sum_p2sales, fill = country),
+           color = "black", show.legend = FALSE)
+```
+
+## {.smaller}
+
+-   **In what countries the company sell more units of product 2?**
+
+    -   Visualizing data
+
+```{r}
+#| fig-height: 4
+
+weekly_store_sales_by_country |> ggplot() + 
+  geom_col(aes(x = country, y = sum_p2sales, fill = country),
+           color = "black", show.legend = FALSE) +
+  scale_x_discrete(labels = c("Australia", "Japan", "Brazil", 
+                              "Britain", "Germany", "China", "United States"))
+```
+
+## {.smaller}
+
+-   **In what countries the company sell more units of product 2?**
+
+    -   Visualizing data
+
+```{r}
+#| fig-height: 3.5
+
+weekly_store_sales_by_country |> ggplot() + 
+  geom_col(aes(x = country, y = sum_p2sales, fill = country),
+           color = "black", show.legend = FALSE) +
+  scale_x_discrete(labels = c("Australia", "Japan", "Brazil", 
+                              "Britain", "Germany", "China", "United States")) +
+  labs(x = NULL, y = "Sales (Units)",
+       title = "Sales in units per country")
+```
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**skimr**](https://CRAN.R-project.org/package=skimr) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+# References {.allowframebreaks}
