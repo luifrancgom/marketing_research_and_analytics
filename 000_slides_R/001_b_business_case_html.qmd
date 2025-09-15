@@ -1,0 +1,372 @@
+---
+title: Business Case
+subtitle: Session 1
+author:
+  - name: 
+      given: Luis F.
+      family: Gómez L.
+    orcid: 0000-0002-2877-9015
+    email: luis.gomezl@unimilitar.edu.co
+    affiliations:
+      - name: Distance Learning Faculty
+toc: true
+toc-depth: 1
+slide-level: 2
+format:
+  presentation-umng-revealjs:
+    logo-vertical-strip: ../000_logos/logo-white-vertical.png 
+    embed-resources: true
+    mermaid-format: png
+    reference-location: document
+date: last-modified
+date-format: "D MMMM, YYYY"
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig.align: center
+    out.width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+csl: ../000_references/apa-7.csl
+editor: source
+---
+
+```{r}
+#| label: libraries
+#| echo: false
+
+library(tidyverse)
+library(tigris)
+library(janitor)
+library(ggrepel)
+library(sweep)
+library(gt)
+```
+
+```{r}
+#| label: palette
+#| echo: false
+
+umng_palette <- c(
+  "#043074",
+  "#fdc600",
+  "#0d5e30",
+  "#ee2a24",
+  "#fc6700",
+  "#00b3f0",
+  "#6e3c1a",
+  "#f8941c",
+  "#8e44ad",
+  "#2c3e50",
+  "#16a085",
+  "#c0392b",
+  "#e91e63"
+)
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on a business case taken from the course [Data Science for Business Part 1](https://university.business-science.io/p/ds4b-101-r-business-analysis-r) offered by the company [Business Science](https://www.business-science.io/) and adapted to be in line with the topics covered in [@chapman_r_2019]
+
+## 
+
+- **Purpose**
+
+    - Deliver essential knowledge within a minimal timeframe by employing hands-on learning techniques to enhance productivity in the R programming language
+    
+# Business Case
+
+## {.smaller}
+
+-   You and your team will work for a corporation located in Wilton, Connecticut, United States that supplies bicycle frames and other components related to bicycles to different bicycle shops through the United States.
+
+-   Your team is assigned to complete 2 tasks:
+
+    -   Support the Research and Development (R & D) division in identifying potential new products and pricing them by using data collected from the bicycle shops.
+
+    -   Support the marketing team in the creation of a marketing segmentation clustering model by using data collected from to the bicycle shops to offer more personalized products and messaging them.
+    
+## {.smaller}
+
+-   Business unit: Cannondale Bicycle Corporation (Manufacturer)
+    
+    -   Location: USA
+    -   Product: Bicycle frames
+    -   Retailers: Bikeshops located through USA
+    
+        -   We are not going to analyze the business-to-customer (B2C) subchannel (Retailer to Customer) where the focus will be on the business-to-business (B2B) subchannel (Manufacturer to Retailer)
+        
+```{mermaid}
+%%| label: fig-distribution-channel
+%%| fig-cap: Distribution channel
+
+flowchart LR
+    subgraph S1["Manufacturer to Retailer"]
+    A("Cannondale Bicycle Corporation (Manufacturer)")-->B("Bikeshops (Retailers)")
+    end
+    B --> C("Customers")
+
+    classDef UmngNode fill:#fdc600,stroke:#043074,stroke-width:2px;
+    class A,B,C UmngNode;
+    
+    style S1 fill:#16a085,stroke:#043074,stroke-width:2px
+```
+
+##
+
+```{r}
+#| echo: false
+#| include: false
+
+map_usa_states <- states() |> 
+  as_tibble() |>
+  clean_names() |> 
+  select(stusps, name, geometry) |> 
+  filter(!(stusps %in% c("AK", "HI", 
+                         "VI", "MP", "GU", "AS",
+                         "PR")))
+
+bike_sales <- bike_sales
+
+bike_shops <- bike_sales |> 
+  distinct(pick(bikeshop.name:longitude)) |> 
+  clean_names()
+
+bike_shops_map <- map_usa_states |> 
+  left_join(y = bike_shops,
+            by = join_by(stusps == bikeshop_state)) |> 
+  rename(bikeshop_state = stusps)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| label: fig-bike-shops-locations
+#| fig-cap: Bike shops locations
+
+bike_shops_map |> 
+  ggplot() + 
+  geom_sf(aes(geometry = geometry)) + 
+  geom_label_repel(aes(x = longitude, y = latitude,
+                       label = bikeshop_city,
+                       box.padding = 0.5, 
+                       max.overlaps = Inf,
+                       min.segment.length = 0,
+                       seed = 1234)) + 
+  geom_point(aes(x = longitude, y = latitude),
+             shape = 21, color = "black", fill = "#E31A1C") +
+  theme_void()
+```
+
+##
+
+![Invoice example representing a transaction](../000_images/001_example_invoice_transaction.png){.nostretch width=50% #fig-invoice-example-transaction fig-align="center"}
+
+##
+
+-   Entities
+
+    -   **Product**
+    
+        -   Product Id: unique product identification number
+        -   Model: model name of the bicycle
+        -   Category primary: main bicycle category (Mountain, Road)
+        -   Category secondary: More specific bicycle category (9 categories)
+        -   Frame: bicycle frame material (Carbon, Aluminum) 
+
+##
+
+-   Entities
+
+    -   **Retailer**
+    
+        -   Bike shop Id: unique bike shop identification number
+        -   Bike shop name
+        -   Bike shop state: state that the bike shop is located
+        -   Bike shop city: city that the bike shop is located
+        -   Latitude: geograhpic latitude of the bike shop location
+        -   Longitude: geograhpic longitude of the bike shop location
+        
+## {.smaller}
+
+-   Entities
+
+    -   **Closed order**
+    
+        -   Order Id: unique order identification number
+        -   Order date: date the order was placed
+        -   Order line: sequential identification number for products on an order
+        -   Quantity: number of units purchased by the retailer
+        -   Price: unit price of the bicycle
+        -   Bike shop Id: unique bike shop identification number
+        -   Product Id: unique product identification number
+
+##
+
+![Database Entity Relationship Diagram (ERD)[^1]](../000_images/001_database_er_diagram_foot_crow_notation.png){.nostretch width=80% #fig-etd fig-align="center"}
+
+[^1]: See [@abba_crows_2022] 
+
+## {.smaller}
+
+-   Understand the business data
+
+```{r}
+#| eval: false
+library(tidyverse) # Remember to load the tidyverse library
+library(sweep) # Remember to load the sweep library
+```
+
+```{r}
+bike_sales |> head(n = 8)
+```
+
+-   Only works in RStudio IDE
+
+```{r}
+#| eval: false
+bike_sales |> View()
+```
+
+##
+
+-   Products
+
+    -   97 bicycle models
+
+```{r}
+#| echo: false
+#| label: tbl-products-first
+#| tbl-cap: First 5 products
+
+bike_sales_products <- bike_sales |>
+  distinct(pick(product.id:frame))
+
+bike_sales_products |> 
+  slice_head(n = 5) |>
+  gt() |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |>
+  cols_label(
+    product.id         = "Product Id",
+    model              = "Model",
+    category.primary   = "Category primary",
+    category.secondary = "Frame" 
+  ) |> 
+  tab_options(
+    row.striping.include_table_body = TRUE,
+    table.border.top.width = px(3),
+    table.border.top.color = "black",
+    column_labels.border.bottom.width = px(2),
+    column_labels.border.bottom.color = "black",
+    table.border.bottom.width = px(3),
+    table.border.bottom.color = "black",
+    table.font.size = px(20)
+  )
+```
+
+##
+
+-   Retailers
+
+    -   30 bike shops
+
+```{r}
+#| echo: false
+#| label: tbl-retailers-first
+#| tbl-cap: First 5 retailers
+
+bike_sales_retailers <- bike_sales |>
+  distinct(pick(customer.id:longitude))
+
+bike_sales_retailers |> 
+  slice_head(n = 5) |>
+  gt() |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |>
+  cols_label(
+    customer.id    = "Retailer Id",
+    bikeshop.name  = "Bike shop name",
+    bikeshop.city  = "City",
+    bikeshop.state = "State",
+    latitude       = "Latitude",
+    longitude      = "Longitude"
+  ) |> 
+  tab_options(
+    row.striping.include_table_body = TRUE,
+    table.border.top.width = px(3),
+    table.border.top.color = "black",
+    column_labels.border.bottom.width = px(2),
+    column_labels.border.bottom.color = "black",
+    table.border.bottom.width = px(3),
+    table.border.bottom.color = "black",
+    table.font.size = px(20)
+  )
+```
+
+## {.smaller}
+
+-   Closed orders
+
+    -   2000 orders
+    
+```{r}
+#| echo: false
+#| label: tbl-transactions-first
+#| tbl-cap: First 5 orders
+
+bike_sales_orders <- bike_sales |> 
+  select(order.date:price,
+         customer.id, product.id)
+
+bike_sales_orders |> 
+  slice_head(n = 14) |>
+  gt() |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |>
+  cols_label(
+    order.date  = "Order date",
+    order.id    = "Order Id",
+    order.line  = "Order line",
+    quantity    = "Quantity",
+    price       = "Price",
+    customer.id = "Retailer Id",
+    product.id  = "Product Id" 
+  ) |> 
+  tab_options(
+    row.striping.include_table_body = TRUE,
+    table.border.top.width = px(3),
+    table.border.top.color = "black",
+    column_labels.border.bottom.width = px(2),
+    column_labels.border.bottom.color = "black",
+    table.border.bottom.width = px(3),
+    table.border.bottom.color = "black",
+    table.font.size = px(14), 
+    data_row.padding =px(5) 
+  )
+```
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**tigris**](https://CRAN.R-project.org/package=tigris), [**janitor**](https://CRAN.R-project.org/package=janitor),
+[**ggrepel**](https://CRAN.R-project.org/package=ggrepel),
+[**sweep**](https://CRAN.R-project.org/package=sweep), [**gt**](https://CRAN.R-project.org/package=gt) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+# References {.allowframebreaks}
