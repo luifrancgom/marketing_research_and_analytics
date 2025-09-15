@@ -33,7 +33,7 @@ library(sweep)
 
 # Describing data
 
-Please clean all the instructions in the different sections including this text and add the necessary text to present the report.  
+**Please clean all the instructions** in the different sections of the template including this text and add the necessary text to present the report.  
 
 ## Introduction
 
