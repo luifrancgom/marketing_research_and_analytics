@@ -90,7 +90,6 @@ flowchart LR
     A("Cannondale Bicycle Corporation (Manufacturer)")-->B("Bikeshops (Retailers)")
     end
     B --> C("Customers")
-
 ```
 
 ### Bikeshops (Retailers)
