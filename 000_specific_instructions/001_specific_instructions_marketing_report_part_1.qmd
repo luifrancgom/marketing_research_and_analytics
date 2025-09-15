@@ -10,7 +10,7 @@ format:
     embed-resources: true
     css: ../000_css/styles.css
 bibliography: ../000_references/marketing_research_and_analytics.bib
-editor: visual
+editor: source
 ---
 
 # Business Case
