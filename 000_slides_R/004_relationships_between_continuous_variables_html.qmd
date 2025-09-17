@@ -1,0 +1,452 @@
+---
+title: Describing Data
+subtitle: Session 1
+author:
+  - name: 
+      given: Luis F.
+      family: Gómez L.
+    orcid: 0000-0002-2877-9015
+    email: luis.gomezl@unimilitar.edu.co
+    affiliations:
+      - name: Distance Learning Faculty
+toc: true
+toc-depth: 1
+slide-level: 2
+format:
+  presentation-umng-revealjs:
+    logo-vertical-strip: ../000_logos/logo-white-vertical.png 
+    embed-resources: true
+    mermaid-format: png
+    reference-location: document
+date: last-modified
+date-format: "D MMMM, YYYY"
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig.align: center
+    out.width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+csl: ../000_references/apa-7.csl
+editor: source
+---
+
+```{r}
+#| label: libraries
+#| echo: false
+
+library(tidyverse)
+library(skimr)
+```
+
+```{r}
+#| label: palette
+#| echo: false
+
+umng_palette <- c(
+  "#043074",
+  "#fdc600",
+  "#0d5e30",
+  "#ee2a24",
+  "#fc6700",
+  "#00b3f0",
+  "#6e3c1a",
+  "#f8941c",
+  "#8e44ad",
+  "#2c3e50",
+  "#16a085",
+  "#c0392b",
+  "#e91e63"
+)
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on [@chapman_r_2019, Chapter 4]
+
+## 
+
+- **Purpose**
+
+    - Understand the relationships between pairs of variables in multivariate data and examine how to visualize the relationships and compute statistics that describe their associations
+
+# CRM system data
+
+## {.smaller}
+
+-   **cust.id**: customer identifier
+-   **age**: decimal age in years
+-   **credit.score**: 3-digit number in \[300, 900\], representing the credit risk
+-   **email**: whether or not there is information about the customer email
+-   **distance.to.store**: distance in kilometers to the nearest physical store
+-   **online.visits**: yearly visits to the online store
+-   **online.trans**: yearly online orders
+-   **online.spend**: yearly spending in those online orders
+-   **store.trans**: yearly orders in physical stores
+-   **store.spend**: yearly spending in those physical store orders
+
+## {.smaller}
+
+-   **sat.service**: satisfaction with service using an ordinal 5 point scale and collected using a survey
+
+-   **sat.selection**: satisfaction with product selection using an ordinal 5 point scale and collected using a survey
+
+    -   **Ordinal 5 point scale used and possible values in the survey**:
+
+        -   Extremely satisfied: 5
+        -   Very satisfied: 4
+        -   Moderately satisfied: 3
+        -   Very unsatisfied: 2
+        -   Extremely unsatisfied: 1
+        -   NA: customer did not response the survey
+
+##
+
+-   **Import data**
+
+```{r}
+customer <- read_csv(file = "http://goo.gl/PmPkaG")
+customer |> head(n=5)
+```
+
+## {.smaller}
+
+-   **Transform data**
+
+```{r}
+customer <- customer |>
+  mutate(cust.id = factor(x = cust.id, ordered = FALSE),
+         email = factor(x = email, ordered = FALSE),
+         online.visits = as.integer(x = online.visits),
+         online.trans = as.integer(x = online.trans),
+         store.trans = as.integer(x = store.trans),
+         sat.service = factor(x = sat.service, ordered = TRUE),
+         sat.selection = factor(x = sat.selection, ordered = TRUE))
+customer |> head(n=5)
+```
+
+##
+
+-   **Inspect data**
+
+```{r}
+customer |> glimpse()
+```
+
+##
+
+-   **Summarize data**
+
+    -   Ups the table is really big!!! Try it in your console to see the complete table
+
+```{r}
+#| eval: false
+customer |> skim()
+```
+
+##
+
+-   **Scatterplots: the base R way**
+
+```{r}
+plot(x = customer$store.spend, y = customer$online.spend)
+```
+
+##
+
+-   **Scatterplots: the base R way**
+
+```{r}
+plot(x = customer$store.spend, y = customer$online.spend,
+     cex=0.7,
+     main="Customers as of June 2014", 
+     xlab="Prior 12 months in-store sales ($)", 
+     ylab="Prior 12 months online sales ($)")
+```
+
+## {.smaller}
+
+-   **Scatterplots: the base R way**
+
+```{r}
+my.col <- c("black", "green3")
+my.pch <- c(1, 19)
+plot(x = customer$store.spend, y = customer$online.spend,
+     cex=0.7, col=my.col[customer$email], pch=my.pch[customer$email],
+     main="Customers as of June 2014", 
+     xlab="Prior 12 months in-store sales ($)", 
+     ylab="Prior 12 months online sales ($)")
+```
+
+## {.smaller}
+
+-   **Scatterplots: the base R way**
+
+```{r}
+my.col <- c("black", "green3")
+my.pch <- c(1, 19)
+plot(x = customer$store.spend, y = customer$online.spend,
+     cex=0.7, col=my.col[customer$email], pch=my.pch[customer$email],
+     main="Customers as of June 2014", 
+     xlab="Prior 12 months in-store sales ($)", 
+     ylab="Prior 12 months online sales ($)")
+legend(x="topright", legend=paste("email on file:", levels(customer$email)), col=my.col, pch=my.pch)
+```
+
+## {.smaller}
+
+-   **Scatterplots: the base R way**
+
+```{r}
+my.col <- c("black", "green3")
+my.pch <- c(1, 19)
+plot(x = customer$store.spend + 1, y = customer$online.spend + 1,
+     cex=0.7, col=my.col[customer$email], pch=my.pch[customer$email],
+     log ="xy",
+     main="Customers as of June 2014", 
+     xlab="Prior 12 months in-store sales ($)", 
+     ylab="Prior 12 months online sales ($)")
+legend(x="topright", legend=paste("email on file:", levels(customer$email)), col=my.col, pch=my.pch)
+```
+
+##
+
+-   **Scatterplots: the tidyverse way**
+
+```{r}
+#| fig-height: 4
+
+customer |> ggplot() +
+  geom_point(aes(x = store.spend, y = online.spend, color = email))
+```
+
+## {.smaller}
+
+-   **Scatterplots: the tidyverse way**
+
+```{r}
+#| fig-height: 4
+
+customer |> ggplot() +
+  geom_point(aes(x = store.spend, y = online.spend, color = email, shape = email)) +
+  scale_color_manual(values = c("black", "green3"), labels = c("email on file: no", "email on file: yes")) +
+  scale_shape_manual(values = c(1, 19), labels = c("email on file: no", "email on file: yes"))
+```
+
+## {.smaller}
+
+-   **Scatterplots: the tidyverse way**
+
+```{r}
+#| fig-height: 4
+
+customer |> ggplot() +
+  geom_point(aes(x = store.spend, y = online.spend, color = email, shape = email)) +
+  scale_color_manual(values = c("black", "green3"), labels = c("email on file: no", "email on file: yes")) +
+  scale_shape_manual(values = c(1, 19), labels = c("email on file: no", "email on file: yes")) +
+  scale_x_continuous(trans = "log1p", breaks = c(1, 2, 5, 10, 20, 50, 100, 500)) + 
+  scale_y_continuous(trans = "log1p", breaks = c(1, 5, 50, 500))
+```
+
+## {.smaller}
+
+-   **Scatterplots: the tidyverse way**
+
+```{r}
+#| fig-height: 3.5
+
+customer |> ggplot() +
+  geom_point(aes(x = store.spend, y = online.spend, color = email, shape = email)) +
+  scale_color_manual(values = c("black", "green3"), labels = c("email on file: no", "email on file: yes")) +
+  scale_shape_manual(values = c(1, 19), labels = c("email on file: no", "email on file: yes")) +
+  scale_x_continuous(trans = "log1p", breaks = c(1, 2, 5, 10, 20, 50, 100, 500)) + 
+  scale_y_continuous(trans = "log1p", breaks = c(1, 5, 50, 500)) +
+  labs(x = "Prior 12 months in-store sales ($)", y = "Prior 12 months online sales ($)",
+       title = "Customers as of June 2014")
+```
+
+##
+
+-   **Correlation Coefficients**
+
+    -   Pearson correlation coefficient for a sample
+
+$$r_{xy} = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2}\sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}}$$ 
+
+Where $n$ is the sample size, we must have paired numeric data $\{ (x_1, y_1), ..., (x_n, y_n) \}$, $\bar{x} = \sum_{i=1}^n x_i$ and $\bar{y} = \sum_{i=1}^n y_i$
+
+-   This is a "nasty" formula but we can brake it down in smaller chunks
+
+##
+
+-   **Correlation Coefficients**
+
+    -   Pearson correlation coefficient for a sample
+
+```{r}
+age_mean <- mean(customer$age)
+age_credit.score <- mean(customer$credit.score)
+numerator <- sum((customer$age - age_mean) * (customer$credit.score - age_credit.score)) 
+denominator <- sqrt(sum((customer$age - age_mean)^2)) * sqrt(sum(((customer$credit.score - age_credit.score)^2)))
+pearson_corr <- numerator / denominator
+pearson_corr
+```
+
+-   **But don't worry be happy!!!: Use `cor`**
+
+```{r}
+cor(customer$age, customer$credit.score, method = 'pearson')
+```
+
+## {.smaller}
+
+-   **Correlation matrices**
+
+    -   Pearson correlation coefficients for samples in a tibble
+
+```{r}
+library(corrr) # Remember to install the package if it is not installed
+correlation_matrix <- customer |> 
+  select(where(is.numeric)) |> 
+  correlate(use = "pairwise.complete.obs", # There are NA values
+            method = "pearson",
+            diagonal = NA)
+correlation_matrix # Ups!!! The tibble is wide. Check out the tibble in your console
+```
+
+## {.smaller}
+
+-   **Correlation matrices**
+
+    -   Pearson correlation coefficients for samples in a tibble
+
+```{r}
+#| fig-height: 4
+
+correlation_matrix |> autoplot(triangular = "lower")
+```
+
+## {.smaller}
+
+-   **Transforming variables**
+
+```{r}
+cor(customer$store.spend, customer$distance.to.store)
+```
+
+```{r}
+#| fig-height: 4
+
+customer |> ggplot() +
+  geom_point(aes(x = distance.to.store, y = store.spend))
+```
+
+## {.smaller}
+
+-   **Transforming variables**
+
+```{r}
+cor(customer$store.spend, 1 / sqrt(customer$distance.to.store))
+```
+
+```{r}
+#| fig-height: 4
+
+customer |>
+  mutate(distance.to.store_trans = 1 / sqrt(distance.to.store)) |>
+  ggplot() +
+  geom_point(aes(x = distance.to.store_trans, y = store.spend))
+```
+
+## {.smaller}
+
+-   **Transforming variables**
+
+    -   Understanding the logic behind inverse square root distance
+
+```{r}
+#| fig-height: 4
+
+ggplot() +
+  geom_function(fun = function(x) {1 / sqrt(x)}) +
+  labs(x = "Distance",
+       y = "Inverse square root distance")
+```
+
+## {.smaller}
+
+-   **Visualizing categorical variables**
+
+    -   **Scatterplots: the base R way**
+
+```{r}
+plot(as.integer(customer$sat.service), as.integer(customer$sat.selection),
+     xlab = "Customer Satisfaction with Service",
+     ylab = "Customer Satisfaction with Selection",
+     main = "Customer as of June 2014")
+```
+
+##  {.smaller}
+
+-   **Visualizing categorical variables**
+
+    -   **Scatterplots: the base R way**
+
+```{r}
+plot(jitter(as.integer(customer$sat.service)), jitter(as.integer(customer$sat.selection)),
+     xlab = "Customer Satisfaction with Service",
+     ylab = "Customer Satisfaction with Selection",
+     main = "Customer as of June 2014")
+```
+
+## {.smaller}
+
+-   **Visualizing categorical variables**
+
+    -   **Scatterplots: the tidyverse way**
+
+```{r}
+#| fig-height: 3.5
+
+customer |> 
+  ggplot() +
+  geom_point(aes(x = sat.service, y = sat.selection)) +
+  labs(x = "Customer Satisfaction with Service",
+       y = "Customer Satisfaction with Selection",
+       title = "Customer as of June 2014")
+```
+
+## {.smaller}
+
+-   **Visualizing categorical variables**
+
+    -   **Scatterplots: the tidyverse way**
+
+```{r}
+#| fig-height: 3.5
+
+customer |> 
+  ggplot() +
+  geom_point(aes(x = sat.service, y = sat.selection), 
+             position = position_jitter(width = 0.2, height = 0.2)) +
+  labs(x = "Customer Satisfaction with Service",
+       y = "Customer Satisfaction with Selection",
+       title = "Customer as of June 2014")
+```
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**skimr**](https://CRAN.R-project.org/package=skimr), [**corrr**](https://CRAN.R-project.org/package=corrr) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+# References {.allowframebreaks}
