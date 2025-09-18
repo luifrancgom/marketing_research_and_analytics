@@ -64,7 +64,7 @@ umng_palette <- c(
 
 ##
 
--   This presentation is based on [@chapman_r_2019, Chapter 4]
+-   This presentation is based on [@chapman_r_2019, Chapter 5]
 
 ## 
 
