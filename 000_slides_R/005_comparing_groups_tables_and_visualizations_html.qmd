@@ -1,0 +1,366 @@
+---
+title: "Comparing Groups: Tables and Visualizations"
+subtitle: Session 1
+author:
+  - name: 
+      given: Luis F.
+      family: Gómez L.
+    orcid: 0000-0002-2877-9015
+    email: luis.gomezl@unimilitar.edu.co
+    affiliations:
+      - name: Distance Learning Faculty
+toc: true
+toc-depth: 1
+slide-level: 2
+format:
+  presentation-umng-revealjs:
+    logo-vertical-strip: ../000_logos/logo-white-vertical.png 
+    embed-resources: true
+    mermaid-format: png
+    reference-location: document
+date: last-modified
+date-format: "D MMMM, YYYY"
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig.align: center
+    out.width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+csl: ../000_references/apa-7.csl
+editor: source
+---
+
+```{r}
+#| label: libraries
+#| echo: false
+
+library(tidyverse)
+```
+
+```{r}
+#| label: palette
+#| echo: false
+
+umng_palette <- c(
+  "#043074",
+  "#fdc600",
+  "#0d5e30",
+  "#ee2a24",
+  "#fc6700",
+  "#00b3f0",
+  "#6e3c1a",
+  "#f8941c",
+  "#8e44ad",
+  "#2c3e50",
+  "#16a085",
+  "#c0392b",
+  "#e91e63"
+)
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on [@chapman_r_2019, Chapter 4]
+
+## 
+
+- **Purpose**
+
+    - Use descriptive summaries by groups and visualize them to investigate differences between groups
+
+# Consumer segmentation survey
+
+##
+
+-   **age**: age of the consumer in years
+-   **gender**: if the consumer is male of female
+-   **income**: yearly disposable income of the consumer
+-   **kids**: number of children of the consumer
+-   **ownHome**: if the consumer owns a home
+-   **subscribe**: if the consumer is subscribed or not
+-   **Segment**: market segment assigned by a clustering algorithm [@chapman_r_2019, chapter 11], expert assignment or a segmentation typing tool
+
+##
+
+-   **Segment**:
+
+    -   **Moving up**: consumers experiencing upward mobility in terms of their socioeconomic status
+    -   **Suburb mix**: consumers living in suburban areas
+    -   **Travelers**: consumers who prioritize experiences and adventures
+    -   **Urban Hip**: consumers interested in urban culture, artistic expression, and modern trends
+
+##
+
+-   **Import data**
+
+```{r}
+segmentation <- read_csv(file = "http://goo.gl/qw303p")
+segmentation |> head(n = 5)
+```
+
+##
+
+-   **Transform data**
+
+```{r}
+segmentation <- segmentation |>
+  mutate(gender = factor(gender, ordered = FALSE),
+         kids = as.integer(kids),
+         ownHome = factor(ownHome, ordered = FALSE),
+         subscribe = factor(subscribe, ordered = FALSE),
+         Segment = factor(Segment, ordered = FALSE))
+
+segmentation |> head(n = 5)
+```
+
+## {.smaller}
+
+-   **Basic Formula Syntax**
+
+    -   $\sim$ and $+$: operators
+
+    -   $y$: response variable
+
+    -   $x, z$: explanatory variables
+
+    -   $y \sim x + z$: a formula which means that $y$ depends on $x$ and $z$
+
+        -   $+$ is used to indicate the addition of predictor variables to the right of the formula
+        -   Be careful not to confuse the arithmetic operator $+$ with $+$ within a formula
+
+```{r}
+#| eval: false
+?`+` # Arithmetic Operators
+?formula # operators in a formula
+```
+
+##
+
+-   **Descriptives for n-Way Groups: the base R way**
+
+    -   Split data into $n$ subsets and compute summary statistics
+
+```{r}
+aggregate(x = income ~ Segment + ownHome, 
+          data = segmentation, FUN = mean)
+```
+
+##
+
+-   **Descriptives for n-Way Groups: the base R way**
+
+    -   Split data into $n$ subsets and compute summary statistics
+
+```{r}
+aggregate(x = kids ~ Segment + ownHome, 
+          data = segmentation, FUN = sum)
+```
+
+##
+
+-   **Descriptives for n-Way Groups: the tidyverse way**
+
+    -   Split data into $n$ subsets and compute summary statistics
+
+```{r}
+segmentation |> 
+  group_by(Segment, ownHome) |>
+  summarise(mean_income = mean(income))
+```
+
+##
+
+-   **Descriptives for n-Way Groups: the tidyverse way**
+
+    -   Split data into $n$ subsets and compute summary statistics
+
+```{r}
+segmentation |> 
+  group_by(Segment, ownHome) |>
+  summarise(sum_kids = sum(kids))
+```
+
+## {.smaller}
+
+-   **Basic Formula Syntax**
+
+    -   $\sim$, $+$ and $|$: operators
+
+    -   $y$: response variable
+
+    -   $x$: explanatory variable
+
+    -   $z$: grouping variable
+
+    -   $y \sim x | z$: $y$ depends on $x$ based on different groups defined by $z$
+
+        -   $|$ is used to separate the grouping variable from the explanatory variable
+        -   Be careful not to confuse the logical operator $|$ with $|$ within a formula
+
+```{r}
+#| eval: false
+?`|` # Logical Operators
+?lattice::xyplot # operators in a formula (you need first to install the package lattice)
+```
+
+## {.smaller}
+
+-   **Visualization by group as frequencies: the lattice way**
+
+```{r}
+library(lattice)
+histogram(~ subscribe | Segment + ownHome, data = segmentation)
+```
+
+## {.smaller}
+
+-   **Visualization by group as frequencies: the tidyverse way**
+
+```{r}
+# Prepare data
+subscriber_by_segment_home_ownership <- segmentation |>
+  count(subscribe, Segment, ownHome) |>
+  group_by(Segment, ownHome) |>
+  mutate(n_pct = (n / sum(n)) * 100) |>
+  ungroup() |> 
+  arrange(Segment, ownHome)
+
+subscriber_by_segment_home_ownership
+```
+
+## {.smaller}
+
+-   **Visualization by group as frequencies: the tidyverse way**
+
+```{r}
+#| fig-height: 4
+
+subscriber_by_segment_home_ownership |>
+  ggplot() + 
+  geom_col(aes(x = subscribe, y=n_pct)) + 
+  facet_wrap(facets = vars(Segment,ownHome), 
+             nrow = 2, ncol = 4)
+```
+
+## {.smaller}
+
+-   **Visualization by group as proportions: the lattice way**
+
+```{r}
+# Prepare data
+prop_table <- table(segmentation$subscribe,
+                    segmentation$Segment) |>
+  prop.table(margin = 2) |>
+  _[2, ] # You can use _ as a placeholder. Check ?pipeOp
+```
+
+```{r}
+#| fig-height: 4
+
+barchart(prop_table, 
+         xlab='Subscriber proportion by Segment', col='darkolivegreen')
+```
+
+## {.smaller}
+
+-   **Visualization by group as proportions: the tidyverse way**
+
+```{r}
+# Prepare data
+prop_table <- segmentation |>
+  count(subscribe, Segment) |>
+  group_by(Segment) |>
+  mutate(n_pct = n / sum(n)) |>
+  filter(subscribe == 'subYes')
+```
+
+```{r}
+#| fig-height: 3
+
+prop_table |> ggplot() + 
+  geom_col(aes(x=n_pct, y=Segment),
+           fill='darkolivegreen') +
+  labs(x='Subscriber proportion by Segment', 
+       y=NULL)
+```
+
+## {.smaller}
+
+-   **Visualization by group with continuous data: the lattice way**
+
+```{r}
+# Prepare data
+seg_income_agg <- aggregate(income ~ Segment + ownHome, 
+                            data=segmentation, FUN = mean)
+```
+
+```{r}
+barchart(income ~ Segment, data = seg_income_agg,
+         groups=ownHome, auto.key=TRUE, # Add groups
+         par.settings=simpleTheme(col=terrain.colors(n = 2))) # Change default colors
+```
+
+## {.smaller}
+
+-   **Visualization by group with continuous data: the tidyverse way**
+
+```{r}
+# Prepare data
+seg_income_agg <- segmentation |> 
+  group_by(Segment, ownHome) |> 
+  summarise(mean_income = mean(income)) |> 
+  ungroup()
+```
+
+```{r}
+#| fig-height: 3.5
+
+seg_income_agg |> ggplot() +
+  geom_col(aes(x=Segment, y=mean_income, fill=ownHome),
+           position = position_dodge(), color='black') +
+  scale_fill_manual(values=terrain.colors(n = 2))
+```
+
+## {.smaller}
+
+-   **Visualization by group with continuous data: the lattice way**
+
+```{r}
+#| fig-height: 4.5
+
+bwplot(Segment ~ income | ownHome,
+       data = segmentation,
+       xlab = 'Income')
+```
+
+## {.smaller}
+
+-   **Visualization by group with continuous data: the tidyverse way**
+
+```{r}
+#| fig-height: 4
+
+segmentation |> ggplot() +
+  geom_boxplot(aes(x=income, y=Segment)) +
+  facet_wrap(facets = vars(ownHome)) +
+  labs(x='Income',
+       y=NULL)
+```
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**lattice**](https://CRAN.R-project.org/package=lattice) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+# References {.allowframebreaks}
