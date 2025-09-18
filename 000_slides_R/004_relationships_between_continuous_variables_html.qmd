@@ -324,7 +324,7 @@ correlation_matrix # Ups!!! The tibble is wide. Check out the tibble in your con
     -   Pearson correlation coefficients for samples in a tibble
 
 ```{r}
-#| fig-height: 4
+#| fig-height: 4.5
 
 correlation_matrix |> autoplot(triangular = "lower")
 ```
