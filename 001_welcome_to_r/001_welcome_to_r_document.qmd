@@ -1,0 +1,36 @@
+---
+title: "Welcome to R"
+author: 
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gómez
+format: 
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Introduction
+
+This is an introduction
+
+# Warnings
+
+```{r}
+sqrt(-9)
+```
+
+# Errors
+
+```{r}
+#| error: true
+x <- c(1, 2, 3, 4, 5)
+X
+```
+
