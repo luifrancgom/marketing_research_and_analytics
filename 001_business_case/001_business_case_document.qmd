@@ -1,0 +1,44 @@
+---
+title: "Business Case"
+author: 
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gómez
+format: 
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: libraries
+#| message: false
+
+library(tidyverse)
+library(sweep)
+```
+
+# Introduction
+
+Put text in this part.
+
+# Inspect
+
+Put text in this part.
+
+```{r}
+bike_sales |> 
+  glimpse()
+```
+
+# Count
+
+Put text in this part.
+
+```{r}
+bike_sales |> 
+  count(model)
+```
+
