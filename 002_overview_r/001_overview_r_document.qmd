@@ -1,0 +1,57 @@
+---
+title: "An overview of the R language"
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gómez
+format: 
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: libraries
+#| message: false
+
+library(tidyverse)
+library(skimr)
+```
+
+# Introduction
+
+Insert some text
+
+# Import
+
+```{r}
+#| message: false
+
+satisfaction_data <- read_csv(file = "../000_data/002_chapter_2.csv")
+```
+
+# Inspect
+
+```{r}
+satisfaction_data |> 
+  glimpse()
+```
+
+# Transform
+
+```{r}
+satisfaction_data <- satisfaction_data |> 
+  mutate(Segment = factor(x = Segment, 
+                          ordered = FALSE))
+```
+
+# Summarize
+
+```{r}
+satisfaction_data |> 
+  skim()
+```
+
+
