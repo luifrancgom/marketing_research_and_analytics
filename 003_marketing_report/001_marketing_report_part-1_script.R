@@ -38,20 +38,47 @@ bike_sales |>
   skim()
 
 ## Count ----
-bike_sales |> 
-  count(category.secondary)
+category_secondary <- bike_sales |> 
+  count(category.secondary) |> 
+  select(category.secondary)
 
-bike_sales |> 
-  count(frame)
+category_secondary |> 
+  datatable(
+    colnames = c("Category secondary" = "category.secondary") 
+  )
 
-bike_sales |> 
+frame <- bike_sales |> 
+  count(frame) |> 
+  select(frame)
+
+frame |> 
+  datatable(
+    colnames = c("Frame" = "frame") 
+  )
+
+category_secondary_frame <- bike_sales |> 
   count(category.secondary,
         frame) |> 
   select(category.secondary, frame)
+
+category_secondary_frame |> 
+  datatable(
+    colnames = c("Category secondary", "Frame") 
+  )
 
 # Cyclocross   Aluminum
 # Fat Bike     Carbon
 # Overmountain Aluminum
 # Sport        Carbon
 # Triathalon   Carbon
-  
+
+bike_shops <- bike_sales |> 
+  count(bikeshop.name, 
+        sort = TRUE)
+
+bike_shops |> 
+  datatable(
+    colnames = c("Bike shop" = "bikeshop.name",
+                 "Transactions" = "n")
+  )
+
