@@ -21,6 +21,7 @@ editor: source
 library(tidyverse)
 library(sweep)
 library(skimr)
+library(DT)
 ```
 
 # Describing data
@@ -35,7 +36,29 @@ Pending
 
 ```{r}
 # Import the data from the sweep package
-bike_sales <- bike_sales
+bike_sales <- bike_sales |> 
+  mutate(order.id = factor(x = order.id, 
+                           ordered = TRUE),
+         order.line = factor(x = order.line,
+                             ordered = TRUE),
+         customer.id = factor(x = customer.id,
+                              ordered = FALSE),
+         bikeshop.name = factor(x = bikeshop.name,
+                                ordered = FALSE),
+         bikeshop.city = factor(x = bikeshop.city,
+                                ordered = FALSE),
+         bikeshop.state = factor(x = bikeshop.name,
+                                 ordered = FALSE),
+         product.id = factor(x = product.id,
+                             ordered = FALSE),
+         model = factor(x = model,
+                        ordered = FALSE),
+         category.primary = factor(category.primary,
+                                   ordered = FALSE),
+         category.secondary = factor(x = category.secondary,
+                                     ordered = FALSE),
+         frame = factor(x = frame,
+                        ordered = FALSE))
 ```
 
 ## Inspect data
@@ -62,41 +85,55 @@ bike_sales |>
 
 ### Counting
 
-Remember that you want to support the Research and Development (R & D) division in identifying potential new products
-
-You can use the `count` function from the `tidyverse` and the variables `category.secondary` and `frame` to identify [product gaps](https://en.wikipedia.org/wiki/Gap_analysis). In that way you can identify possible new models that are not yet offered by the corporation but that can potentially generate an important revenue:
-
--   First, check the specific bicycle categories: `bike_sales |> count(category.secondary)`
-
--   Second, check the bicycle frame materials: `bike_sales |> count(frame)`
-
--   Third, you can calculate the possible combinations (Hint: There are $9 \times 2 = 18$ possible combinations)
-
-Applying the above steps, you can proceed in the following way to identify [product gaps](https://en.wikipedia.org/wiki/Gap_analysis) (Hint: Only $13$ combinations are available which means that $18 - 13 = 5$ new models can be explored):
+Pending
 
 ```{r}
-#| code-fold: show
-#| eval: false
-# If you have loaded the tidyverse library, library(tidyverse),
-## you can learn more about this function using ?count or
-## check out https://dplyr.tidyverse.org/reference/count.html
-## so see the documentation online
-bike_sales |>
-  count(category.secondary, frame)
+category_secondary <- bike_sales |> 
+  count(category.secondary) |> 
+  select(category.secondary)
+
+category_secondary |> 
+  datatable(
+    colnames = c("Category secondary" = "category.secondary") 
+      )
 ```
 
-Also remember that you want to support the marketing team in the creation of a marketing segmentation clustering model. Therefore the first step is to know the bicycle shops and the number of transactions. You can proceed in the following way as a first step:
+```{r}
+frame <- bike_sales |> 
+  count(frame) |> 
+  select(frame)
+
+frame |> 
+  datatable(
+    colnames = c("Frame" = "frame") 
+      )
+```
 
 ```{r}
-#| code-fold: show
-#| eval: false
+category_secondary_frame <- bike_sales |> 
+  count(category.secondary,
+        frame) |> 
+  select(category.secondary, frame)
 
-# Explore the argument sort in the count function
-## You can check the documentation using ?count or
-## checking it online 
-### https://dplyr.tidyverse.org/reference/count.html
-bike_sales |>
-  count(bikeshop.name)
+category_secondary_frame |> 
+  datatable(
+    colnames = c("Category secondary" = "category.secondary",
+      "Frame" = "frame") 
+  )
+```
+
+Pending
+
+```{r}
+bike_shops <- bike_sales |> 
+  count(bikeshop.name, 
+        sort = TRUE)
+
+bike_shops |> 
+  datatable(
+    colnames = c("Bike shop" = "bikeshop.name",
+      "Transactions" = "n")
+  )
 ```
 
 ## Data visualization

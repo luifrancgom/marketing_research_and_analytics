@@ -18,6 +18,7 @@ format:
 
 library(tidyverse)
 library(skimr)
+library(DT)
 ```
 
 # Introduction
@@ -25,6 +26,8 @@ library(skimr)
 Insert some text
 
 # Import
+
+Insert some text
 
 ```{r}
 #| message: false
@@ -34,12 +37,16 @@ satisfaction_data <- read_csv(file = "../000_data/002_chapter_2.csv")
 
 # Inspect
 
+Insert some text
+
 ```{r}
 satisfaction_data |> 
   glimpse()
 ```
 
 # Transform
+
+Insert some text
 
 ```{r}
 satisfaction_data <- satisfaction_data |> 
@@ -49,9 +56,27 @@ satisfaction_data <- satisfaction_data |>
 
 # Summarize
 
+Insert some text
+
 ```{r}
 satisfaction_data |> 
   skim()
 ```
 
+# Descriptive statistics
 
+```{r}
+satisfaction_data_prod_sat <- satisfaction_data |> 
+  group_by(Segment) |> 
+  summarise(
+    mean_prod_sat = mean(iProdSAT),
+    median_prod_sat = median(iProdSAT)
+  )
+
+satisfaction_data_prod_sat |> 
+  datatable(colnames = 
+              c("Mean Product Satisfaction" = "mean_prod_sat",
+                "Median Product Satisfaction" = "median_prod_sat")) |> 
+  formatRound(columns = "Mean Product Satisfaction", 
+              digits = 2)
+```
