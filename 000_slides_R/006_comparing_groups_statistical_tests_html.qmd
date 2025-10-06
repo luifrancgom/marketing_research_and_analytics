@@ -486,7 +486,7 @@ segmentation |>
                shape = 21, fill = '#E31A1C', color = 'black')
 ```
 
-##
+## {.smaller}
 
 -   Testing Multiple Group Means: Analysis of Variance (ANOVA)
 
