@@ -112,7 +112,14 @@ $H_0: p_1 = \frac{1}{4} \land p_2 = \frac{1}{4} \land p_3 = \frac{1}{4} \land p_
 
 $H_1: p_1 \neq \frac{1}{4} \lor p_2 \neq \frac{1}{4} \lor p_3 = \frac{1}{4} \lor p_4 \neq \frac{1}{4}$
 
-$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{(70 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(100 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(80 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(50 - 300\frac{1}{4})^2}{300\frac{1}{4}}$
+$\begin{align}
+  \chi^2 & = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} \\ 
+  & = \frac{(70 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(100 - 300\frac{1}{4})^2}{300\frac{1}{4}} +
+                              \frac{(80 - 300\frac{1}{4})^2}{300\frac{1}{4}} + 
+                              \frac{(50 - 300\frac{1}{4})^2}{300\frac{1}{4}}
+  \end{align}$
+
+##
 
 -   **Base R way**
 
@@ -175,7 +182,12 @@ $H_0: p_1 = \frac{1}{4} \land p_2 = \frac{1}{4} \land p_3 = \frac{1}{4} \land p_
 
 $H_1: p_1 \neq \frac{1}{4} \lor p_2 \neq \frac{1}{4} \lor p_3 = \frac{1}{4} \lor p_4 \neq \frac{1}{4}$
 
-$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{(70 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(100 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(80 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(50 - 300\frac{1}{4})^2}{300\frac{1}{4}}$
+$\begin{align}
+ \chi^2 & = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} \\
+ & = \frac{(70 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(100 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(80 - 300\frac{1}{4})^2}{300\frac{1}{4}} + \frac{(50 - 300\frac{1}{4})^2}{300\frac{1}{4}}
+ \end{align}$
+
+##
 
 -   **tidymodels way**
 
@@ -194,7 +206,13 @@ $H_0: p_{11} = \frac{260}{300}\frac{159}{300} \land p_{12} = \frac{260}{300}\fra
 
 $H_1: p_{11} \neq \frac{260}{300}\frac{159}{300} \lor p_{12} \neq \frac{260}{300}\frac{141}{300} \lor p_{21} \neq \frac{40}{300}\frac{159}{300} \lor p_{22} \neq \frac{40}{300}\frac{141}{300}$
 
-$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{(137 - 300\frac{260}{300}\frac{159}{300})^2}{300\frac{260}{300}\frac{159}{300}} + \frac{(123 - 300\frac{260}{300}\frac{141}{300})^2}{300\frac{260}{300}\frac{141}{300}} + \frac{(22 - 300\frac{40}{300}\frac{159}{300})^2}{300\frac{40}{300}\frac{159}{300}} + \frac{(18 - 300\frac{40}{300}\frac{141}{300})^2}{300\frac{40}{300}\frac{141}{300}}$
+$\begin{align}
+  \chi^2 & = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} \\
+  & = \frac{(137 - 300\frac{260}{300}\frac{159}{300})^2}{300\frac{260}{300}\frac{159}{300}} + \frac{(123 - 300\frac{260}{300}\frac{141}{300})^2}{300\frac{260}{300}\frac{141}{300}} \\
+  & \: \: \: + \frac{(22 - 300\frac{40}{300}\frac{159}{300})^2}{300\frac{40}{300}\frac{159}{300}} + \frac{(18 - 300\frac{40}{300}\frac{141}{300})^2}{300\frac{40}{300}\frac{141}{300}}
+ \end{align}$
+
+##
 
 -   **Base R way**
 
@@ -257,7 +275,13 @@ $H_0: p_{11} = \frac{260}{300}\frac{159}{300} \land p_{12} = \frac{260}{300}\fra
 
 $H_1: p_{11} \neq \frac{260}{300}\frac{159}{300} \lor p_{12} \neq \frac{260}{300}\frac{141}{300} \lor p_{21} \neq \frac{40}{300}\frac{159}{300} \lor p_{22} \neq \frac{40}{300}\frac{141}{300}$
 
-$\chi^2 = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} = \frac{(137 - 300\frac{260}{300}\frac{159}{300})^2}{300\frac{260}{300}\frac{159}{300}} + \frac{(123 - 300\frac{260}{300}\frac{141}{300})^2}{300\frac{260}{300}\frac{141}{300}} + \frac{(22 - 300\frac{40}{300}\frac{159}{300})^2}{300\frac{40}{300}\frac{159}{300}} + \frac{(18 - 300\frac{40}{300}\frac{141}{300})^2}{300\frac{40}{300}\frac{141}{300}}$
+$\begin{align}
+  \chi^2 & = \sum_{i=1}^n \frac{(Observed_i - Expected_i)^2}{Expected_i} \\
+  & = \frac{(137 - 300\frac{260}{300}\frac{159}{300})^2}{300\frac{260}{300}\frac{159}{300}} + \frac{(123 - 300\frac{260}{300}\frac{141}{300})^2}{300\frac{260}{300}\frac{141}{300}} \\
+  & \: \: \: + \frac{(22 - 300\frac{40}{300}\frac{159}{300})^2}{300\frac{40}{300}\frac{159}{300}} + \frac{(18 - 300\frac{40}{300}\frac{141}{300})^2}{300\frac{40}{300}\frac{141}{300}}
+ \end{align}$
+
+##
 
 -   **tidymodels way**
 
@@ -432,7 +456,7 @@ segmentation |>
          conf_level = 0.95)
 ```
 
-##
+## {.smaller}
 
 -   Testing Multiple Group Means: Analysis of Variance (ANOVA)
 
@@ -776,9 +800,12 @@ coef(model_aov) |> enframe(name = "coef")
 
     -   Segment, ownHome
 
-        $H_0: \mu_{Moving\;up,\;ownNo} - \mu_{Moving\;up,\;ownYes} = \mu_{Suburb\;mix,\;ownNo} - \mu_{Suburb\;mix,\;ownYes} =$
-        
-        $\;\;\;\;\;\;\;\;\;\mu_{Travelers,\;ownNo} - \mu_{Travelers,\;ownYes} = \mu_{Urban\;hip,\;ownNo} - \mu_{Urban\;hip,\;ownYes}$
+        $\begin{align}
+          H_0: & \mu_{Moving\;up,\;ownNo} - \mu_{Moving\;up,\;ownYes} = \\
+               & \mu_{Suburb\;mix,\;ownNo} - \mu_{Suburb\;mix,\;ownYes} = \\ 
+               & \mu_{Travelers,\;ownNo} - \mu_{Travelers,\;ownYes} = \\
+               & \mu_{Urban\;hip,\;ownNo} - \mu_{Urban\;hip,\;ownYes}
+              \end{align}$
         
         $H_1: \text{At least one difference group mean is different from the rest}$
 
