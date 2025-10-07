@@ -1,0 +1,814 @@
+---
+title: "Identifying Drivers of Outcomes: Linear Models"
+subtitle: Session 1
+author:
+  - name: 
+      given: Luis F.
+      family: Gómez L.
+    orcid: 0000-0002-2877-9015
+    email: luis.gomezl@unimilitar.edu.co
+    affiliations:
+      - name: Distance Learning Faculty
+toc: true
+toc-depth: 1
+slide-level: 2
+format:
+  presentation-umng-revealjs:
+    logo-vertical-strip: ../000_logos/logo-white-vertical.png 
+    embed-resources: true
+    mermaid-format: png
+    reference-location: document
+date: last-modified
+date-format: "D MMMM, YYYY"
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig.align: center
+    out.width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+csl: ../000_references/apa-7.csl
+editor: source
+---
+
+```{r}
+#| echo: false
+#| label: libraries
+
+library(tidyverse)
+library(skimr)
+library(tidymodels)
+library(dotwhisker)
+library(performance)
+library(gt)
+
+library(kableExtra)
+```
+
+```{r}
+#| label: palette
+#| echo: false
+
+umng_palette <- c(
+  "#043074",
+  "#fdc600",
+  "#0d5e30",
+  "#ee2a24",
+  "#fc6700",
+  "#00b3f0",
+  "#6e3c1a",
+  "#f8941c",
+  "#8e44ad",
+  "#2c3e50",
+  "#16a085",
+  "#c0392b",
+  "#e91e63"
+)
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on [@chapman_r_2019, Chapter 7]
+
+## 
+
+- **Purpose**
+
+    - Apply linear modeling to understand a response variable and make predictions of forecasts
+
+# Amusement park survey
+
+##
+
+-   **weekend**: whether the visit was on a weekend
+-   **num.child**: number of children in the visit
+-   **distance**: how far the customer traveled to the park in miles
+-   **rides**: satisfaction with rides using a scale \[0, 100\]
+-   **games**: satisfaction with games using a scale \[0, 100\]
+-   **wait**: satisfaction with waiting times using a scale \[0, 100\]
+-   **clean**: satisfaction with cleanliness using a scale \[0, 100\]
+-   **overall**: overall satisfaction rating using a scale \[0, 100\]
+
+##
+
+-   Import data
+
+```{r}
+amusement_park <- read_csv("http://goo.gl/HKnl74")
+amusement_park |> head(n = 5)
+```
+
+##
+
+-   Transform data
+
+```{r}
+amusement_park <- amusement_park |> 
+  mutate(weekend = factor(x = weekend, 
+                          labels = c('no', 'yes'),
+                          ordered = FALSE),
+         num.child = as.integer(num.child),
+         # logarithmic transform
+         logdist = log(distance, base = exp(x = 1)))
+amusement_park |> head(n = 5)
+```
+
+##
+
+-   Summarize data
+
+    -   Ups the table is really big!!! Try it in your console to see the complete table
+
+```{r}
+#| eval: false
+amusement_park |> skim()
+```
+
+##
+
+-   Correlation matrices
+
+    -   Pearson correlation coefficients for samples in a tibble
+
+```{r}
+correlation_matrix <- amusement_park |> 
+  select(num.child, rides:logdist) |>
+  corrr::correlate()
+correlation_matrix
+```
+
+##
+
+-   Correlation matrices
+
+    -   Pearson correlation coefficients for samples in a tibble
+
+```{r}
+correlation_matrix |> autoplot(triangular = "lower")
+```
+
+##
+
+-   **Bivariate Association: the base R way**
+
+```{r}
+plot(overall~rides, data=amusement_park,
+     xlab="Satisfaction with Rides", ylab="Overall Satisfaction")
+abline(reg = lm(formula = overall~rides, data = amusement_park), 
+       col = 'blue')
+```
+
+##
+
+-   **Bivariate Association: the tidyverse way**
+
+```{r}
+amusement_park |> ggplot(aes(x = rides, y = overall)) +
+  geom_point() + 
+  geom_smooth(method = 'lm', 
+              color = 'blue', 
+              se = FALSE) + 
+  labs(x = "Satisfaction with Rides",
+       y = "Overall Satisfaction")
+```
+
+##
+
+-   Linear Model with a Single Predictor
+
+```{r}
+#| echo: false
+#| out-width: 80%
+
+# A tutorial related to set.seed
+## https://r-coder.com/set-seed-r/
+set.seed(12345)
+toy_data <- amusement_park |> 
+  slice_sample(n = 15)
+
+toy_model <- lm(formula = overall ~ rides, data = toy_data)
+
+augment(x = toy_model) |> 
+  ggplot(aes(x = rides, y = overall)) + 
+  geom_point(shape = 21, 
+             color = 'black', fill = umng_palette[4],
+             size = 2) +
+  geom_smooth(method = 'lm', 
+              color = umng_palette[1],
+              se = FALSE) + 
+  geom_segment(aes(xend=rides, yend=.fitted),
+               color=umng_palette[2]) + 
+  labs(x = "Satisfaction with Rides",
+       y = "Overall Satisfaction")
+```
+
+## {.smaller}
+
+-   Linear Model with a Single Predictor
+
+$$overall_{i} = \beta_0 + \beta_1 rides_i + \epsilon_i \text{ where } \epsilon_i \sim \mathcal{N}(0, \sigma^2) \text{ and } i = 1, \ldots, 500$$ $$\widehat{overall}_{i} = \widehat{\beta}_0 + \widehat{\beta}_1 rides_i \text{ and } \widehat{\sigma}^2 \text{ where } i = 1, \ldots, 500$$ $$overall_{i} - \widehat{overall}_{i} = \widehat{\epsilon}_i \text{ where } i = 1, \ldots, 500$$
+
+
+```{r}
+model1 <- lm(formula = overall ~ rides, data = amusement_park)
+model1
+```
+
+##
+
+-   Linear Model with a Single Predictor
+
+```{r}
+ls.str(model1)
+```
+
+##
+
+-   Linear Model with a Single Predictor
+
+```{r}
+summary(model1)
+```
+
+##
+
+-   Linear Model with a Single Predictor
+
+```{r}
+model1$coefficients
+# Make some predictions
+# We want to forecast the overall satisfaction rating
+# if the satisfaction with rides is 95
+-94.962246 + 1.703285*95
+```
+
+##
+
+-   Linear Model with a Single Predictor
+
+    -   Std. Error column
+
+        -   Indicates uncertainty in the coefficient estimate
+        -   We can build a confidence interval
+
+```{r}
+summary(model1)$coefficients[, 2]
+confint(model1, level = 0.95)
+```
+
+## {.smaller}
+
+-   Linear Model with a Single Predictor
+
+```{r}
+library(performance)
+check_model(model1)
+```
+
+## {.smaller}
+
+-   Linear Model with a Single Predictor
+
+    -   **Posterior Predictive Checks**: plot $(1,1)$
+
+        -   Model-predicted lines should resemble observed data line 
+
+    -   **Linearity Assumption**: plot $(1,2)$
+
+        -   Reference line should be flat and horizontal
+
+    -   **Homogeneity of variance**: plot $(2,1)$
+
+        -   Reference line should be flat and horizontal
+
+    -   **Influential observations**: plot $(2,2)$
+
+        -   Points should be inside the contour lines
+    
+    -   **Normality of residuals**: plot $(3,1)$
+    
+        -   Dots should fall along the line
+
+##
+
+-   Linear Model with Multiple Predictors
+
+$$\begin{split}
+   overall_{i} & = \beta_0 + \beta_1 rides_i + \beta_2 games_i \\
+   & + \beta_3 wait_i + \beta_4 clean_i + \epsilon_i \\
+   & \text{ where } \epsilon_i \sim \mathcal{N}(0, \sigma^2) \text{ and } i = 1, \ldots, 500
+   \end{split}$$
+
+
+```{r}
+model2 <- lm(formula = overall ~ rides + games + wait + clean, 
+             data = amusement_park)
+model2
+```
+
+##
+
+-   Linear Model with Multiple Predictors
+
+```{r}
+check_model(model2)
+```
+
+##
+
+-   Linear Model with Multiple Predictors
+
+```{r}
+summary(model2)
+```
+
+##
+
+-   Linear Model with Multiple Predictors
+
+$H_0: \beta_1 = 0$
+
+$H_1: \beta_1 \neq 0$
+
+$t_{rides} = \frac{\hat{\beta}_1 - \beta_1}{\sqrt{\widehat{Var(\hat{\beta}_1)}}} = \frac{0.529078 - 0}{0.14207176} = 3.724019$
+
+```{r}
+model2$coefficients
+# Calculate the variance-covariance matrix, extract
+# the diagonal and calculate the standard deviaton of
+# the parameters
+model2 |> vcov() |> diag() |> sqrt()
+```
+
+##
+
+-   Linear Model with Multiple Predictors
+
+```{r}
+#| echo: false
+#| out-width: 80%
+
+t_test_rides <- summary(model2)$coefficients[, 3][2]
+degrees_of_freedom <- summary(model2)$df[2]
+
+ggplot() + 
+  geom_function(fun=dt, args=list(df=degrees_of_freedom),
+                xlim=c(-5,5),
+                color=umng_palette[1]) +
+  geom_vline(xintercept = qt(p = 0.025, df = degrees_of_freedom, ncp = 0, 
+                             lower.tail = TRUE),
+             color=umng_palette[4]) +
+  geom_vline(xintercept = qt(p = 0.025, df = degrees_of_freedom, ncp = 0, 
+                             lower.tail = FALSE),
+             color=umng_palette[4]) +
+  geom_vline(xintercept = t_test_rides |> round(digits = 2) |> unname(),
+             color=umng_palette[11]) +
+  geom_ribbon(data = tibble(x = seq.int(from = -5,
+                                        to = qt(p = 0.025, df = degrees_of_freedom, ncp = 0, 
+                                                lower.tail = TRUE),
+                                        by = 0.01),
+                            y = dt(x = x, df = degrees_of_freedom, ncp = 0)),
+              aes(x=x, ymin = 0, ymax=y),
+              fill=umng_palette[2], alpha=0.5) +
+  geom_ribbon(data = tibble(x = seq.int(from = qt(p = 0.025, df = degrees_of_freedom, ncp = 0, 
+                                                  lower.tail = FALSE),
+                                        to = 5,
+                                        by = 0.01),
+                            y = dt(x = x, df = degrees_of_freedom, ncp = 0)),
+              aes(x=x, ymin = 0, ymax=y),
+              fill=umng_palette[2], alpha=0.5) +
+  scale_x_continuous(breaks = c(-5,
+                                t_test_rides,
+                                qt(p = 0.025, df = degrees_of_freedom, ncp = 0, 
+                                   lower.tail = TRUE),
+                                qt(p = 0.025, df = degrees_of_freedom, ncp = 0, 
+                                   lower.tail = FALSE),
+                                5),
+                     labels = scales::label_number(accuracy = 0.01)) +
+  labs(x=NULL,
+       y=NULL,
+       color=NULL,
+       title = "Student's t-distribution distribution function",
+       subtitle = str_glue('Degrees of freedom= {summary(model2)$df[2]},
+                           Critical values: ({qt(p = 0.025, df = degrees_of_freedom, ncp = 0, 
+                                                lower.tail = TRUE) |> round(digits=2)},{qt(p = 0.025, df = degrees_of_freedom, ncp = 0, 
+                                                lower.tail = FALSE) |> round(digits=2)})
+                           T statistic: {t_test_rides |> round(digits=2)}')) +
+  theme(panel.border      = element_rect(fill = NA, color = "black"),
+        plot.background   = element_rect(fill = "#f3fcfc"),
+        panel.background  = element_rect(fill = "#f3f7fc"),
+        plot.title        = element_text(face = "bold"),
+        axis.title        = element_text(face = "bold"),
+        legend.title      = element_text(face = "bold"),
+        legend.position   = 'bottom', 
+        axis.text         = element_text(face = "bold"))
+```
+
+##
+
+-   Linear Model with Multiple Predictors
+
+\tiny
+
+```{r}
+confint(model2, level = 0.95)
+```
+
+##
+
+-   Linear Model with Multiple Predictors
+
+\tiny
+
+```{r}
+library(coefplot) # Remember to install the package if it is not installed
+coefplot(model = model2, 
+         # The intercept is relatively large: -131.4092 
+         intercept = FALSE,
+         ylab="Rating of Feature", 
+         xlab="Association with Overall Satisfaction",
+         lwdOuter = 1.5)
+```
+
+##
+
+-   Comparing models
+
+```{r}
+summary(model1)$r.squared
+summary(model2)$r.squared
+summary(model1)$adj.r.squared
+summary(model2)$adj.r.squared
+```
+
+##
+
+-   Comparing models
+
+    -   **Base R way**
+
+```{r}
+plot(x = amusement_park$overall, y = fitted(model1),
+     col = "red", xlim = c(0,100), ylim = c(0,100),
+     xlab = "Actual Overall Satisfaction", 
+     ylab = "Fitted Overall Satisfaction")
+points(x = amusement_park$overall, y = fitted(model2),
+       col = "blue")
+legend(x = "topleft", legend = c("Model 1", "Model 2"), col = c("red", "blue"), pch = 1)
+```
+
+##
+
+-   Comparing models
+
+    -   **Tidymodels and tidyverse way**: Prepare data
+
+```{r}
+model1_augment <- augment(x = model1) |> mutate(model = "Model 1")
+model2_augment <- augment(x = model2) |> mutate(model = "Model 2")
+models_performance <- model1_augment |> bind_rows(model2_augment)
+
+models_performance |> glimpse()
+```
+
+##
+
+-   Comparing models
+
+    -   **Tidymodels and tidyverse way**: Visualize
+
+```{r}
+models_performance |> 
+  ggplot() +
+  geom_point(aes(x = overall, y = .fitted,
+                 color = model)) +
+  labs(x = "Actual Overall Satisfaction",
+       y = "Fitted Overall Satisfaction")
+```
+
+##
+
+-   Comparing models
+
+    -   Analysis of variance (`anova`) for nested models[^1]
+
+[^1]: This statistical analysis only make sense for nested models that are fitted with the same data where the convention is to include the models from smallest to largest. See `?anova.lm`
+
+```{r}
+anova_lm <- anova(model1, model2, test = "F")
+anova_lm
+```
+
+## {.smaller}
+
+-   Comparing models
+
+$H_0: \beta_0 = \beta_1 = \beta_2 = \beta_3 = \beta_4 = 0$
+
+$H_1: \text{At least one } \beta_j \neq 0 \text{ for } j = 0, 1, 2, 3, 4$
+
+$F = \frac{\frac{RSS_1 - RSS_2}{p_2 - p_1}}{\frac{RSS_2}{n - p_2}} = \frac{\frac{82611.81 - 55531.53}{5 - 2}}{\frac{55531.53}{500 - 5}} = 80.46323$
+
+```{r}
+#| echo: false
+
+df1 <- 3
+df2 <- 495
+f_statistic <- anova_lm |> 
+  tidy() |>
+  select(statistic) |> 
+  pull(1) |> 
+  _[2]
+
+ggplot() + 
+  geom_function(fun=df, args=list(df1=df1, df2=df2, log=FALSE),
+                xlim=c(0,90),
+                color=umng_palette[1]) +
+  geom_ribbon(data = tibble(x = seq.int(from = qf(p = 0.05,
+                                                  df1 = df1,
+                                                  df2 = df2,
+                                                  lower.tail = FALSE),
+                                        to = 90,
+                                        by = 0.01),
+                            y = df(x = x, df1 = df1, df2 = df2)),
+              aes(x = x, ymin = 0, ymax = y),
+              fill=umng_palette[4],
+              alpha=0.1) +
+  geom_vline(xintercept = qf(p = 0.05, df1=df1, df2=df2, lower.tail = FALSE),
+             color=umng_palette[4]) +
+  geom_vline(xintercept = f_statistic,
+             color=umng_palette[11]) +
+               scale_x_continuous(breaks = c(qf(p = 0.05, df1 = df1, df2=df2, lower.tail = FALSE),
+                                             f_statistic,
+                                             90),
+                                             labels = scales::label_number(accuracy = 0.1)) +
+                                    labs(x=NULL,
+                                         y=NULL,
+                                         color=NULL,
+                                         title = 'F-squared distribution function',
+                                         subtitle = str_glue('df1={df1},
+                           df2={df2},
+                           Critical value: {qf(p = 0.05, df1=3, df2=495, lower.tail = FALSE) |> round(digits=2)}
+                           F statistic: {f_statistic |> round(digits=2)}')) +
+                                    theme(panel.border      = element_rect(fill = NA, color = "black"),
+                                          plot.background   = element_rect(fill = "#f3fcfc"),
+                                          panel.background  = element_rect(fill = "#f3f7fc"),
+                                          plot.title        = element_text(face = "bold"),
+                                          axis.title        = element_text(face = "bold"),
+                                          legend.title      = element_text(face = "bold"),
+                                          legend.position   = 'bottom',
+                                          axis.text         = element_text(face = "bold"))
+```
+
+##
+
+-   Predictions
+
+$$\begin{split}
+   \widehat{overall}_{j} & = \widehat{\beta}_0 + \widehat{\beta}_1 rides_j + \widehat{\beta}_2 games_j \\
+   & + \widehat{\beta}_3 wait_j + \widehat{\beta}_4 clean_j
+   \end{split}$$
+
+```{r}
+coef(model2) |> enframe(name = "coef")
+```
+
+##
+
+-   Predictions
+
+    -   Manual
+
+```{r}
+(coef(model2)["(Intercept)"]*1 + coef(model2)["rides"]*30 + coef(model2)["games"]*10 + 
+    coef(model2)["wait"]*57 +  coef(model2)["clean"]*90) |>
+  unname()
+```
+
+-   Predictions
+
+    -   Matrix multiplication
+
+```{r}
+coef(model2) %*% c(1, 30, 10, 57, 90)
+```
+
+##
+
+-   Predictions
+
+    -   `predict`
+
+```{r}
+# New data
+new_data <- tibble(rides = c(30, 70),
+                   games = c(10, 80),
+                   wait =  c(57, 60),
+                   clean = c(90, 93))
+# Result
+predict(object = model2, newdata = new_data) |> 
+  enframe(name = "observation", value = "overall_pred") |>
+  bind_cols(new_data)
+```
+
+## {.smaller}
+
+-   Standardizing the predictors
+
+    -   Compare the effect that different predictor variables have on a response variable
+    -   It must be interpreted in terms of standard deviations
+        -   One standard deviation in $x$ variable is associated with a standard deviation increase of decrease depending on the value of the estimated parameter
+
+```{r}
+amusement_park_std <- amusement_park |> 
+  select(-distance) |> 
+  mutate(across(rides:logdist, 
+                .fns = ~ scale(x = .x, 
+                               center = TRUE, 
+                               scale = TRUE)[,1]))
+amusement_park_std |> head()
+```
+
+##
+
+-   Standardizing the predictors
+
+```{r}
+model2_std <- lm(formula = overall ~ rides + games + wait + clean, 
+             data = amusement_park_std)
+summary(model2_std)
+```
+
+## {.smaller}
+
+-   Using factors as predictors
+
+```{r}
+model3 <- lm(formula = overall ~ rides + games + wait + clean + weekend + logdist + num.child,
+             data = amusement_park_std)
+tidy(model3)
+```
+
+```{r}
+glance(model3)
+```
+
+## {.smaller}
+
+-   Using factors as predictors
+
+    -   Overall satisfaction is about the same regardless the number of children
+
+```{r}
+amusement_park_std <- amusement_park_std |> 
+  mutate(num.child.factor = factor(num.child))
+model4 <- lm(formula = overall ~ rides + games + wait + clean + weekend + logdist + num.child.factor,
+             data = amusement_park_std)
+tidy(model4) |> slice(1, 2, 8:12)
+```
+
+```{r}
+glance(model4)
+```
+
+## {.smaller}
+
+-   Using factors as predictors
+
+    -   Preparing data
+
+```{r}
+amusement_park_std <- amusement_park_std |>
+  mutate(has.child = factor(x = num.child > 0, labels = c("No", "Yes")))
+model5 <- lm(formula = overall ~ rides + games + wait + clean + logdist + has.child,
+             data = amusement_park_std)
+tidy(model5) |> slice(1, 2, 7)
+```
+
+```{r}
+glance(model5)
+```
+
+## {.smaller}
+
+-   Using factors as predictors
+
+    -   Maybe having children and the visits on weekends are important for the scores so an interaction will be useful
+
+```{r}
+model6 <- lm(formula = overall ~ rides + games + wait + clean + weekend + logdist + 
+                                 has.child + rides:has.child + games:has.child + wait:has.child + 
+                                 clean:has.child + rides:weekend + games:weekend + wait:weekend + 
+                                 clean:weekend, data = amusement_park_std)
+tidy(model6) |> slice(9:16)
+glance(model6)
+```
+
+## {.smaller}
+
+-   Using factors as predictors
+
+    -   Only an interaction was significant
+
+```{r}
+model7 <- lm(formula = overall ~ rides + games + wait + clean + logdist + has.child +
+                       wait:has.child, data = amusement_park_std)
+tidy(model7)
+glance(model7)
+```
+
+## {.smaller}
+
+-   Using factors as predictors
+
+    -   Final model
+
+```{r}
+library(dotwhisker)  # Remember to install the package if it is not installed
+tidy(model7) |> 
+  dwplot(ci = 0.95,
+         dot_args = list(size = 2, color = "black"), whisker_args = list(color = "red"),
+         vline = geom_vline(xintercept = 0, color = "black", linetype = 2)) + 
+  labs(x = "Association with Overall Satisfaction", y = "Rating of Feature")
+```
+
+## {.smaller}
+
+-   Formula syntax
+
+```{r}
+#| echo: false
+
+tibble(formula = c("y $\\sim$ x",
+                   "y $\\sim$ -1 + x",
+                   "y $\\sim$ x + z",
+                   "y $\\sim$ x + z + x:z",
+                   "y $\\sim$ x*z",
+                   "y $\\sim$ (x + z + w)$\\^{}$2",
+                   "y $\\sim$ (x + z + w)$\\^{}$2 - x:z",
+                   "y $\\sim$ x + I(x$^2$)"),
+       model = c("$y_i = \\beta_0 + \\beta_1x_i + \\varepsilon_i$",
+                 "$y_i = \\beta_1 x_i + \\varepsilon_i$",
+                 "$y_i = \\beta_0 + \\beta_1 x_i + \\beta_2 z_i + \\varepsilon_i$",
+                 "$y_i = \\beta_0 + \\beta_1 x_i + \\beta_2 z_i + \\beta_3 x_i z_i + \\varepsilon_i$",
+                 "$y_i = \\beta_0 + \\beta_1 x_i + \\beta_2 z_i + \\beta_3 x_i z_i + \\varepsilon_i$",
+                 "$y_i = \\beta_0 + \\beta_1 x_i + \\beta_2 z_i + \\beta_3 w_i + \\beta_4 x_i z_i + \\beta_5 x_i w_i + \\beta_6 w_i z_i + \\varepsilon_i$",
+                 "$y_i = \\beta_0 + \\beta_1 x_i + \\beta_2 z_i + \\beta_3 w_i + \\beta_4 x_i w_i + \\beta_5 w_i z_i + \\varepsilon_i$",
+                 "$y_i = \\beta_0 + \\beta_1x_i + \\beta_1x_i^2 + \\varepsilon_i$")) |> 
+  gt() |> 
+  cols_label(
+    formula = "Formula",
+    model   = "Model"
+  )|> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |>
+  # tab_options(
+  #   row.striping.include_table_body = TRUE,
+  #   table.border.top.width = px(3),
+  #   table.border.top.color = "black",
+  #   column_labels.border.bottom.width = px(2),
+  #   column_labels.border.bottom.color = "black",
+  #   table.border.bottom.width = px(3),
+  #   table.border.bottom.color = "black",
+  #   table.font.size = px(24)
+  # ) |> 
+  fmt_markdown(columns = everything())
+```
+
+##
+
+-   Try the following models using `tidy`:
+
+```{r}
+#| eval: false
+
+lm(formula = overall ~ rides, data = amusement_park_std) |> tidy()
+lm(formula = overall ~ -1 + rides, data = amusement_park_std) |> tidy()
+lm(formula = overall ~ rides + has.child, data = amusement_park_std) |> tidy()
+lm(formula = overall ~ rides + has.child + has.child, data = amusement_park_std) |> tidy()
+lm(formula = overall ~ (rides + has.child + weekend)^2, 
+   data = amusement_park_std) |> tidy()
+lm(formula = overall ~ (rides + has.child + weekend)^2 - rides:has.child, 
+   data = amusement_park_std) |> tidy()
+lm(formula = overall ~ rides + I(rides^2) - rides:has.child, data = amusement_park_std) |> tidy()
+```
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**skimr**](https://CRAN.R-project.org/package=skimr), [**tidymodels**](https://CRAN.R-project.org/package=tidymodels), [**dotwhisker**](https://CRAN.R-project.org/package=dotwhisker), [**performance**](https://CRAN.R-project.org/package=performance),
+[**gt**](https://CRAN.R-project.org/package=gt) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+# References {.allowframebreaks}
