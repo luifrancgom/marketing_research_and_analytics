@@ -292,7 +292,7 @@ check_model(model1)
     
         -   Dots should fall along the line
 
-##
+## {.smaller}
 
 -   Linear Model with Multiple Predictors
 
@@ -325,7 +325,7 @@ check_model(model2)
 summary(model2)
 ```
 
-##
+## {.smaller}
 
 -   Linear Model with Multiple Predictors
 
@@ -747,9 +747,9 @@ tibble(formula = c("y $\\sim$ x",
                    "y $\\sim$ x + z",
                    "y $\\sim$ x + z + x:z",
                    "y $\\sim$ x*z",
-                   "y $\\sim$ (x + z + w)$\\^{}$2",
-                   "y $\\sim$ (x + z + w)$\\^{}$2 - x:z",
-                   "y $\\sim$ x + I(x$^2$)"),
+                   "y $\\sim$ (x + z + w)^2",
+                   "y $\\sim$ (x + z + w)^2 - x:z",
+                   "y $\\sim$ x + I(x^2)"),
        model = c("$y_i = \\beta_0 + \\beta_1x_i + \\varepsilon_i$",
                  "$y_i = \\beta_1 x_i + \\varepsilon_i$",
                  "$y_i = \\beta_0 + \\beta_1 x_i + \\beta_2 z_i + \\varepsilon_i$",
@@ -767,17 +767,17 @@ tibble(formula = c("y $\\sim$ x",
     style = cell_text(weight = "bold"),
     locations = cells_column_labels()
   ) |>
-  # tab_options(
-  #   row.striping.include_table_body = TRUE,
-  #   table.border.top.width = px(3),
-  #   table.border.top.color = "black",
-  #   column_labels.border.bottom.width = px(2),
-  #   column_labels.border.bottom.color = "black",
-  #   table.border.bottom.width = px(3),
-  #   table.border.bottom.color = "black",
-  #   table.font.size = px(24)
-  # ) |> 
-  fmt_markdown(columns = everything())
+   tab_options(
+     row.striping.include_table_body = TRUE,
+     table.border.top.width = px(3),
+     table.border.top.color = "black",
+     column_labels.border.bottom.width = px(2),
+     column_labels.border.bottom.color = "black",
+     table.border.bottom.width = px(3),
+     table.border.bottom.color = "black",
+     table.font.size = px(24)
+   ) |> 
+  fmt_markdown(columns = everything()) 
 ```
 
 ##
