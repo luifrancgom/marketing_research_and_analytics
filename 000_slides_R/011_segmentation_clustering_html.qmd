@@ -1,0 +1,101 @@
+---
+title: "Reducing Data Complexity"
+subtitle: Session 1
+author:
+  - name: 
+      given: Luis F.
+      family: Gómez L.
+    orcid: 0000-0002-2877-9015
+    email: luis.gomezl@unimilitar.edu.co
+    affiliations:
+      - name: Distance Learning Faculty
+toc: true
+toc-depth: 1
+slide-level: 2
+format:
+  presentation-umng-revealjs:
+    logo-vertical-strip: ../000_logos/logo-white-vertical.png 
+    embed-resources: true
+    mermaid-format: png
+    reference-location: document
+date: last-modified
+date-format: "D MMMM, YYYY"
+knitr: 
+  opts_chunk: 
+    echo: true
+    warning: false
+    fig.align: center
+    out.width: 85%
+lang: en
+bibliography: ../000_references/marketing_research_and_analytics.bib
+csl: ../000_references/apa-7.csl
+editor: source
+---
+
+```{r}
+#| echo: false
+#| label: libraries
+
+library(tidyverse)
+library(skimr)
+library(latex2exp)
+library(ggforce)
+library(gt)
+
+library(kableExtra)
+```
+
+```{r}
+#| label: palette
+#| echo: false
+
+umng_palette <- c(
+  "#043074",
+  "#fdc600",
+  "#0d5e30",
+  "#ee2a24",
+  "#fc6700",
+  "#00b3f0",
+  "#6e3c1a",
+  "#f8941c",
+  "#8e44ad",
+  "#2c3e50",
+  "#16a085",
+  "#c0392b",
+  "#e91e63"
+)
+```
+
+# Please Read Me
+
+##
+
+-   This presentation is based on [@chapman_r_2019, Chapter 11]
+
+## 
+
+- **Purpose**
+
+    - Find groups of customers that differ in different dimensions to engage in more effective promotion
+
+# Consumer segmentation survey
+
+##
+
+
+
+# Acknowledgments
+
+##
+
+-   To my family that supports me
+
+-   To the taxpayers of Colombia and the [**UMNG students**](https://www.umng.edu.co/estudiante) who pay my salary
+
+-   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
+
+-   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**skimr**](https://CRAN.R-project.org/package=skimr), [**latex2exp**](https://CRAN.R-project.org/package=latex2exp), [**ggforce**](https://CRAN.R-project.org/package=ggforce),
+[**gt**](https://CRAN.R-project.org/package=gt) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+
+# References {.allowframebreaks}
+
