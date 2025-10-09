@@ -1,5 +1,5 @@
 ---
-title: "Reducing Data Complexity"
+title: "Segmentation: Clustering"
 subtitle: Session 1
 author:
   - name: 
@@ -82,7 +82,937 @@ umng_palette <- c(
 
 ##
 
+-   **age**: age of the consumer in years
+-   **gender**: if the consumer is male of female
+-   **income**: yearly disposable income of the consumer
+-   **kids**: number of children of the consumer
+-   **ownHome**: if the consumer owns a home
+-   **subscribe**: if the consumer is subscribed or not
 
+##
+
+-   **Import data**
+
+```{r}
+segmentation <- read_csv(file = "http://goo.gl/qw303p") |> 
+  select(-Segment) # Remove Segment column to understand how it was build
+segmentation |> head(n = 5)
+```
+
+##
+
+-   **Inspect data**
+
+```{r}
+segmentation |> glimpse()
+```
+
+##
+
+-   Transform data
+
+```{r}
+segmentation <- segmentation |>
+  mutate(gender = factor(gender, ordered = FALSE),
+         kids = as.integer(kids),
+         ownHome = factor(ownHome, ordered = FALSE),
+         subscribe = factor(subscribe, ordered = FALSE))
+
+segmentation |> head(n = 5)
+```
+
+##
+
+-   **Summarize data**
+
+    -   Ups the table is really big!!! Try it in your console to see the complete table
+
+```{r}
+#| eval: false
+segmentation |> skim()
+```
+
+## {.smaller}
+
+**Segmentation**
+
+-   Classification (**We will not cover this topic**)
+
+    -   Supervised learning
+
+        -   Dependent variable is known and the goal is to predict the dependent variable from the independent variables
+
+        -   Naive bayes, Random Forest
+
+-   Clustering (**This topic will be covered**)
+
+    -   Unsupervised learning
+
+        -   Dependent variable is unknown and the goal is to discover it from the independent variables
+
+        -   Model-based clustering, Latent Class Analysis (**We will not cover these methods**)
+
+        -   Hierarchical clustering, k-means (**These methods will be covered**)
+
+##
+
+-   Clustering
+
+    -   Grouping a set of observations in such a way that observations in the same group (cluster) are more similar to each other than to those in other groups (clusters).
+
+    -   A notion of how **"close"** 2 observations is necessary to group objects where this is formalized using the concept of **distance** (known as metric[^1] in mathematics)
+
+        -   There are many notions of distance [@deza_encyclopedia_2016] where in this chapter the **Euclidean** and the **Gower** distance will be used
+
+[^1]: <https://en.wikipedia.org/wiki/Metric_space>
+
+## {.smaller}
+
+-   **Euclidean distance**: it can only be used for numerical data
+
+    -   $x = (x_1, x_2, \ldots, x_n)$
+    -   $y = (y_1, y_2, \ldots, y_n)$
+
+$$\begin{split}
+  d(x,y) & = \sqrt{(x_1 - y_1)^2 + (x_2 - y_2)^2 + \ldots + (x_n - y_n)^2} \\
+  & = \sqrt{ \sum_{k = 1}^n (x_k - y_k)^2 }
+  \end{split}$$
+
+-   An example:
+
+    -   2 customers characteristic by age and income
+
+        -   $a = (45, 3500)$
+        -   $b = (23, 1500)$
+
+## {.smaller}
+
+-   Manual calculation
+
+    -   $d(a,b) = \sqrt{(45 - 23)^2 + (3500 - 1500)^2} = 2000.121$
+
+```{r}
+#| echo: false
+
+customers <- tibble(Age = c(45, 23),
+                    Income = c(3500, 1500),
+                    Customer = c("a", "b"))
+
+customers |> 
+  ggplot(aes(x = Age, y = Income)) + 
+  geom_point(aes(fill = Customer),
+             shape = 21, color = "black",
+             size = 3) + 
+  annotate(geom = "segment",
+           x = 23, xend = 45,
+           y = 1500, yend = 1500,
+           color = "#2C3E50",
+           linetype = "dashed") + 
+  annotate(geom = "segment",
+           x = 45, xend = 45,
+           y = 1500, yend = 3500,
+           color = "#2C3E50",
+           linetype = "dashed") + 
+  annotate(geom = "segment",
+           x = 23, xend = 45,
+           y = 1500, yend = 3500,
+           color = "#E31A1C") + 
+  annotate(geom = "text",
+           x = 35, y = 2500,
+           label = TeX(r'($\sqrt{(45 - 23)^2 + (3500 - 1500)^2}$)', 
+                       output = "character"), 
+           parse = TRUE,
+           vjust = -2,
+           angle = 27) + 
+  scale_x_continuous(breaks = customers$Age) +
+  scale_y_continuous(breaks = customers$Income) + 
+  labs(title = "Euclidean distance")
+```
+
+## {.smaller}
+
+-   Using R
+
+```{r}
+customers <- tibble(Customer = c("a", "b"),
+                    Age = c(45, 23),
+                    Income = c(3500, 1500))
+customers
+```
+
+```{r}
+library(cluster)
+customers |> 
+  select(-Customer) |> 
+  daisy(metric = "euclidean")
+```
+
+## {.smaller}
+
+-   **Gower distance**: it can be used for categorical, numerical data and missing values
+
+    -   $x = (x_1, x_2, \ldots, x_n)$
+    -   $y = (y_1, y_2, \ldots, y_n)$
+
+$$\begin{split}
+  d(x,y) & = \left[ \frac{w_1\delta_{x_1y_1}^k}{\sum_{k=1}^n w_k\delta_{x_iy_i}^k}\right] d_{x_1y_1}^1 + \ldots + \left[ \frac{w_n\delta_{x_ny_n}^k}{\sum_{k=1}^n w_k\delta_{x_iy_i}^k} \right] d_{x_ny_n}^n \\ 
+  & = \frac{\sum_{k=1}^n w_k \delta_{x_iy_i}^kd_{x_iy_i}^k}{\sum_{k=1}^n w_k\delta_{x_iy_i}^k}
+  \end{split}$$
+
+Where:
+
+$$w_k \in \mathbb{R} \text{ for } k = 1, 2, \ldots, n$$
+
+$$\sum_{k=1}^n w_k\delta_{x_iy_i}^k = w_1\delta_{x_1y_1}^1 + w_2\delta_{x_2y_2}^2 + \ldots + w_n\delta_{x_ny_n}^n$$
+
+## {.smaller}
+
+-   **Gower distance**: it can be used for categorical, numerical data and missing values
+
+    -   $x = (x_1, x_2, \ldots, x_n)$
+    -   $y = (y_1, y_2, \ldots, y_n)$
+
+$$d(x,y) = \frac{\sum_{k=1}^n w_k \delta_{x_ky_k}^kd_{x_ky_k}^k}{\sum_{k=1}^n w_k\delta_{x_ky_k}^k}$$
+
+Where[^2]:
+
+[^2]: See [@kaufman_finding_1990, pp. 25-27] for a definition of **asymmetric binary variable**
+
+$$\delta_{x_ky_k}^k = 
+  \begin{cases}
+   0 & \text{if } x_k \text{ or } y_k \text{ is a missing value}\\
+   0 & \text{if } x_k, y_k \text{ represent an  asymmetric binary variable and } x_k = y_k = 0 \\
+   1 & \text{otherwise}
+  \end{cases}$$
+
+## {.smaller}
+
+-   **Gower distance**: it can be used for categorical, numerical data and missing values
+
+    -   $x = (x_1, x_2, \ldots, x_n)$
+    -   $y = (y_1, y_2, \ldots, y_n)$
+
+$$d(x,y) = \frac{\sum_{k=1}^n w_k \delta_{x_ky_k}^kd_{x_ky_k}^k}{\sum_{k=1}^n w_k\delta_{x_ky_k}^k}$$
+
+Where:
+
+$$d_{x_ky_k}^k = 
+  \begin{cases}
+   0 & \text{if } x_k, y_k \text{ is a nominal or binary variable and } x_k = y_k \\
+   1 & \text{if } x_k, y_k \text{ is a nominal or binary variable and } x_k \neq y_k \\
+   \frac{\left| x_k - y_k \right|}{max(x_k, y_k) - min(x_k, y_k)} & \text{otherwise}
+  \end{cases}$$
+
+If $x_k, y_k$ represent an ordinal variable they are replaced by their integer codes. For example if $x_k \precsim y_k$ then $1$ is assigned to $x_k$ and $2$ is assigned to $y_k$
+
+## {.smaller}
+
+-   An example:
+
+    -   2 customers characteristic by sex (nominal), income (numerical), satisfaction (ordinal with levels $Low \precsim Medium \precsim High$) and age (with a missing value $(NA)$)
+
+        -   $a = (Female, 3500, Medium, 45)$
+        -   $b = (Male, 1500, High, NA)$
+
+-   Manual calculation:
+
+    -   In R $w_k = 1$ for every $k$ as a default value where in this example $k = 1, 2, 3, 4$
+
+    -   $\sum_{k=1}^4 w_k\delta_{x_ky_k}^k = 1*1 + 1*1 + 1*1 + 1*0 = 1 + 1 + 1 + 0 = 3$
+
+    -   $\sum_{k=1}^4 w_k \delta_{x_ky_k}^kd_{x_ky_k}^k = 1*1 + 1*\frac{\left| 3500 - 1500 \right|}{3500 - 1500} + 1*\frac{\left| 2 - 3 \right|}{3 - 2} + 0 = 3$
+
+    -   $d(x,y) = \frac{\sum_{k=1}^4 w_k \delta_{x_ky_k}^kd_{x_ky_k}^k}{\sum_{k=1}^4 w_k\delta_{x_ky_k}^k} = \frac{3}{3} = 1$
+
+## {.smaller}
+
+-   **Gower distance** range:
+
+    -   $d(x,y) \in [0,1]$
+    -   If $d(x,y) \longrightarrow 0$ is more similar
+    -   If $d(x,y) \longrightarrow 1$ is more dissimilar
+
+-   Using R
+
+```{r}
+customers2 <- tibble(Customer = c("a", "b"),
+                     Sex = c("Female", "Male"),
+                     Income = c(3500, 1500),
+                     Satisfaction = c("Medium", "High"),
+                     Age = c(45, NA)) |> 
+  mutate(Sex = factor(x = Sex, 
+                      ordered = FALSE),
+         Satisfaction = factor(x = Satisfaction, 
+                               levels = c("Low", "Medium", "High"),
+                               ordered = TRUE))
+customers2
+```
+
+## {.smaller}
+
+-   Using R
+
+```{r}
+customers2 |>
+  select(-Customer) |>
+  daisy(metric = "gower")
+```
+
+-   In this case:
+
+    -   `Metric: mixed` because it includes categorical and numerical data
+
+    -   For `Types = N, I, O, I` check out `?cluster::dissimilarity.object`[^3]
+
+        -   `N`: Nominal (factor)
+        -   `I`: Interval scaled (numeric)
+        -   `O`: Ordinal (ordered factor)
+
+[^3]: See [@stevens_theory_1946] and [Level of measurement](https://en.wikipedia.org/wiki/Level_of_measurement)
+
+## {.smaller}
+
+-   Using R
+
+```{r}
+customers2 |>
+  select(-Customer) |>
+  daisy(metric = "gower")
+```
+
+-   In this case:
+
+    -   `Number of objects : 2`
+
+        -   There are 2 observations that correspond to customers **a** and **b**: $a = (Female, 3500, Medium, 45)$ and $b = (Male, 1500, High, NA)$
+
+## {.smaller}
+
+-   The original dissimilarity matrix is of dimension $300 \times 300$
+
+    -   Showing only the relation between the first $5$ observations
+
+    -   The position $(i,j)$ means the dissimilarity between the observations $i$ and $j$
+
+        -   For example $(4, 3)$, which is equal to $0.425$, is the dissimilarity between the observations $4$ and $3$
+
+```{r}
+segmentation_dist <- segmentation |> 
+  daisy(metric = "gower")
+
+segmentation_dist |> 
+  as.matrix() |> 
+  as_tibble() |> 
+  select(`1`:`5`) |> 
+  slice(1:5)
+```
+
+## {.smaller}
+
+```{r}
+customers3 <- tibble(Customer = c("a", "b", "c", "d", "e"),
+                     Sex = c("Female", "Male", "Female", "Female", "Male"),
+                     Income = c(3500, 1500, 200, 450, 5000),
+                     Satisfaction = c("Medium", "High", "Low", "Low", "Medium"),
+                     Age = c(45, NA, 34, 23, 55)) |> 
+  mutate(Sex = factor(x = Sex, 
+                      ordered = FALSE),
+         Satisfaction = factor(x = Satisfaction, 
+                               levels = c("Low", "Medium", "High"),
+                               ordered = TRUE))
+
+customers3
+```
+
+## {.smaller}
+
+-   Hierarchical clustering
+
+    -   **Method**: Complete Linkage Clustering
+
+```{r}
+customers3_dist <- daisy(x = select(customers3, -Customer),
+                        metric = "gower")
+
+customers3_dist
+
+customers3_hc <- hclust(d = customers3_dist, 
+                        method = "complete")
+
+customers3_hc
+```
+
+##
+
+-   Hierarchical clustering
+
+    -   **Method**: Complete Linkage Clustering
+
+```{r}
+plot(customers3_hc)
+```
+
+##
+
+-   Compare each observation and find the pair that is more similar
+
+```{r}
+#| echo: false
+
+data_frame <- customers3_dist |> 
+  as.matrix() |> 
+  as.data.frame() |> 
+  mutate(` ` = 1:5, .before = `1`) |> 
+  mutate(across(.cols = `1`:`5`, 
+                .fns = ~ round(x = .x,
+                               digits = 8)))
+
+iteration_1_tbl <- data_frame |> 
+  gt() |>
+  fmt_number(
+    columns = 2,
+    rows = 1, 
+    decimals = 0
+  ) |>
+  fmt_number(
+    columns = 3,
+    rows = 2, 
+    decimals = 0
+  ) |>
+  fmt_number(
+    columns = 4,
+    rows = 3, 
+    decimals = 0
+  ) |>
+  fmt_number(
+    columns = 5,
+    rows = 4, 
+    decimals = 0
+  ) |>
+  fmt_number(
+    columns = 6,
+    rows = 5, 
+    decimals = 0
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(everything())
+  ) |> 
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(
+      columns = 1
+    )
+  ) |> 
+  tab_style(
+    style = list(
+      cell_fill(color = "#2C3E50"),
+      cell_text(color = "white")
+    ),
+    locations = cells_body(
+      columns = 4,
+      rows = 4
+    )
+  ) |>
+  tab_options(
+    row.striping.include_table_body = TRUE,
+    table.border.top.width = px(3),
+    table.border.top.color = "black",
+    column_labels.border.bottom.width = px(2),
+    column_labels.border.bottom.color = "black",
+    table.border.bottom.width = px(3),
+    table.border.bottom.color = "black",
+    table.font.size = px(34),
+    footnotes.marks = "letters"
+  )
+
+iteration_1_tbl
+```
+
+##
+
+-   Now we have the first cluster that includes the observations $3$ and $4$: $C(3,4)$
+
+-   Then we need to create clusters with observations $1$, $2$ and $5$ and the cluster $C(3,4)$
+
+    -   How we compare a cluster with an observation
+
+        -   **Complete Linkage Clustering**: Use the maximum distance between an observation and an observation that belongs to the cluster
+
+## {.smaller}
+
+-   Compare each observation, including the clusters build, and find the pair that is more similar
+
+    -   In our case $1$, $2$, $5$ and $C(3,4)$
+
+        -   The distance between $1$ and $C(3,4)$ is $0.45572917$\
+        -   The distance between $2$ and $C(3,4)$ is $0.7569444$
+        -   The distance between $5$ and $C(3,4)$ is $0.8619792$
+
+```{r}
+#| echo: false
+
+iteration_2_tbl <- iteration_1_tbl |> 
+  tab_style(
+    style = list(
+      cell_fill(color = "#E31A1C"),
+      cell_text(color = "white")
+    ),
+    locations = cells_body(
+      columns = 2,
+      rows = 5
+    )
+  )
+
+iteration_2_tbl
+```
+
+##
+
+-   Now we have the second cluster that includes the observations $1$ and $5$: $C(1,5)$
+
+-   Then we need to create clusters with observation $2$ and clusters $C(3,4)$ and $C(1,5)$
+
+    -   How we compare a cluster with another cluster
+
+        -   **Complete Linkage Clustering**: Use the maximum distance between an observation that belongs to the first cluster and an observation that belongs to the second cluster
+
+## {.smaller}
+
+-   Compare each observation, including the clusters build, and find the pair that is more similar
+
+    -   In our case $2$, $C(3,4)$ and $C(1,5)$
+
+        -   The distance between $2$ and $C(3,4)$ is $0.7569444$\
+        -   The distance between $2$ and $C(1,5)$ is $0.6388889$
+
+```{r}
+#| echo: false
+
+iteration_3_tbl <- iteration_2_tbl |> 
+  tab_style(
+    style = list(
+      cell_fill(color = "#18BC9C"),
+      cell_text(color = "white")
+    ),
+    locations = cells_body(
+      columns = 2,
+      rows = 2
+    )
+  )
+
+iteration_3_tbl
+```
+
+##
+
+-   Now we have the third cluster that includes the observation $2$ and the cluster $C(1,5)$: $C(2, C(1,5))$
+
+-   Then we need to create clusters with cluster $C(2, C(1,5))$ and cluster $C(3,4)$
+
+    -   This is the cluster that includes all the observations
+
+## {.smaller}
+
+-   Compare each observation, including the clusters build, and find the pair that is more similar
+
+    -   In our case $C(3,4)$ and $C(2, C(1,5))$
+
+        -   The distance between $C(3,4)$ and $C(2, C(1,5))$ is $0.86197917$
+
+```{r}
+#| echo: false
+
+iteration_4_tbl <- iteration_3_tbl |> 
+  tab_style(
+    style = list(
+      cell_fill(color = "#CCBE93"),
+      cell_text(color = "white")
+    ),
+    locations = cells_body(
+      columns = 5,
+      rows = 5
+    )
+  )
+
+iteration_4_tbl
+```
+
+-   The heights of the **Cluster Dendrogram** are: $0.09895833$, $0.40625$, $0.63888889$ and $0.86197917$
+
+##
+
+-   Select a number of clusters, for example: $2$ clusters
+
+```{r}
+plot(customers3_hc)
+rect.hclust(customers3_hc, k = 2, border = "red")
+```
+
+##
+
+-   Extract clusters and assign them to observations
+
+```{r}
+customers3_hc_clusters <- cutree(customers3_hc, k = 2)
+customers3 |> 
+  mutate(cluster = customers3_hc_clusters)
+```
+
+##
+
+-   Select a number of clusters, using `segmentation`, for example: $4$ clusters
+
+```{r}
+segmentation_hc <- hclust(d = segmentation_dist,
+                          method = "complete")
+plot(segmentation_hc)
+rect.hclust(segmentation_hc, k = 4, border = "red")
+```
+
+##
+
+-   Extract clusters and assign them to observations, using `segmentation`
+
+```{r}
+segmentation_hc_clusters <- cutree(segmentation_hc, k = 4)
+segmentation |> 
+  mutate(cluster = segmentation_hc_clusters)
+```
+
+## {.smaller}
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+```{r}
+kaufman_example <- tibble(name = c("Ilan", "Jacqueline", "Kim", "Lieve", "Leon", "Peter", "Talia", "Tina"),
+                          weight_kg = c(15, 49, 13, 45, 85, 66, 12, 10),
+                          height_cm = c(95, 156, 95, 160, 178, 176, 90, 78))
+
+kaufman_example
+```
+
+##
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+```{r}
+kaufman_example |> 
+  ggplot() + 
+  geom_point(aes(x = weight_kg, y = height_cm))
+```
+
+##
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+    -   Applying the [**Lloyd's algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+        -   Choose $k$ centers or the computer will choose $k$ centers at random, in our case we choose $k = 2$
+
+```{r}
+#| echo: false
+
+centers_named <- matrix(data = c(40, 150, 80, 150), 
+                        nrow = 2, byrow = TRUE,
+                        dimnames = list(1:2,
+                                        c("weight_kg", "height_cm"))) |> 
+  as_tibble() |> 
+  mutate(Center = factor(x = 1:2, ordered = FALSE))
+
+kaufman_example |> 
+  ggplot() + 
+  geom_point(aes(x = weight_kg, y = height_cm)) + 
+  geom_point(data = centers_named,
+             aes(x = weight_kg, y = height_cm,
+                 fill = Center), 
+                 size = 6, shape = 21, color = "black")
+```
+
+## {.smaller}
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+    -   Applying the [**Lloyd's algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+        -   Calculate the squared euclidean distance for each point to the $k$ centers and assign each point to the nearest center
+
+        -   For example for the point $Ilan = (15, 95)$ the distance to $Center_1 = (40, 150)$ is $(15 - 40)^2 + (95 - 150)^2 = 3650$ and the distance to $Center_2 = (80, 150)$ is $(15 - 80)^2 + (95 - 150)^2 = 7250$
+
+        -   Therefore $Ilan = (15, 95)$ is assigned to $Center_1$
+
+##
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+    -   Applying the [**Lloyd's algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+```{r}
+#| echo: false
+
+kaufman_example <- kaufman_example |> 
+  mutate(x_center1 = 40,
+         y_center1 = 150,
+         x_center2 = 80,
+         y_center2 = 150,
+         dist_center1 = (weight_kg - x_center1)^2 + ( height_cm - y_center1)^2,
+         dist_center2 = (weight_kg - x_center2)^2 + ( height_cm - y_center2)^2,
+         Center = if_else(condition = dist_center1 < dist_center2,
+                          true = 1, false = 2) |> factor(ordered = FALSE)) |>
+  select(-c(dist_center1:dist_center2))
+
+kaufman_example |> 
+  ggplot() + 
+  geom_point(aes(x = weight_kg, y = height_cm,
+                 color = Center)) + 
+  geom_point(data = centers_named,
+             aes(x = weight_kg, y = height_cm,
+                 fill = Center), 
+             size = 6, shape = 21, color = "black")
+```
+
+## {.smaller}
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+    -   Applying the [**Lloyd's algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+        -   Now calculate new centers using the assigned points by using the mean
+
+        -   For example for the new $Center_1$ the new position will be $x = \frac{15 + 49 + 13 + 45 + 12 + 10}{6} = 24$ and $y = \frac{95 + 156 + 95 + 160 + 90 + 78}{6} \approx 112.33$
+
+        -   Therefore we update as $Center_1 \approx (24, 112.33)$
+
+##
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+    -   Applying the [**Lloyd's algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+```{r}
+#| echo: false
+
+kaufman_example <- kaufman_example |> 
+  mutate(x_center1 = 
+           mean(x = kaufman_example$weight_kg[kaufman_example$Center == 1]),
+         y_center1 = mean(kaufman_example$height_cm[kaufman_example$Center == 1]),
+         x_center2 = mean(x = kaufman_example$weight_kg[kaufman_example$Center == 2]),
+         y_center2 = mean(kaufman_example$height_cm[kaufman_example$Center == 2])) |> 
+  select(weight_kg:y_center2)
+
+centers_named <- matrix(data = c(unique(kaufman_example$x_center1),
+                                 unique(kaufman_example$y_center1),
+                                 unique(kaufman_example$x_center2),
+                                 unique(kaufman_example$y_center2)),
+                        nrow = 2, byrow = TRUE,
+                        dimnames = list(1:2,
+                                        c("weight_kg", "height_cm"))) |>
+  as_tibble() |>
+  mutate(Center = factor(x = 1:2, ordered = FALSE))
+
+kaufman_example |>
+  ggplot() +
+  geom_point(aes(x = weight_kg, y = height_cm)) +
+  geom_point(data = centers_named,
+             aes(x = weight_kg, y = height_cm,
+                 fill = Center),
+             size = 6, shape = 21, color = "black")
+```
+
+## {.smaller}
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+    -   Applying the [**Lloyd's algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+    -   Repeat the process by calculating the squared euclidean distance for each point to the new $k$ centers and assign each point to the nearest center
+
+```{r}
+#| echo: false
+
+kaufman_example <- kaufman_example |> 
+  mutate(dist_center1 = (weight_kg - x_center1)^2 + ( height_cm - y_center1)^2,
+         dist_center2 = (weight_kg - x_center2)^2 + ( height_cm - y_center2)^2,
+         Center = if_else(condition = dist_center1 < dist_center2,
+                          true = 1, false = 2) |> factor(ordered = FALSE)) |>
+  select(-c(dist_center1:dist_center2))
+
+kaufman_example |> 
+  ggplot() + 
+  geom_point(aes(x = weight_kg, y = height_cm,
+                 color = Center)) + 
+  geom_point(data = centers_named,
+             aes(x = weight_kg, y = height_cm,
+                 fill = Center), 
+             size = 6, shape = 21, color = "black")
+```
+
+## {.smaller}
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+    -   Applying the [**Lloyd's algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+    -   Repeat the process until the $k$ centers don't change and assign each point to the nearest final center
+
+```{r}
+#| echo: false
+
+kaufman_example <- kaufman_example |> 
+  mutate(x_center1 = 
+           mean(x = kaufman_example$weight_kg[kaufman_example$Center == 1]),
+         y_center1 = mean(kaufman_example$height_cm[kaufman_example$Center == 1]),
+         x_center2 = mean(x = kaufman_example$weight_kg[kaufman_example$Center == 2]),
+         y_center2 = mean(kaufman_example$height_cm[kaufman_example$Center == 2])) |> 
+  select(weight_kg:y_center2) |> 
+  mutate(dist_center1 = (weight_kg - x_center1)^2 + ( height_cm - y_center1)^2,
+         dist_center2 = (weight_kg - x_center2)^2 + ( height_cm - y_center2)^2,
+         Center = if_else(condition = dist_center1 < dist_center2,
+                          true = 1, false = 2) |> factor(ordered = FALSE)) |>
+  select(-c(dist_center1:dist_center2))
+
+centers_named <- matrix(data = c(unique(kaufman_example$x_center1),
+                                 unique(kaufman_example$y_center1),
+                                 unique(kaufman_example$x_center2),
+                                 unique(kaufman_example$y_center2)),
+                        nrow = 2, byrow = TRUE,
+                        dimnames = list(1:2,
+                                        c("weight_kg", "height_cm"))) |>
+  as_tibble() |>
+  mutate(Center = factor(x = 1:2, ordered = FALSE))
+
+kaufman_example |> 
+  ggplot() + 
+  geom_point(aes(x = weight_kg, y = height_cm,
+                 color = Center),
+             show.legend = FALSE) + 
+  geom_point(data = centers_named,
+             aes(x = weight_kg, y = height_cm,
+                 fill = Center), 
+             size = 6, shape = 21, color = "black",
+             alpha = 0.5) +
+  geom_mark_rect(aes(x = weight_kg, y = height_cm,
+                     color = Center),
+                 expand = unit(2, "mm"),
+                 show.legend = FALSE)
+```
+
+##
+
+-   K-means clustering example [@kaufman_finding_1990, pp. 5]
+
+    -   Applying the [**Hartigan-Wong algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+```{r}
+kaufman_example_kmeans <- kaufman_example |> 
+  select(weight_kg, height_cm) |> 
+  kmeans(centers = 2, 
+         algorithm = "Hartigan-Wong") # R uses this algorithm by default
+
+kaufman_example_kmeans
+```
+
+##
+
+-   Extract clusters and assign them to observations
+
+```{r}
+#| echo: false
+
+kaufman_example <- tibble(name = c("Ilan", "Jacqueline", "Kim", "Lieve", "Leon", "Peter", "Talia", "Tina"),
+                          weight_kg = c(15, 49, 13, 45, 85, 66, 12, 10),
+                          height_cm = c(95, 156, 95, 160, 178, 176, 90, 78))
+```
+
+```{r}
+kaufman_example_kmeans_clusters <- kaufman_example |> 
+  mutate(cluster = kaufman_example_kmeans$cluster)
+kaufman_example_kmeans_clusters
+```
+
+## {.smaller}
+
+-   Select a number of clusters, using `segmentation`, for example: 4 clusters
+
+    -   k-means only work with numerical data
+
+    -   A possible solution is to transform categorical data into numerical data
+
+        -   If a variable is nominal only works if you have 2 categories
+        -   If a variable is ordinal you assume that the notion of distance between them is constant or you need to specify integers to determine what distance is appropiate
+        -   Also you need to scale the variables taking into account that you are mixing categorical and numerical variables
+
+## {.smaller}
+
+-   Convert binary nominal data to numerical data
+
+    -   Only make sense when you have 2 categories
+
+
+```{r}
+segmentation_numeric <- segmentation |> 
+  mutate(gender = as.integer(gender),
+         ownHome = as.integer(ownHome),
+         subscribe = as.integer(subscribe))
+
+segmentation_numeric
+```
+
+## {.smaller}
+
+-   Scale data to map each variable to a common scale
+
+    -   We are going to scale each variable to $[0,1]$
+
+        -   Use `across` and `rescale`
+
+```{r}
+segmentation_numeric_scale <- segmentation_numeric |> 
+  mutate(across(.cols = age:subscribe,
+                # scales is a package that is 
+                # installed with the tidyverse
+                # but it is not loaded automatically
+                # You can use a particular function of a package using the notation
+                ## <package>::<function>
+                .fns = scales::rescale))
+
+segmentation_numeric_scale |> head()
+```
+
+## {.smaller}
+
+-   Apply k-means with $k = 4$ and [**Hartigan-Wong algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+
+    -   k-means start with $k = 4$ random centers so you need to fix this initial decision using `set.seed` if the clusters tend to change
+
+\tiny
+
+```{r}
+set.seed(seed = 1234)
+
+segmentation_numeric_scale_kmeans <- segmentation_numeric_scale |> 
+  kmeans(centers = 4, 
+         algorithm = "Hartigan-Wong")
+
+segmentation_numeric_scale_kmeans |> str()
+```
+
+##
+
+-   Extract clusters and assign them to observations
+
+\tiny
+
+```{r}
+segmentation_kmeans_clusters <- segmentation |> 
+  mutate(cluster = segmentation_numeric_scale_kmeans$cluster)
+
+segmentation_kmeans_clusters
+```
 
 # Acknowledgments
 
@@ -95,7 +1025,7 @@ umng_palette <- c(
 -   To the [**Business Science**](https://www.business-science.io/) and [**R4DS Online Learning**](https://www.rfordatasci.com/) communities where I learn [**R**](https://www.r-project.org/about.html) and [**$\pi$-thon**](https://www.python.org/about/)
 
 -   To the [**R Core Team**](https://www.r-project.org/contributors.html), the creators of [**RStudio IDE**](https://posit.co/products/open-source/rstudio/), [**Quarto**](https://quarto.org/) and the authors and maintainers of the packages [**tidyverse**](https://CRAN.R-project.org/package=tidyverse), [**skimr**](https://CRAN.R-project.org/package=skimr), [**latex2exp**](https://CRAN.R-project.org/package=latex2exp), [**ggforce**](https://CRAN.R-project.org/package=ggforce),
-[**gt**](https://CRAN.R-project.org/package=gt) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
+[**gt**](https://CRAN.R-project.org/package=gt),
+[**cluster**](https://CRAN.R-project.org/package=cluster) and [**tinytex**](https://CRAN.R-project.org/package=tinytex) for allowing me to access these tools without paying for a license
 
 # References {.allowframebreaks}
-
