@@ -901,13 +901,15 @@ kaufman_example |>
                  show.legend = FALSE)
 ```
 
-##
+## {.smaller}
 
 -   K-means clustering example [@kaufman_finding_1990, pp. 5]
 
     -   Applying the [**Hartigan-Wong algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
 
 ```{r}
+set.seed(seed = 1234) # By default R chooses at random the initial centers
+                      # with set.seed we always fix the same initial centers
 kaufman_example_kmeans <- kaufman_example |> 
   select(weight_kg, height_cm) |> 
   kmeans(centers = 2, 
@@ -933,10 +935,34 @@ kaufman_example_kmeans_clusters <- kaufman_example |>
   mutate(cluster = kaufman_example_kmeans$cluster)
 kaufman_example_kmeans_clusters
 ```
+## {.smaller}
+
+-   How to choose the number of clusters?
+
+```{r}
+library(parameters)
+# Choose the optimal number of clusters
+n_clusts_kaufman_example <- kaufman_example |> 
+  select(weight_kg, height_cm) |> 
+  n_clusters(
+    standardize = TRUE,
+    nbclust_method = "kmeans",
+    n_max = 7 # We have only 8 rows
+  )
+
+# select the most parsimonious solution with fewer clusters
+n_clusts_kaufman_example
+
+# show the criterions used
+n_clusts_kaufman_example |> 
+  as_tibble()
+```
 
 ## {.smaller}
 
--   Select a number of clusters, using `segmentation`, for example: 4 clusters
+-   Select a number of clusters, using `segmentation`
+
+    -   Use the package `parameters` to select the number of clusters for k-means
 
     -   k-means only work with numerical data
 
@@ -983,19 +1009,41 @@ segmentation_numeric_scale <- segmentation_numeric |>
 segmentation_numeric_scale |> head()
 ```
 
+## 
+
+-  Choose the numbers of clusters using the package `parameters` for k-means
+
+```{r}
+n_clusts_segmentation_numeric_scale <- segmentation_numeric_scale |> 
+  n_clusters(
+    standardize = FALSE, # In this case we don't need to standardize
+    nbclust_method = "kmeans",
+    n_max = 10 # This is the number set by default
+  )
+
+n_clusts_segmentation_numeric_scale
+```
+
+## 
+
+- You can check, if you want, the criteria used to select the number of clusters:
+
+```{r}
+n_clusts_segmentation_numeric_scale |> 
+  as_tibble()
+```
+
 ## {.smaller}
 
--   Apply k-means with $k = 4$ and [**Hartigan-Wong algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
+-   Apply k-means with $k = 5$ and [**Hartigan-Wong algorithm**](https://en.wikipedia.org/wiki/K-means_clustering)
 
-    -   k-means start with $k = 4$ random centers so you need to fix this initial decision using `set.seed` if the clusters tend to change
-
-\tiny
+    -   k-means start with $k = 5$ random centers so you need to fix this initial decision using `set.seed` if the clusters tend to change
 
 ```{r}
 set.seed(seed = 1234)
 
 segmentation_numeric_scale_kmeans <- segmentation_numeric_scale |> 
-  kmeans(centers = 4, 
+  kmeans(centers = 5, 
          algorithm = "Hartigan-Wong")
 
 segmentation_numeric_scale_kmeans |> str()
@@ -1004,8 +1052,6 @@ segmentation_numeric_scale_kmeans |> str()
 ##
 
 -   Extract clusters and assign them to observations
-
-\tiny
 
 ```{r}
 segmentation_kmeans_clusters <- segmentation |> 
