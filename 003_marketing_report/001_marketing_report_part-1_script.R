@@ -83,6 +83,29 @@ bike_shops |>
                  "Transactions" = "n")
   )
 
+bike_sales |> 
+  count(quantity,
+        sort = TRUE)
+
 # Data visualization ----
 ## Histograms ----
+bike_sales |> 
+  ggplot() +
+  geom_histogram(aes(x = quantity),
+                 color = "black",
+                 fill = "steelblue",
+                 bins = 30) +
+  labs(x = "Units sold",
+       y = "Frequency",
+       subtitle = "Distribution of units sold")
 
+bike_sales |> 
+  ggplot() +
+  geom_histogram(aes(x = price),
+                 color = "black",
+                 fill = "steelblue",
+                 bins = 30) +
+  labs(x = "Price (US Dollars)",
+       y = "Frequency",
+       subtitle = "Distribution of frame prices")
+  
