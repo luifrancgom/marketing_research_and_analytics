@@ -302,17 +302,51 @@ Also check out the argument `values_fill` from this function and try this functi
 
 ### Performing k-means clustering
 
-The objective of this section is to apply the k-means clustering technique by grouping the bike shops in **5** clusters
+The objective of this section is to apply the k-means clustering technique by grouping the bike shops
 
--   If you want you can try with a different number of clusters but first it is important that you at least be able to complete the task with **5** clusters
+-   First using the function `n_clusters` from the package `parameters` on the customer-product table to identify the number of clusters to use for k-means
 
-Use the `kmeans` function with the argument `centers = 5` and applying it to the customer product table
+```{r}
+# Follow this template to identify the number of clusters to use in k-means
+
+# library(parameters)
+
+# n_clusters_customer_product_table <- customer_product_table |> 
+#   select(-bikeshop.name) |> 
+#   n_clusters(standardize = FALSE,
+#              nbclust_method = "kmeans")
+
+# n_clusters_customer_product_table
+
+# If you want, you can check the 
+# criteria or methods used to select 
+# the number of clusters to use in kmeans
+# This part is optional
+
+# n_clusters_customer_product_table |> 
+#   as_tibble()
+```
+
+
+Use the `kmeans` function with the argument `centers` equal to the number of clusters identify above and applying it to the customer product table
+
+-   Remember to use `set.seed` to fix the initial centers. For example, you can use `set.seed(seed = 1234)`  
 
 -   Remember that `kmeans` only works with numerical data so you will need to drop the `bikeshop.name` from the customer product table
 
     -   Checkout `?kmeans` and the argument `x` in relation to this aspect
 
 -   Once you have apply the k-means clustering technique save this object as `kmeans_object`
+
+```{r}
+# Follow this template to apply k-means
+# to the customer-product table
+
+# set.seed(seed = 1234)
+# kmeans_object <- customer_product_table |> 
+#   select(-bikeshop.name) |> 
+#   kmeans(centers = 4)
+```
 
 #### Extracting the cluster assignment
 
@@ -349,6 +383,15 @@ Use the `prcomp` function with the argument `center = TRUE` and applying it to t
 
 -   Once you have apply the principal component analysis technique save this object as `pca_object`
 
+```{r}
+# Follow this template to apply the principal component analysis technique
+
+# pca_object <- customer_product_table |>
+#   select(-bikeshop.name) |> 
+#   prcomp(center = TRUE, 
+#          scale. = FALSE)
+```
+
 #### Extracting the first 2 principal components
 
 In this section you are going to extract the first 2 principal components so you can use them to visualize the clusters in a 2 dimensional plot
@@ -374,6 +417,9 @@ Using the information about the cluster assignment and the 2 principal component
 
 ```{r}
 # Follow this template to visualize the fill clusters
+
+# clusters_pca_1_2 <- pca_1_2 |> 
+#   bind_cols(clusters)
 
 # clusters_pca_1_2 |> 
 #   ggplot() + 
