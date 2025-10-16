@@ -1,0 +1,142 @@
+---
+title: "Describing data"
+author: 
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format: 
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+    code-fold: true
+---
+
+```{r}
+#| label: libraries
+#| message: false
+
+library(tidyverse)
+library(skimr)
+```
+
+# Introduction
+
+Insert text here. Bla bla bla @fig-p1-sales
+
+Bla bla bla @fig-p2-sales-prom
+
+# Import
+
+Inset text here.
+
+```{r}
+#| message: false
+weekly_store <- read_csv(file = "../000_data/003_chapter_3.csv")
+```
+
+# Transform
+
+Insert text here.
+
+```{r}
+weekly_store <- weekly_store |> 
+  mutate(
+    storeNum = factor(x = storeNum, 
+                         ordered = FALSE),
+    Year = factor(x = Year, 
+                     ordered = TRUE),
+    Week = factor(x = Week,
+                  ordered = TRUE),
+    p1prom = as.logical(x = p1prom),
+    p2prom = as.logical(x = p2prom)
+  )
+```
+
+# Summarize
+
+Insert text here.
+
+```{r}
+weekly_store |> 
+  skim()
+```
+
+# Visualization
+
+## Histograms
+
+Insert text here. Bla bla bla @fig-p1-sales
+
+```{r}
+#| label: fig-p1-sales
+#| fig-cap: Distribution of product 1 sales
+weekly_store |> 
+  ggplot() +
+  geom_histogram(aes(x = p1sales),
+                 color = "black",
+                 fill = "steelblue",
+                 bins = 30) +
+  labs(x = "Product 1 sales (units)",
+       y = "Frequency",
+       subtitle = "Distribution of product 1 sales")
+```
+
+## Boxplots
+
+Insert text here.
+
+```{r}
+#| label: fig-p2-sales-prom
+#| fig-cap: Distribution of sales depending if the product was promoted
+weekly_store |> 
+  ggplot() +
+  geom_boxplot(aes(x = p2sales,
+                   y = p2prom),
+               fill = "steelblue") +
+  scale_y_discrete(labels = c("No", "Yes")) +
+  labs(x = "Product 2 sales (units)",
+       y = "Product 2 was promoted?",
+       subtitle = "Distribution of product sales when product 2 was or was not promoted")
+```
+
+# Questions and answers with data
+
+Bla bla bla 
+
+## Prepare data
+
+Insert text here.
+
+```{r}
+weekly_store_sales_by_country <- weekly_store |> 
+  group_by(country) |> 
+  summarise(sum_p2sales = sum(p2sales)) |> 
+  mutate(country = fct_reorder(.f = country, 
+                               .x = sum_p2sales))
+```
+
+## Visualization
+
+Insert text here.
+
+```{r}
+#| label: fig-sales-by-country-p2
+#| fig-cap: In what country the company sells more units of product 2?
+weekly_store_sales_by_country |> 
+  ggplot() +
+  geom_col(aes(x = country,
+               y = sum_p2sales),
+           color = "black",
+           fill = "steelblue") +
+  scale_x_discrete(labels = c("Australia",
+                              "China",
+                              "Brazil",
+                              "United States",
+                              "Great Britain",
+                              "Japan",
+                              "Germany")) +
+  labs(x = "Country",
+       y = "Total sales product 2 (units)",
+       subtitle = "Total sales by country of product 2")
+```

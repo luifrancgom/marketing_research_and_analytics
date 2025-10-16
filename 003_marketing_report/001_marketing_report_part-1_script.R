@@ -2,6 +2,7 @@
 library(tidyverse)
 library(sweep)
 library(skimr)
+library(DT)
 
 # Import ----
 bike_sales <- bike_sales |> 
@@ -81,4 +82,7 @@ bike_shops |>
     colnames = c("Bike shop" = "bikeshop.name",
                  "Transactions" = "n")
   )
+
+# Data visualization ----
+## Histograms ----
 

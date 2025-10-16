@@ -10,7 +10,7 @@ format:
     code-fold: true
     number-sections: true
     embed-resources: true
-editor: visual
+editor: source
 ---
 
 ```{r }
@@ -82,7 +82,7 @@ Brake the process in 2 steps:
 
 -   Generate an informative plot
 
-    -   You can use `ggplot`, `geom_point`, `position_jitter`, `scale_y_continuous`, `scales::label_dollar` and `facet_wrap`
+    -   You can use `ggplot`, `geom_point`, `position_jitter`, `scale_y_continuous`, `scales::label_currency` and `facet_wrap`
 
     -   You can also use `labs` to personalize the labels of the x-axis, y-axis and title and change the colors if you want
 
@@ -106,7 +106,7 @@ Also check out the combinations that you reported in the first marketing report 
 #   geom_point(aes(x = frame, y = total_revenue), 
 #              position = position_jitter(width = 0.2, 
 #                                         height = 0.2)) +
-#   scale_y_continuous(labels = scales::label_dollar()) +
+#   scale_y_continuous(labels = scales::label_currency()) +
 #   facet_wrap(facets = vars(category.secondary))
 ```
 
@@ -143,7 +143,7 @@ Recall that you explored the following models, which are organized by level of c
 -   `price ~ category.secondary*frame`
 -   `price ~ category.secondary*frame*bikeshop.state`
 
-**Note 1**: If the model is to complex like `price ~ category.secondary*frame*bikeshop.state` you will obtain a considerable parameters but if the model is to simple like `price ~ category.secondary` you will not be able to obtain good predictions. Choose the level of complexity that you consider appropriate to help the Research and Development (R & D) division and to determine the new price of the new product
+**Note 1**: If the model is to complex like `price ~ category.secondary*frame*bikeshop.state` you will obtain a considerable number of parameters but if the model is to simple like `price ~ category.secondary` you will not be able to obtain good predictions. Choose the level of complexity that you consider appropriate to help the Research and Development (R & D) division and to determine the new price of the new product
 
 **Note 2**: If you find that the model generates silly results, like for example negative or 0 values for the price, abandon the choosen model and use another model or change the product gap combination or discard particular locations where the product will going to be offer.
 

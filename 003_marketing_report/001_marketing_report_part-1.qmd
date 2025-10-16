@@ -138,30 +138,42 @@ bike_shops |>
 
 ## Data visualization
 
-Add some text pointing out the principal findings as a result of visualizing the suggested variables.
+Pending
 
 ### Histograms
 
-Check the distribution of the variables `quantity` and `price` to understand its behavior using the function `hist` from base R or the `tidyverse` through the package `ggplot2`
+Pending
 
 #### Quantity behavior
 
+Pending
+
 ```{r}
-# If you use base R check out the hist documentation
-## ?hist
-# If you use the tidyverse check out the geom_histogram
-# documentation
-## ?geom_histogram
-### Also you can check out the online documentation in the 
-### case of the tidyverse
-#### https://ggplot2.tidyverse.org/reference/geom_histogram.html
+bike_sales |> 
+  ggplot() +
+  geom_histogram(aes(x = quantity),
+                 color = "black",
+                 fill = "steelblue",
+                 bins = 30) +
+  labs(x = "Units sold",
+       y = "Frequency",
+       subtitle = "Distribution of units sold")
 ```
 
 #### Price behavior
 
+Pending
+
 ```{r}
-# Check out the comments pointed out in the 
-# Quantity behavior code chunk section
+bike_sales |> 
+  ggplot() +
+  geom_histogram(aes(x = price),
+                 color = "black",
+                 fill = "steelblue",
+                 bins = 30) +
+  labs(x = "Price (US Dollars)",
+       y = "Frequency",
+       subtitle = "Distribution of frame prices")
 ```
 
 ### Boxplots
