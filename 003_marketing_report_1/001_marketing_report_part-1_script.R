@@ -3,6 +3,7 @@ library(tidyverse)
 library(sweep)
 library(skimr)
 library(DT)
+library(scales)
 
 # Import ----
 bike_sales <- bike_sales |> 
@@ -109,3 +110,74 @@ bike_sales |>
        y = "Frequency",
        subtitle = "Distribution of frame prices")
   
+## Boxplots ----
+bike_sales |> 
+  mutate(category.secondary = fct_reorder(.f = category.secondary,
+                                          .x = price.ext, 
+                                          .fun = median)) |> 
+  ggplot() +
+  geom_boxplot(aes(x = price.ext,
+                   y = category.secondary),
+               fill = "steelblue") +
+  scale_x_continuous(labels = label_currency(), 
+                     transform = "log10") +
+  labs(x = "Revenue (US Dollars)",
+       y = "Category secondary",
+       subtitle = "Distribution of revenue by category secondary")
+
+bike_sales |> 
+  ggplot() +
+  geom_boxplot(aes(x = price.ext,
+                   y = frame),
+               fill = "steelblue") +
+  scale_x_continuous(labels = label_currency(),
+                     transform = "log10") +
+  labs(x = "Revenue (US Dollars)",
+       y = "Frame material",
+       subtitle = "Distribution of revenue by frame material")
+  
+# Answering questions with data ----
+bike_sales_revenue_by_cat2 <- bike_sales |> 
+  group_by(bikeshop.name) |> 
+  summarise(revenue = sum(price.ext)) |> 
+  mutate(bikeshop.name = fct_reorder(.f = bikeshop.name,
+                                     .x = revenue))
+
+bike_sales_revenue_by_cat2 |> 
+  ggplot() +
+  geom_col(aes(x = revenue,
+               y = bikeshop.name),
+           color = "black",
+           fill = "steelblue") +
+  scale_x_continuous(label = label_currency()) +
+  labs(x = "Revenue (US Dollars)",
+       y = "Bike shops",
+       subtitle = "Revenue by bike shops")
+  
+bike_sales_revenue_by_frame <- bike_sales |> 
+  group_by(category.secondary) |> 
+  summarise(revenue = sum(price.ext)) |> 
+  mutate(category.secondary = fct_reorder(.f = category.secondary,
+                                          .x = revenue))
+
+bike_sales_revenue_by_frame |> 
+  ggplot() +
+  geom_col(aes(x = revenue,
+               y = category.secondary),
+           fill = "steelblue",
+           color = "black") +
+  scale_x_continuous(labels = label_currency()) +
+  labs(x = "Revenue (US Dollars)",
+       y = "Category secondary",
+       subtitle = "Revenue by category secondary")
+  
+
+
+
+
+
+
+
+
+
+
