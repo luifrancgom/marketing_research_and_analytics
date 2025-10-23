@@ -1,0 +1,116 @@
+---
+title: "Relationships Between Continuous Variables"
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format: 
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+    code-fold: true
+---
+
+```{r}
+#| label: libraries
+#| message: false
+
+library(tidyverse)
+library(skimr)
+library(corrr)
+library(DT)
+```
+
+# Introduction
+
+Pending
+
+# Import
+
+Pending
+
+```{r}
+#| message: false
+customer <- read_csv(file = "../000_data/004_chapter_4.csv")
+```
+
+# Transform
+
+Pending
+
+```{r}
+customer <- customer |> 
+  mutate(cust.id = factor(x = cust.id, 
+                          ordered = FALSE),
+         email = factor(x = email,
+                        ordered = FALSE),
+         online.visits = as.integer(x = online.visits),
+         online.trans = as.integer(x = online.trans),
+         store.trans = as.integer(x = store.trans),
+         sat.service = factor(x = sat.service,
+                              ordered = TRUE),
+         sat.selection = factor(x = sat.selection,
+                                ordered = TRUE))
+```
+
+# Summarize
+
+Pending
+
+```{r}
+customer |> 
+  skim()
+```
+
+# Visualization
+
+## Online spending vs store spending
+
+```{r}
+customer |> 
+  ggplot() +
+  geom_point(aes(x = store.spend,
+                 y = online.spend,
+                 colour = email)) +
+  scale_x_continuous(transform = "log1p",
+                     breaks = c(1, 2, 5, 
+                                10, 20, 50, 
+                                100, 500)) + 
+  scale_y_continuous(transform = "log1p",
+                     breaks = c(1, 5, 
+                                50, 500))
+```
+
+# Correlation
+
+```{r}
+#| message: false
+correlation_matrix <- customer |> 
+  select(where(is.numeric)) |> 
+  correlate(use = "pairwise.complete.obs")
+
+correlation_matrix |> 
+  datatable()
+```
+
+## Visualization
+
+```{r}
+#| message: false
+#| warning: false
+correlation_matrix |> 
+  autoplot(triangular = "lower")
+```
+
+# Categorical variables 
+
+```{r}
+customer |> 
+  count(sat.service,
+        sat.selection) |> 
+  ggplot() +
+  geom_label(aes(x = sat.service,
+                 y = sat.selection,
+                 label = n))
+```
