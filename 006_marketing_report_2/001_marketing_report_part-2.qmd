@@ -1,0 +1,367 @@
+---
+title: "Marketing report part 2"
+date: 2025-11-08
+author: 
+  - Norah Jones   
+  - Bill Gates
+  - Luis Francisco Gomez
+format: 
+  html:
+    toc: true
+    code-fold: true
+    number-sections: true
+    embed-resources: true
+editor: source
+---
+
+```{r }
+#| label: libraries
+#| message: false
+
+library(tidyverse)
+library(sweep)
+library(scales)
+```
+
+# Exploring data, visualizing it and applying statistical tests
+
+## Introduction
+
+Pending
+
+## Import data
+
+Pending
+
+```{r}
+# Import the data from the sweep package
+bike_sales <- bike_sales |> 
+  mutate(order.id = factor(x = order.id, 
+                           ordered = TRUE),
+         order.line = factor(x = order.line,
+                             ordered = TRUE),
+         customer.id = factor(x = customer.id,
+                              ordered = FALSE),
+         bikeshop.name = factor(x = bikeshop.name,
+                                ordered = FALSE),
+         bikeshop.city = factor(x = bikeshop.city,
+                                ordered = FALSE),
+         bikeshop.state = factor(x = bikeshop.name,
+                                 ordered = FALSE),
+         product.id = factor(x = product.id,
+                             ordered = FALSE),
+         model = factor(x = model,
+                        ordered = FALSE),
+         category.primary = factor(category.primary,
+                                   ordered = FALSE),
+         category.secondary = factor(x = category.secondary,
+                                     ordered = FALSE),
+         frame = factor(x = frame,
+                        ordered = FALSE))
+```
+
+## Relation between continuous variables
+
+Pending bla bla bla @fig-price-quantity
+
+```{r}
+#| label: fig-price-quantity
+#| fig-cap: Relationship between frames sold and its price
+
+bike_sales |> 
+  ggplot() + 
+  geom_point(aes(x = price,
+                 y = quantity,
+                 color = frame)) +
+  scale_color_manual(values = c("#043074",
+                                "#FDC600")) +
+  labs(x = "Price (US Dollars / 1 frame)",
+       y = "Quantity",
+       color = "Frame",
+       subtitle = "Relationship between quantity and price")
+```
+
+```{r}
+#| label: cor-price-quantity
+#| echo: false
+
+cor_price_quantity <- cor(x = bike_sales$price,
+    y = bike_sales$quantity) |> 
+  number(accuracy = 0.000001)
+```
+
+In @fig-price-quantity it is possible to identify that there is not a relationship between the variable `price` and `quantity`. For example if you calculate the correlation the result is `{r} cor_price_quantity`.
+
+Pending bla bla bla
+
+```{r}
+#| label: fig-log-10-price-quantity
+#| fig-cap: Relationship between frames sold and its price using a logarithmic scale in base 10
+
+bike_sales |> 
+  ggplot() +
+  geom_point(aes(x = price,
+                 y = quantity,
+                 color = frame)) +
+  scale_x_continuous(transform = "log10") +
+  scale_y_continuous(transform = "log10") +
+  scale_color_manual(values = c("#043074",
+                                "#FDC600")) +
+  labs(x = "Price (US Dollars / 1 frame)",
+       y = "Quantity",
+       color = "Frame",
+       subtitle = "Relationship between quantity and price using a logarithmic scale in base 10")
+```
+
+```{r}
+#| label: cor-log-10-price-quantity
+#| echo: false
+
+log_10_price <- log(x = bike_sales$price,
+                    base = 10)
+log_10_quantity <- log(x = bike_sales$quantity,
+                       base = 10) 
+cor_log_10_price_quantity <- cor(x = log_10_price,
+                                 y = log_10_quantity) |> 
+  number(accuracy = 0.000001)
+```
+
+In @fig-log-10-price-quantity it is also possible to identify that there is not a relationship between the variable `log 10 price` and `log 10 quantity`. For example if you calculate the correlation the result is `{r} cor_log_10_price_quantity`.
+
+## Relation between categorical variables
+
+Pending
+
+```{r}
+#| label: fig-product-gap
+#| fig-cap: Graphical representation of the product gap
+
+bike_sales |> 
+  count(frame, category.secondary) |> 
+  ggplot() +
+  geom_label(aes(x = frame,
+                 y = category.secondary,
+                 label = n)) +
+  labs(x = "Frame",
+       y = "Category secondary",
+       subtitle = "Frame vs Category secondary")
+```
+
+Bla bla bla @fig-product-gap
+
+## Descriptive statistics by group
+
+Add some text pointing out the principal findings as a result of generating the descriptive statistics by group.
+
+### Mean, median and standard deviation for revenue by `(category.secondary, frame)`
+
+Calculate the mean, median and standard deviation for revenue by `category.secondary` and `frame` to understand the behavior of this variable by these categories.
+
+In that way you can identify new products that will be appropriate to be launch by the company taking into account the products that are already offered.
+
+```{r}
+# You can use the functions group_by and
+# summarise
+## For more information check out 
+## https://dplyr.tidyverse.org/reference/summarise.html
+### Also explore the argument .groups from summarise
+### and use in connection with the function arrange plus
+### desc to order the resulting table by the mean or the
+### median
+#### For more information check out 
+#### https://dplyr.tidyverse.org/reference/arrange.html
+#### https://dplyr.tidyverse.org/reference/desc.html
+```
+
+### Percentage of total revenue generated by `(category.secondary, frame)`
+
+Calculate the total revenue by `category.secondary` and `frame`. Use this information to specify the percentage of total revenue generated by `category.secondary` and `frame`
+
+In that way you can identify if the total revenue generated by the company is distributed in an homogeneous way by `category.secondary` and `frame`
+
+```{r}
+# Attack the problem in the following way
+## Group the data by category.secondary and frame
+## Calculate the total revenue using summarise and 
+## sum
+### Don't forget to check out the argument .groups
+### in summarise
+## Use mutate to calculate the percentage of total 
+## revenue by category.secondary and frame
+### Arrange the data in descending order using arrange
+### and desc
+#### For more information check out 
+#### https://dplyr.tidyverse.org/reference/arrange.html
+#### https://dplyr.tidyverse.org/reference/desc.html
+```
+
+### Mean, median and standard deviation for revenue by `bikeshop.name`
+
+Calculate the mean, median and standard deviation for revenue by `bikeshop.name` to understand the behavior of this variable by this category.
+
+In that way you can understand the clients of the company and use this information to build a segmentation clustering model.
+
+```{r}
+# You can use the functions group_by and
+# summarise
+## For more information check out 
+## https://dplyr.tidyverse.org/reference/summarise.html
+### Also explore the argument .groups from summarise
+### and use in connection with the function arrange plus
+### desc to order the resulting table by the mean or the
+### median
+#### For more information check out 
+#### https://dplyr.tidyverse.org/reference/arrange.html
+#### https://dplyr.tidyverse.org/reference/desc.html
+```
+
+### Percentage of total revenue generated by each `bikeshop.name`
+
+Calculate the total revenue by `bikeshop.name`. Use this information to specify the percentage of total revenue generated by `bikeshop.name`
+
+In that way you can identify if it make sense to build a segmentation clustering model by inspecting if the total revenue generated by the company is distributed in an heterogeneous way by `bikeshop.name`
+
+```{r}
+# Attack the problem in the following way
+## Group the data by bikeshop.name
+## Calculate the total revenue using summarise and 
+## sum
+### Don't forget to check out the argument .groups
+### in summarise
+## Use mutate to calculate the percentage of total 
+## revenue by bikeshop.name
+### Arrange the data in descending order using arrange
+### and desc
+#### For more information check out 
+#### https://dplyr.tidyverse.org/reference/arrange.html
+#### https://dplyr.tidyverse.org/reference/desc.html
+```
+
+## Statistical tests
+
+### Testing group frequencies: `chisq.test()`
+
+Inspect, using an statistical test, if the total revenue is distributed in a homogeneous way by `category.secondary` and `frame` using a $\chi^2$ test for a given vector of probabilities.
+
+Taking into account that there are 13 available models offer by the corporation use $p_i = \frac{1}{13}$ for $i = 1, 2, \ldots, 13$ in the $\chi^2$ test
+
+Once you apply the test point out your conclusion taking into account the p-value of the test
+
+```{r}
+# To attack the problem you need to really understand 
+# the chi squared test for given probabilities
+
+## First, prepare the data in a similar or in the following
+## way
+### table_category_secondary_frame <- bike_sales |>
+###   group_by(category.secondary, frame) |>
+###   summarise(total_revenue = sum(price.ext),
+###             .groups = "drop") |>
+###   mutate(total_revenue_pct = (total_revenue / sum(total_revenue))*100) |>
+###   arrange(desc(total_revenue_pct))
+
+## Second, create a new variable to identify
+## the models in a similar or in the following way
+### table_models <- table_category_secondary_frame |> 
+###  mutate(model = str_c(category.secondary, frame, sep = " ")) |> 
+###  select(model, total_revenue)
+#### For more information about str_c check out the examples in
+#### https://stringr.tidyverse.org/reference/str_c.html
+
+## Third, create a named vector to apply the chi test
+## taking into account what is mention in ?chisq.test
+## in the section related to the Examples and the part
+## about Testing for population probabilities
+### To create a named vector check out the deframe
+### function from the tidyverse
+#### https://tibble.tidyverse.org/reference/enframe.html
+##### deframe(table_models)
+
+## Fourth, apply the chi squared test
+### deframe(table_models) |> 
+###  chisq.test(p = rep.int(x = 1/13, times = 13))
+#### rep.int(x = 1/13, times = 13) is just a way
+#### to repeat 1/13 thirteen times
+##### Check out ?rep.int to understand it
+
+## Fifth, use the tidymodels library:
+## library(tidymodels) using tidy
+### Remember to load the library in the first code 
+### chunk: library(tidymodels)
+#### For more information check out
+#### https://broom.tidymodels.org/reference/tidy.htest.html
+##### deframe(table_models) |> 
+#####  chisq.test(p = rep.int(x = 1/13, times = 13)) |> 
+#####  tidy()
+```
+
+Inspect, using an statistical test, if the total revenue is distributed in a homogeneous way by `bikeshop.name` using a $\chi^2$ test for a given vector of probabilities.
+
+Taking into account that there are 30 bike shops offer use $p_i = \frac{1}{30}$ for $i = 1, 2, \ldots, 30$ in the $\chi^2$ test
+
+Once you apply the test point out your conclusion taking into account the p-value of the test
+
+```{r}
+# Apply a similar process as in the case of
+# applying the chi squared test for 
+# category.secondary and frame in relation to
+# the total revenue
+## See the comments in that section for more 
+## information about how to apply the test
+```
+
+### Testing group means: `t.test()`
+
+Inspect, using a two sample t-tests, if the mean revenue between the `Aluminum` and `Carbon` bicycle models are the same in relation to the `frame` variable
+
+Once you apply the test point out your conclusion taking into account the p-value of the test
+
+```{r}
+# If you use base R you can apply t.test
+## Check out more information in ?t.test
+### 
+# If you use the tidyverse framework you can 
+# use t_test from tidymodels
+## For more information check out 
+### https://infer.tidymodels.org/reference/t_test.html
+```
+
+### Analysis of Variance (ANOVA)
+
+Apply an analysis of variance (ANOVA) using `price` as a response variable
+
+-   First begin with a simple model
+
+    -   `price ~ category.secondary`
+
+-   Then add another variable
+
+    -   `price ~ category.secondary + frame`
+
+-   Expand the model in the following way where you can use the following equivalent expressions
+
+    -   `price ~ category.secondary + frame + category.secondary:frame`
+    -   `price ~ category.secondary*frame`[^1]
+
+[^1]: `category.secondary*frame` is a short way to specify all the possible interactions between these 2 categorical variables which is equivalent to `category.secondary + frame + category.secondary:frame`
+
+```{r}
+# Use the functions aov and anova from base R
+# to apply the analysis of variance (ANOVA)
+## As an example you can begin with a simple model
+### aov(formula = price ~ category.secondary, 
+###    data = bike_sales) |> 
+###  anova() |> 
+###  tidy()
+
+## Then change the formula argument with the 
+## different alternative models
+```
+
+Taking into account the analysis of variance, point out if it make sense to add `category.secondary`, `frame` and its interaction to the model.
+
+Depending on the answer to the above question point out if it make sense to try the following model:
+
+-   `price ~ category.secondary*frame*bikeshop.state`[^2]
+
+[^2]: `category.secondary*frame*bikeshop.state` is a way to specify all the possible interactions between these 3 categorical variables. In this case the model will have $2^3 - 1 = 7$ terms
