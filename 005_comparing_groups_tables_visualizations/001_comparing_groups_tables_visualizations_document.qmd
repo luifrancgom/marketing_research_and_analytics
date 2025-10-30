@@ -1,0 +1,167 @@
+---
+title: "Comparing Groups: Tables and Visualizations"
+author: 
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format: 
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+    code-fold: true
+---
+
+```{r}
+#| label: libaries
+#| message: false
+
+library(tidyverse)
+library(skimr)
+library(DT)
+```
+
+# Introduction
+
+Pending
+
+Bla bla bla @tbl-segmentation-kids
+
+# Import
+
+Pending
+
+```{r}
+#| message: false
+
+segmentation <- read_csv(file = "../000_data/005_chapter_5.csv")
+```
+
+# Tranform
+
+Pending
+
+```{r}
+segmentation <- segmentation |> 
+  mutate(
+    gender = factor(x = gender,
+                    ordered = FALSE),
+    kids = as.integer(x = kids),
+    ownHome = factor(x = ownHome,
+                     ordered = FALSE),
+    subscribe = factor(x = subscribe,
+                       ordered = FALSE),
+    Segment = factor(x = Segment,
+                     ordered = FALSE)
+  )
+```
+
+# Summarize
+
+Pending
+
+```{r}
+segmentation |> 
+  skim()
+```
+
+# Summary statistics by group 
+
+## Mean income
+
+Bla bla bla @tbl-segmentation-own-seg
+
+```{r}
+#| label: tbl-segmentation-own-seg
+#| tbl-cap: Mean income by own home status and segment
+#| message: false
+  
+segmentation_own_seg_income <- segmentation |> 
+  group_by(ownHome, Segment) |> 
+  summarise(mean_income = mean(income)) |> 
+  ungroup()
+
+segmentation_own_seg_income |> 
+  datatable(
+    colnames = c("Own home status",
+                 "Segment",
+                 "Mean Income")) |> 
+  formatRound(columns = c("mean_income"), 
+              digits = 2)
+```
+
+## Kids
+
+```{r}
+#| label: tbl-segmentation-kids
+#| tbl-cap: Number of kids by own home status and segment
+#| message: false
+
+segmentation_kids_income <- segmentation |> 
+  group_by(ownHome, Segment) |> 
+  summarise(total_kids = sum(kids)) |> 
+  ungroup()
+  
+segmentation_kids_income |> 
+  datatable(
+    colnames = c("Own home status",
+                 "Segment",
+                 "Total kids") 
+  )
+```
+
+# Visualization
+
+## Percentage of subscribers by own home status and segment
+
+Bla bla bla @fig-pct-subs-own-seg
+
+```{r}
+#| label: fig-pct-subs-own-seg
+#| fig-cap: Percentage of subscribers by own home status and segment
+
+segmentation_subs_own_seg <- segmentation |> 
+  count(subscribe, 
+        ownHome, 
+        Segment) |> 
+  group_by(ownHome, Segment) |> 
+  mutate(n_pct = (n / sum(n))*100) |> 
+  ungroup() |> 
+  arrange(ownHome, Segment)
+  
+segmentation_subs_own_seg |> 
+  ggplot() +
+  geom_col(aes(x = subscribe,
+               y = n_pct,
+               fill = subscribe),
+           color = "black") +
+  scale_fill_manual(values = c("#6aa84f",
+                               "#f1c232")) +
+  facet_wrap(vars(ownHome, Segment),
+             nrow = 2,
+             ncol = 4) +
+  labs(x = "Subscribe status",
+       y = "Percentage (%)",
+       fill = "Subscription status")
+```
+
+## Mean income by ownhome status and segment
+
+Pending
+
+```{r}
+#| label: fig-own-seg-income
+#| fig-cap: Mean yearly income by segment and own home status 
+
+segmentation_own_seg_income |> 
+  ggplot() + 
+  geom_col(aes(x = Segment,
+               y = mean_income,
+               fill = ownHome),
+           color = "black",
+           position = position_dodge()) +
+  scale_fill_manual(values = c("#6aa84f",
+                               "#f1c232")) +
+  labs(y = "Mean yearly disposable income (US Dollars)",
+       fill = "Own home status")
+```
