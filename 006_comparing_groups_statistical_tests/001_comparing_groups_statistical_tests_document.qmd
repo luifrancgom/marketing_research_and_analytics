@@ -1,0 +1,27 @@
+---
+title: "Comparing Groups: Statistical Tests"
+author: 
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format: 
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+    code-fold: true
+---
+
+```{r}
+#| label: libraries
+#| message: false
+
+
+```
+
+# Introduction
+
+```{r}
+#| message: false
+```
+
