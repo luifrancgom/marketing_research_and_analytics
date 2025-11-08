@@ -288,6 +288,42 @@ t_test_frame |>
   )
   
 ## Anova ----
-model_1 <- bike_sales
+model_1 <- bike_sales |> 
+  aov(formula = price ~ category.secondary) |> 
+  anova() |> 
+  tidy()
 
+model_2 <- bike_sales |> 
+  aov(formula = price ~ category.secondary + frame) |> 
+  anova() |> 
+  tidy()
+
+model_3 <- bike_sales |> 
+  aov(formula = price ~ category.secondary + frame + category.secondary:frame) |> 
+  anova() |> 
+  tidy()
+
+model_3 |> 
+  datatable(
+    colnames = c("Term",
+                 "Paramter",
+                 "Sum of squares",
+                 "Mean of squares",
+                 "Statistic",
+                 "P-value")
+  ) |> 
+  formatRound(
+    columns = c("sumsq",
+                "meansq",
+                "statistic",
+                "p.value"),
+    digits = 3
+  )
+
+model_4 <- bike_sales |> 
+  aov(formula = price ~ category.secondary*frame*bikeshop.state) |> 
+  anova() |> 
+  tidy()
+  
+  
   
