@@ -4,6 +4,7 @@ library(sweep)
 library(skimr)
 library(scales)
 library(DT)
+library(tidymodels)
 
 # Import ----
 bike_sales <- bike_sales |> 
@@ -187,7 +188,106 @@ bike_sales_bikeshop_total_rev_pct |>
     digits = 2
   )
   
+# Statistical tests ----
+revenue_cat2_frame <- bike_sales |> 
+  group_by(frame, category.secondary) |> 
+  summarise(total_revenue = sum(price.ext)) |> 
+  ungroup() |> 
+  arrange(desc(total_revenue)) |> 
+  mutate(total_revenue_pct = (total_revenue / sum(total_revenue))*100)
 
+revenue_cat2_frame
 
+## Prepare data ----
+### Category secondary, frame ----
+table_model <- revenue_cat2_frame |> 
+  mutate(model = str_c(frame,
+                       category.secondary,
+                       sep = " ")) |> 
+  select(model, total_revenue_pct)
 
+chi_test <- deframe(table_model) |> 
+  chisq.test(p = rep.int(x = 1/13, times = 13)) |> 
+  tidy()
 
+chi_test |> 
+  datatable(
+    colnames = c("Statistic",
+                 "P-value",
+                 "Parameter",
+                 "Method") 
+  ) |> 
+  formatRound(
+    columns = "statistic",
+    digits = 2
+  ) |> 
+  formatRound(
+    columns = "p.value",
+    digits = 7
+    )
+
+### Bikeshop
+revenue_bikeshop <- bike_sales |> 
+  group_by(bikeshop.name) |> 
+  summarise(total_revenue = sum(price.ext)) |> 
+  arrange(desc(total_revenue)) |> 
+  mutate(total_revenue_pct = (total_revenue / sum(total_revenue)) * 100)
+
+table_model_bikeshop <- revenue_bikeshop |> 
+  select(bikeshop.name, total_revenue_pct) |> 
+  deframe()
+
+chi_test_bikeshop <- table_model_bikeshop |> 
+  chisq.test(p = rep.int(x = 1/30, times = 30)) |> 
+  tidy()
+
+chi_test_bikeshop |> 
+  datatable(
+    colnames = c("Statistic", 
+                 "P-value",
+                 "Parameter",
+                 "Method")
+  ) |> 
+  formatRound(
+    columns = "statistic",
+    digits = 2
+  ) |> 
+  formatRound(
+    columns = "p.value",
+    digits = 7
+  )
+
+## t-test ----
+alpha <- 0.05
+
+t_test_frame <- bike_sales |> 
+  t_test(formula = price.ext ~ frame, 
+         order = c("Aluminum", "Carbon"),
+         mu = 0, 
+         alternative = "two-sided",
+         conf_level = 1 - alpha)
+
+t_test_frame |> 
+  datatable(
+    colnames = c("Statistic",
+                 "Parameter",
+                 "P-value",
+                 "Alternative hypothesis",
+                 "Estimated mean",
+                 "Lower CI",
+                 "Upper CI")
+  ) |> 
+  formatRound(
+    columns = c("statistic",
+                "t_df",
+                "p_value",
+                "estimate",
+                "lower_ci",
+                "upper_ci"),
+    digits = 3
+  )
+  
+## Anova ----
+model_1 <- bike_sales
+
+  
