@@ -48,7 +48,7 @@ bike_sales <- bike_sales |>
                                 ordered = FALSE),
          bikeshop.city = factor(x = bikeshop.city,
                                 ordered = FALSE),
-         bikeshop.state = factor(x = bikeshop.name,
+         bikeshop.state = factor(x = bikeshop.state,
                                  ordered = FALSE),
          product.id = factor(x = product.id,
                              ordered = FALSE),
