@@ -19,7 +19,11 @@ amusement_park <- amusement_park |>
     weekend = factor(x = weekend,
                      ordered = FALSE),
     num.child = as.integer(x = num.child),
-    logdist = log(x = distance, base = exp(1))
+    logdist = log(x = distance, base = exp(1)),
+    has.child = factor(x = num.child > 0, 
+                       labels = c("no", 
+                                  "yes"), 
+                       ordered = FALSE)
   )
   
 # Summarize ----
@@ -116,3 +120,68 @@ model_2 |>
   glance() |> 
   glimpse()
 
+## Model 3 ----
+model_3 <- lm( 
+  formula = overall ~ rides + games + wait + clean + weekend + logdist + num.child,
+  data = amusement_park
+)
+
+model_3 |> 
+  tidy() |> 
+  filter(alpha > p.value)
+
+## Model 4 ----
+model_4 <- lm(
+  formula = overall ~ rides + games + wait + clean + logdist + has.child,
+  data = amusement_park
+)
+
+model_4_tidy <- model_4 |> 
+  tidy()
+
+## Model 5 ----
+model_5 <- lm(
+  formula = overall ~ rides + games + wait + clean + logdist + has.child + weekend,
+  data = amusement_park
+)
+
+model_5 |> 
+  tidy() |> 
+  filter(alpha > p.value)
+
+## Comparing models ----
+anova_lm <- anova(
+  model_1,
+  model_2,
+  model_4,
+  model_5,
+  test = "F"
+)
+
+anova_lm |> 
+  tidy() |> 
+  filter(alpha > p.value)
+
+# Prediction ----
+new_data <- tibble(
+  rides = c(30, 70),
+  games = c(10, 80),
+  wait =  c(57, 60),
+  clean = c(90, 93),
+  logdist = c(log(x = 10, base = exp(1)), 
+              log(x = 100, base = exp(1))),
+  has.child = c("yes", "no")
+)
+
+mode_4_pred <- predict(
+  object = model_4,
+  newdata = new_data
+) |> 
+enframe(
+  name = "observation", 
+  value = "overall_pred" 
+) |> 
+  bind_cols(
+    new_data
+  )
+  

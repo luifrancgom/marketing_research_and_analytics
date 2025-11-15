@@ -22,6 +22,7 @@ library(skimr)
 library(corrr)
 library(tidymodels)
 library(performance)
+library(DT)
 ```
 
 # Introduction
@@ -47,7 +48,11 @@ amusement_park <- amusement_park |>
     weekend = factor(x = weekend,
                      ordered = FALSE),
     num.child = as.integer(x = num.child),
-    logdist = log(x = distance, base = exp(1))
+    logdist = log(x = distance, base = exp(1)),
+    has.child = factor(x = num.child > 0, 
+                       labels = c("no", 
+                                  "yes"), 
+                       ordered = FALSE)
   )
 ```
 
@@ -81,6 +86,8 @@ correlation_matrix |>
 ## Model 1
 
 ```{r}
+#| label: tbl-model-1
+#| tbl-cap: "Model 1: overall ~ rides"
 model_1 <- lm(
   formula = overall ~ rides,
   data = amusement_park
@@ -89,7 +96,21 @@ model_1 <- lm(
 model_1_tidy <- model_1 |> 
   tidy()
 
-model_1_tidy
+model_1_tidy |> 
+  datatable(
+    colnames = c("Term",
+                 "Estimate",
+                 "Standard Error",
+                 "Statistic",
+                 "P-value") 
+  ) |> 
+  formatRound(
+    columns = c("estimate",
+                "std.error",
+                "statistic",
+                "p.value"), 
+    digits = 3  
+      )
 ```
 
 ### Checking assumptions: model 1
@@ -103,6 +124,8 @@ check_model(x = model_1)
 ## Model 2
 
 ```{r}
+#| label: tbl-model-2
+#| tbl-cap: "Model 2: overall ~ rides + games + wait + clean"
 model_2 <- lm(
   formula = overall ~ rides + games + wait + clean,
   data = amusement_park
@@ -111,7 +134,21 @@ model_2 <- lm(
 model_2_tidy <- model_2 |> 
   tidy()
 
-model_2_tidy
+model_2_tidy |> 
+  datatable(
+    colnames = c("Term",
+                 "Estimate",
+                 "Standard Error",
+                 "Statistic",
+                 "P-value") 
+  )  |> 
+  formatRound(
+    columns = c("estimate",
+                "std.error",
+                "statistic",
+                "p.value"), 
+    digits = 3  
+      )
 ```
 
 ### Checking assumptions: model 2
@@ -121,5 +158,80 @@ model_2_tidy
 #| fig-width: 8
 
 check_model(x = model_2)
+```
+
+## Model 4
+
+```{r}
+#| label: tbl-model-4
+#| tbl-cap: "Model 4: overall ~ overall ~ rides + games + wait + clean + logdist + has.child"
+model_4 <- lm(
+  formula = overall ~ rides + games + wait + clean + logdist + has.child,
+  data = amusement_park
+)
+
+model_4_tidy <- model_4 |> 
+  tidy() 
+
+model_4_tidy |> 
+  datatable(
+    colnames = c("Term",
+                 "Estimate",
+                 "Standard Error",
+                 "Statistic",
+                 "P-value") 
+  )  |> 
+  formatRound(
+    columns = c("estimate",
+                "std.error",
+                "statistic",
+                "p.value"), 
+    digits = 3  
+      )
+```
+
+## Prediction
+
+```{r}
+#| label: tbl-model-4-pred
+#| tbl-cap: Prediction with Model 4 for a set of hypothetical clients
+new_data <- tibble(
+  rides = c(30, 70),
+  games = c(10, 80),
+  wait =  c(57, 60),
+  clean = c(90, 93),
+  logdist = c(log(x = 10, base = exp(1)), 
+              log(x = 100, base = exp(1))),
+  has.child = c("yes", "no")
+)
+
+mode_4_pred <- predict(
+  object = model_4,
+  newdata = new_data
+) |> 
+enframe(
+  name = "observation", 
+  value = "overall_pred" 
+) |> 
+  bind_cols(
+    new_data
+  )
+
+mode_4_pred |> 
+  datatable(
+    colnames = c("Observation",
+                 "Overall Prediction",
+                 "Ride",
+                 "Games",
+                 "Wait",
+                 "Clean",
+                 "Logarithmic distance (base e)",
+                 "Has Child") 
+  ) |> 
+  formatRound(
+    columns = c("overall_pred",
+                "logdist"),
+    digits = 2
+  )
 ```
 
