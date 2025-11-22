@@ -169,3 +169,99 @@ model_3_pred |>
   bind_cols(
     new_data
   )
+
+# K-means clustering ----
+## Prepare data ----
+### Grouping ----
+bike_sales_total_revenue <- bike_sales |> 
+  select(
+    bikeshop.name,
+    price.ext,
+    model,
+    category.primary,
+    category.secondary,
+    frame
+  ) |> 
+  group_by(
+    bikeshop.name,
+    model,
+    category.primary,
+    category.secondary,
+    frame
+  ) |> 
+  summarise(
+    total_revenue = sum(price.ext)
+  ) |> 
+  ungroup()
+
+# Checking process
+bike_sales_total_revenue |> 
+  select(
+    bikeshop.name, total_revenue
+  )
+
+# check models
+bike_sales |> 
+  count(model)
+
+## Consumer-product table ----
+bike_sales_total_revenue_pct <- bike_sales_total_revenue |> 
+  group_by(bikeshop.name) |> 
+  mutate(total_revenue_pct = total_revenue / sum(total_revenue)) |> 
+  ungroup()
+
+bike_sales_total_revenue_pct |> 
+  select(
+    bikeshop.name,
+    model, 
+    total_revenue,
+    total_revenue_pct
+  ) |> 
+  mutate(
+    total_revenue_pct = total_revenue_pct*100 
+  ) |> 
+  filter(bikeshop.name == "Albuquerque Cycles") |> 
+  arrange(desc(total_revenue_pct))
+  
+bike_sales_total_revenue_pct |> 
+  select(
+    bikeshop.name,
+    total_revenue_pct
+  )
+
+customer_product_table <- bike_sales_total_revenue_pct |> 
+  select(
+    bikeshop.name,
+    model,
+    total_revenue_pct
+  ) |> 
+  pivot_wider(
+    id_cols = bikeshop.name,
+    names_from = model,
+    values_from = total_revenue_pct,
+    values_fill = 0
+  )
+  
+customer_product_table  
+  
+## Applying PCA ----
+pca_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  prcomp(
+    center = TRUE,
+    scale. = FALSE
+  )
+
+pca_1_2 <- pca_object$x |> 
+  as_tibble() |> 
+  select(
+    PC1, PC2
+  )
+
+pca_1_2 |> 
+  ggplot(aes(x = PC1, y = PC2)) + 
+  geom_point()
+  
+
+
+
