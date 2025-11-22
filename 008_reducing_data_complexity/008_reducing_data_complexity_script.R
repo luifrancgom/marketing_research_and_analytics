@@ -6,6 +6,8 @@ library(tidyheatmaps)
 # If you want to use it
 # install.packages("imager")
 library(imager)
+library(tidymodels)
+library(ggbiplot)
 
 # Import ----
 # consumer_brand <- read_csv(file = "http://goo.gl/IQl8nc")
@@ -101,7 +103,7 @@ consumer_brand_sample <- consumer_brand |>
 
 consumer_brand_sample
 
-# Applying PCA ----
+## Applying PCA ----
 boat_gray <- load.image(file = "000_images/008_boat_gray_512_x_512.tiff") |> 
   plot()
 
@@ -115,7 +117,54 @@ boat_gray_wide <- boat_gray_long |>
     names_from = y, 
     values_from = value)
   
+## Apply example ----
+consumer_brand_sample_matrix <- consumer_brand_sample |> 
+  select(-brand) |> 
+  as.matrix()
 
+consumer_brand_sample_matrix
 
+consumer_brand_sample_pca <- consumer_brand_sample_matrix |> 
+  prcomp(
+    center = TRUE, 
+    scale. = TRUE
+  )
 
+consumer_brand_sample_pca
 
+### Components ----
+consumer_brand_sample_pca$x
+
+### Standard deviation ----
+eigenvalues <- consumer_brand_sample_pca |> 
+  tidy(matrix = "eigenvalues") |> 
+  mutate(variance = std.dev^2,
+         .after = std.dev)
+
+### Visualization ----
+consumer_brand_sample_pca |> 
+  ggscreeplot() +
+  scale_x_continuous(breaks = 1:2)
+
+consumer_brand_sample_pca |> 
+  ggbiplot(
+    groups = consumer_brand_sample$brand,
+    scale = 1, pc.biplot = FALSE
+  )
+
+## Apply database ----
+consumer_brand |> 
+  glimpse()
+
+consumer_brand_pca <- consumer_brand |>
+  select(-brand) |> 
+  prcomp(
+    center = TRUE,
+    scale. = TRUE
+  )
+  
+consumer_brand_pca |> 
+  ggbiplot(
+    groups = consumer_brand$brand,
+    scale = 1, pc.biplot = FALSE
+  )

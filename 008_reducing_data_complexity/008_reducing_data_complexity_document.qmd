@@ -19,6 +19,8 @@ format:
 library(tidyverse)
 library(skimr)
 library(tidyheatmaps)
+library(tidymodels)
+library(ggbiplot)
 ```
 
 # Introduction
@@ -102,3 +104,51 @@ brand_mean_longer |>
   )
 ```
 
+# Principal component analysis
+
+## Sample
+
+```{r}
+set.seed(seed = 1234)
+consumer_brand_sample <- consumer_brand |>
+  slice_sample(n = 1, by = brand) |> 
+  select(brand, perform, leader)
+```
+
+```{r}
+consumer_brand_sample_matrix <- consumer_brand_sample |> 
+  select(-brand) |> 
+  as.matrix()
+```
+
+```{r}
+consumer_brand_sample_pca <- consumer_brand_sample_matrix |> 
+  prcomp(
+    center = TRUE, 
+    scale. = TRUE
+  )
+```
+
+```{r}
+consumer_brand_sample_pca |> 
+  ggscreeplot()
+```
+
+## All data base
+
+```{r}
+consumer_brand_pca <- consumer_brand |>
+  select(-brand) |> 
+  prcomp(
+    center = TRUE,
+    scale. = TRUE
+  )
+```
+
+```{r}
+consumer_brand_pca |> 
+  ggbiplot(
+    groups = consumer_brand$brand,
+    scale = 1, pc.biplot = FALSE
+  )
+```
