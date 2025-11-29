@@ -2,6 +2,7 @@
 library(tidyverse)
 library(skimr)
 library(cluster)
+library(parameters)
 
 # Import ----
 segmentation <- read_csv(file = "000_data/005_chapter_5.csv") |> 
@@ -151,6 +152,61 @@ kaufman_example |>
     aes(x = weight_kg,
         y = height_cm)
   )
+
+## K-means ----
+?kmeans
+
+set.seed(1234)
+kaufman_example_kmeans <- kaufman_example |> 
+  select(-name) |> 
+  kmeans(
+    centers = 2,
+    algorithm = "Hartigan-Wong"
+  )
+
+kaufman_example_kmeans$cluster
+
+kaufman_example_cluster <- kaufman_example |> 
+  mutate(
+    cluster = kaufman_example_kmeans$cluster
+  ) |> 
+  mutate(
+    cluster = factor(x = cluster, 
+                     ordered = FALSE)
+  )
   
-  
+### Visualization ----
+kaufman_example_cluster |> 
+  ggplot() +
+  geom_point(
+    aes(x = weight_kg,
+        y = height_cm,
+        color = cluster)
+  )
+
+### ----
+n_clust_kaufman_example <- kaufman_example |> 
+  select(-name) |> 
+  n_clusters(
+    standardize = TRUE,
+    nbclust_method = "kmeans",
+    n_max = 7
+  )
+
+n_clust_kaufman_example
+
+n_clust_kaufman_example |> 
+  View()
+
+### Explain random initial condition ----
+set.seed(1234)
+sample(
+  x = 1:6, 
+  size = 3, 
+  replace = TRUE 
+)
+
+
+
+
 
