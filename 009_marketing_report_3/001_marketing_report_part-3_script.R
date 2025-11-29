@@ -4,6 +4,9 @@ library(tidyverse)
 library(scales)
 library(tidymodels)
 library(performance)
+library(parameters)
+library(DT)
+library(tidyheatmaps)
 
 # Import ----
 bike_sales <- bike_sales |> 
@@ -242,7 +245,43 @@ customer_product_table <- bike_sales_total_revenue_pct |>
     values_fill = 0
   )
   
-customer_product_table  
+customer_product_table
+
+### Choose clusters number ----
+n_clusters_customer_product_table <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  n_clusters(
+    standardize = FALSE,
+    nbclust_method = "kmeans",
+    n_max = 10
+  )
+
+n_clusters_customer_product_table
+
+set.seed(1234)
+kmeans_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  kmeans(
+    centers = 4, 
+    algorithm = "Hartigan-Wong" 
+  )
+
+kmeans_object$cluster
+
+clusters <- kmeans_object |> 
+  augment(
+    data = customer_product_table
+  ) |> 
+  select(
+    bikeshop.name,
+    .cluster
+  )
+  
+clusters |> 
+  datatable(
+    colnames = c("Bikeshop",
+                 "Cluster") 
+      )
   
 ## Applying PCA ----
 pca_object <- customer_product_table |> 
@@ -258,10 +297,51 @@ pca_1_2 <- pca_object$x |>
     PC1, PC2
   )
 
+## Visualization
 pca_1_2 |> 
   ggplot(aes(x = PC1, y = PC2)) + 
   geom_point()
+
+clusters_pca_1_2 <- pca_1_2 |> 
+  bind_cols(clusters)
+
+clusters_pca_1_2 |> 
+  ggplot() +
+  geom_point(
+    aes(x = PC1,
+        y = PC2,
+        color = .cluster)
+  ) + 
+  labs(x = "Principal component 1",
+       y = "Principal component 2",
+       color = "Cluster")
   
+  
+customer_product_table_clusters <- kmeans_object |> 
+  augment(
+    data = customer_product_table
+  )  
+
+customer_product_table_clusters |> 
+  filter(.cluster == 1) |> 
+  View()
+
+customer_product_table_clusters |>
+  select(-.cluster) |> 
+  pivot_longer(
+    cols = -bikeshop.name, 
+    names_to = "model",
+    values_to = "revenue_pct"
+  ) |> 
+  tidyheatmap(
+    rows = model,
+    columns = bikeshop.name,
+    values = revenue_pct,
+    cluster_rows = TRUE,
+    cluster_cols = TRUE,
+    clustering_method = "complete",
+    border_color = "black"
+  )
 
 
 
