@@ -5,7 +5,7 @@ author:
     email: luis.gomezl@unimilitar.edu.co
     affiliations:
       - name: Universidad Militar Nueva Granada
-date: 2025-02-20
+date: 2026-01-21
 date-modified: last-modified
 format:
   html: 
@@ -25,12 +25,12 @@ params:
       end_hour: 15:00
   block:
     value:
-      start_date: 2025-03-24
-      end_date: 2025-05-31
+      start_date: 2026-04-06
+      end_date: 2026-06-07
   schedule:
     value:
-      meeting_dates: [3, 5, 6]
-      dates_recess: [2025-04-14, 2025-04-20]
+      meeting_dates: [2, 4, 6]
+      dates_recess: [2026-03-30, 2026-04-04]
       start_presentation_hour: 19:00
       end_presentation_hour: 21:00
       start_syllabus_hour: 20:00
@@ -67,9 +67,8 @@ library(knitr)
 #| label: meeting-info
 
 # Days ----
-if(length(params$meeting_info$days) > 1) {
-  days_str <- glue_collapse(params$meeting_info$days, 
-                            sep = ", ", last = " or ") 
+if (length(params$meeting_info$days) > 1) {
+  days_str <- glue_collapse(params$meeting_info$days, sep = ", ", last = " or ")
 } else {
   days_str <- params$meeting_info$days[1]
 }
@@ -99,17 +98,17 @@ if(length(params$meeting_info$days) > 1) {
 #| label: block
 
 # Dates ----
-start_date <- ymd(params$block$start_date) 
-end_date   <- ymd(params$block$end_date)
+start_date <- ymd(params$block$start_date)
+end_date <- ymd(params$block$end_date)
 
-str_start_end_date <- paste(format(start_date, 
-                                   format = "%B %d"),
-                            " - ",
-                            format(end_date, 
-                                   format = "%B %d"), 
-                            sep = "",
-                            ", ",
-                            year(start_date))
+str_start_end_date <- paste(
+  format(start_date, format = "%B %d"),
+  " - ",
+  format(end_date, format = "%B %d"),
+  sep = "",
+  ", ",
+  year(start_date)
+)
 ```
 
 -   Credits: 4
@@ -156,33 +155,38 @@ Develop skills in programming, statistics, and data analysis to solve business p
 ## Include references
 ## See https://github.com/quarto-dev/quarto-cli/issues/3340
 ### #| results: asis
-tibble(Week = c(1:9),
-       Material = rep("[@chapman_r_2019]", 
-                      times = 9),
-       Chapter = c(1:8, 11),
-       Pages = c("1-12", 
-                 "13-37, 41-43, 44-45",
-                 "49-60, 62-69, 71-73, 75-77",
-                 "79-101, 103-104, 106-109",
-                 "111-132",
-                 "133-145, 153-155",
-                 "157-183, 185-189",
-                 "193-206, 217-220",
-                 "299-313, 336, 338-339"),
-       Exercises = c("", 
-                     "1-8",
-                     "1-10",
-                     "1-10, 12-15",
-                     "1-7",
-                     "1-9",
-                     "1-12",
-                     "1-7",
-                     "1-5")) |> 
+tibble(
+  Week = c(1:9),
+  Material = rep("[@chapman_r_2019]", times = 9),
+  Chapter = c(1:8, 11),
+  Pages = c(
+    "1-12",
+    "13-37, 41-43, 44-45",
+    "49-60, 62-69, 71-73, 75-77",
+    "79-101, 103-104, 106-109",
+    "111-132",
+    "133-145, 153-155",
+    "157-183, 185-189",
+    "193-206, 217-220",
+    "299-313, 336, 338-339"
+  ),
+  Exercises = c(
+    "",
+    "1-8",
+    "1-10",
+    "1-10, 12-15",
+    "1-7",
+    "1-9",
+    "1-12",
+    "1-7",
+    "1-5"
+  )
+) |>
   kable()
-  # kbl() |>
-  # kable_styling() |>
-  # unclass() |>
-  # cat()
+# kbl() |>
+# kable_styling() |>
+# unclass() |>
+# cat()
 ```
 
 ## Detailed schedule
@@ -192,21 +196,23 @@ tibble(Week = c(1:9),
 
 source(file = "../000_scripts/000_tbl_schedule.R")
 
-tbl_schedule <- tbl_schedule(start_date   = params$block$start_date, 
-                             end_date     = params$block$end_date,
-                             dates_recess = params$schedule$dates_recess,
-                             meeting_days = params$schedule$meeting_dates)
+tbl_schedule <- tbl_schedule(
+  start_date = params$block$start_date,
+  end_date = params$block$end_date,
+  dates_recess = params$schedule$dates_recess,
+  meeting_days = params$schedule$meeting_dates
+)
 
-virtual_meeting <- tbl_schedule |> 
-  filter(virtual_meeting == 1) |> 
+virtual_meeting <- tbl_schedule |>
+  filter(virtual_meeting == 1) |>
   pull(index)
 
-activity <-  tbl_schedule |> 
-  filter(activity == 1) |> 
+activity <- tbl_schedule |>
+  filter(activity == 1) |>
   pull(index)
 
-exam <-  tbl_schedule |> 
-  filter(exam == 1) |> 
+exam <- tbl_schedule |>
+  filter(exam == 1) |>
   pull(index)
 ```
 
@@ -307,13 +313,13 @@ exam <-  tbl_schedule |>
 
 ### Segundo corte 30%
 
--   `r format(x = ymd(params$schedule$dates_recess[[1]]), format = "%B %e")`
+<!-- -   `r format(x = ymd(params$schedule$dates_recess[[1]]), format = "%B %e")`
 
     -   **Begin Holy Week**
 
 -   `r format(x = ymd(params$schedule$dates_recess[[2]]), format = "%B %e")`
 
-    -   **End Holy Week**
+    -   **End Holy Week** -->
 
 -   `r format(x = virtual_meeting[[10]], format = "%B %e")`
 
