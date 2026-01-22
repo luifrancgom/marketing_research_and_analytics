@@ -36,11 +36,11 @@ params:
       start_syllabus_hour: 20:00
       end_syllabus_hour: 20:45  
       start_virtual_meeting_hour: 08:00
-      end_virtual_meeting_hour: 09:55
+      end_virtual_meeting_hour: 09:25
       start_activity_hour: 00:00
       end_activity_hour: 22:00
       start_exam_hour: 18:00
-      end_exam_hour: 21:20
+      end_exam_hour: 20:30
 bibliography: ../000_references/marketing_research_and_analytics.bib
 editor: source
 ---
