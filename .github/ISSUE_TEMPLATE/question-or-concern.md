@@ -20,9 +20,7 @@ If applicable, add screenshots to help explain your problem.
 
 ## Settings (please complete the following information)
 
- - Operating system: [e.g. Windows xx, Mac OS X 10.x, Ubuntu 22.xx ]
- - R version: [e.g. 4.3.x]
- - Quarto version: [e.g. 1.4.xx]
+ - Web Browser: [e.g. Firefox 149.x (64-bit)]
 
 ## Additional context
 
