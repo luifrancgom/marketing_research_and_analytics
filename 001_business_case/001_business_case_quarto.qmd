@@ -1,0 +1,41 @@
+---
+title: Business Case
+author:
+  - Luis Francisco Gomez
+  - Bill Gates
+  - Norah Jones
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: load-r-libraries
+#| message: false
+#| warning: false
+library(tidyverse)
+library(sweep)
+```
+
+# Introduction
+
+In this report we are going to explore the data set.
+
+# Exploring data set
+
+First, we are going to count the different models in the data set.
+
+## Counting
+
+```{r}
+count_model <- bike_sales |> 
+  count(
+    model,
+    sort = TRUE
+  )
+
+count_model
+```

@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Luis Francisco Gomez">
-<meta name="author" content="Norah Jones">
 <meta name="author" content="Bill Gates">
+<meta name="author" content="Norah Jones">
 
-<title>Welcome to R</title>
+<title>Business Case</title>
 <style>
 
 code{white-space: pre-wrap;}
@@ -22,6 +22,41 @@ ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
 width: 0.8em;
 margin: 0 0.8em 0.2em -1em;  vertical-align: middle;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+}
+pre.numberSource { margin-left: 3em; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -2176,7 +2211,10 @@ vertical-align: -.125em;
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#import-data" id="toc-import-data" class="nav-link" data-scroll-target="#import-data"><span class="header-section-number">2</span> Import data</a></li>
+  <li><a href="#exploring-data-set" id="toc-exploring-data-set" class="nav-link" data-scroll-target="#exploring-data-set"><span class="header-section-number">2</span> Exploring data set</a>
+  <ul class="collapse">
+  <li><a href="#counting" id="toc-counting" class="nav-link" data-scroll-target="#counting"><span class="header-section-number">2.1</span> Counting</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -2184,7 +2222,7 @@ vertical-align: -.125em;
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Welcome to R</h1>
+<h1 class="title">Business Case</h1>
 </div>
 
 
@@ -2195,8 +2233,8 @@ vertical-align: -.125em;
     <div class="quarto-title-meta-heading">Authors</div>
     <div class="quarto-title-meta-contents">
              <p>Luis Francisco Gomez </p>
-             <p>Norah Jones </p>
              <p>Bill Gates </p>
+             <p>Norah Jones </p>
           </div>
   </div>
     
@@ -2209,12 +2247,51 @@ vertical-align: -.125em;
 </header>
 
 
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sweep)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p>This is my first sentence of a quarto document.</p>
+<p>In this report we are going to explore the data set.</p>
 </section>
-<section id="import-data" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Import data</h1>
+<section id="exploring-data-set" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Exploring data set</h1>
+<p>First, we are going to count the different models in the data set.</p>
+<section id="counting" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="counting"><span class="header-section-number">2.1</span> Counting</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>count_model <span class="ot">&lt;-</span> bike_sales <span class="sc">|&gt;</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sort =</span> <span class="cn">TRUE</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>count_model</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 97 × 2
+   model                      n
+   &lt;chr&gt;                  &lt;int&gt;
+ 1 Slice Ultegra D12        229
+ 2 Supersix Evo Ultegra 3   227
+ 3 Scalpel 29 4             221
+ 4 F-Si 2                   215
+ 5 CAAD8 105                210
+ 6 CAAD12 Red               209
+ 7 Trail 2                  208
+ 8 F-Si Carbon 4            207
+ 9 Bad Habit 1              206
+10 Jekyll Carbon 4          205
+# ℹ 87 more rows</code></pre>
+</div>
+</div>
+</section>
 </section>
 
 </main>
