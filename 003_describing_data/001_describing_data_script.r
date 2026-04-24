@@ -67,6 +67,30 @@ weekly_store |>
 ### Prepare data ----
 weekly_store_sales_by_country <- weekly_store |> 
   group_by(country) |> 
-  summarise(sum_p2sales = sum(p2sales))
+  summarise(sum_p2sales = sum(p2sales)) |> 
+  mutate(country = fct_reorder(.f = country, .x = sum_p2sales))
 
-weekly_store_sales_by_country
+weekly_store_sales_by_country |> 
+  ggplot() +
+  geom_col(
+    aes(x = country, y = sum_p2sales),
+    color = "black",
+    fill = "steelblue"
+  ) + 
+  scale_x_discrete(
+    labels = c(
+      "Australia",
+      "China",
+      "Brazil",
+      "United States",
+      "Britain",
+      "Japan",
+      "Germany"
+    )
+  ) +
+  labs(
+    x = NULL,
+    y = "Sales (Units)",
+    subtitle = "Distribution of total sales of product 2 by country"
+  )
+
