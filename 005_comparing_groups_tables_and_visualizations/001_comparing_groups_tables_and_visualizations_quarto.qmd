@@ -1,0 +1,111 @@
+---
+title: "Comparing groups: Tables and Visualizations"
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: load-libraries-r
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(skimr)
+library(DT)
+```
+
+# Introduction
+
+Pending. Bla bla bla bla @fig-subscribers-by-ownhome-segment
+
+# Import data
+
+Pending
+
+```{r}
+#| message: false
+segmentation <- read_csv(
+  file = "../000_data/005_data_set_chapter-5.csv"
+)
+```
+
+# Transform data
+
+Pending
+
+```{r}
+segmentation <- segmentation |> 
+  mutate(
+    gender = factor(x = gender, ordered = FALSE),
+    kids = as.integer(x = kids),
+    ownHome = factor(x = ownHome, ordered = FALSE),
+    subscribe = factor(x = subscribe, ordered = FALSE),
+    Segment = factor(x = Segment, ordered = FALSE)
+  )
+```
+
+# Summary statistics
+
+Pending
+
+```{r}
+segmentation |> 
+  skim()
+```
+
+## Tables
+
+```{r}
+#| label: tbl-mean-income-by-ownhome-segment
+#| tbl-cap: Mean income by home owner status and segment
+#| message: false
+mean_income_by_ownhome_segment <- segmentation |> 
+  group_by(ownHome, Segment) |> 
+  summarise(mean_income = mean(income)) |> 
+  ungroup()
+
+mean_income_by_ownhome_segment |> 
+  datatable(
+    colnames = c(
+      "Home owner status",
+      "Segment",
+      "Mean Income"
+    )
+  ) |> 
+  formatRound(
+    columns = 3,
+    digits = 2
+  )
+```
+
+## Facets
+
+```{r}
+#| label: fig-subscribers-by-ownhome-segment
+#| fig-cap: Percentage of subscribers by owner home status and segment
+subscribers_by_ownhome_segment <- segmentation |>
+  count(subscribe, ownHome, Segment) |> 
+  group_by(ownHome, Segment) |> 
+  mutate(n_pct = (n / sum(n))*100) |> 
+  arrange(ownHome, Segment) |> 
+  ungroup()
+
+subscribers_by_ownhome_segment |> 
+  ggplot() +
+  geom_col(
+    aes(x = subscribe, y = n_pct)
+  ) +
+  facet_wrap(
+    facets = vars(ownHome, Segment),
+    ncol = 4,
+    nrow = 2
+  )
+```
