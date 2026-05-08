@@ -2,6 +2,7 @@
 library(sweep)
 library(tidyverse)
 library(scales)
+library(DT)
 
 # Import data ----
 bike_sales <- bike_sales |> 
@@ -92,4 +93,103 @@ frame_category_secondary_count |>
   labs(
     x = "Frame type",
     y = "Category Secondary"
+  )
+
+# Descriptive statistics by group ----
+## Mean, median, sd ----
+revenue_stats_by_cat2_frame <- bike_sales |> 
+  group_by(category.secondary, frame) |> 
+  summarise(
+    mean_revenue   = mean(price.ext),
+    median_revenue = median(price.ext),
+    sd_revenue     = sd(price.ext) 
+  ) |> 
+  ungroup() |> 
+  arrange(desc(mean_revenue))
+
+revenue_stats_by_cat2_frame |> 
+  datatable(
+    colnames = c(
+      "Category secondary",
+      "Frame",
+      "Mean",
+      "Median",
+      "Standard deviation"
+    )
+  ) |> 
+  formatRound(
+    columns = c(3, 5),
+    digits = 2
+  )
+
+revenue_stats_by_bikeshop <- bike_sales |> 
+  group_by(bikeshop.name) |> 
+  summarise(
+    mean_revenue   = mean(price.ext),
+    median_revenue = median(price.ext),
+    sd_revenue     = sd(price.ext) 
+  ) |> 
+  ungroup() |> 
+  arrange(desc(mean_revenue))
+
+revenue_stats_by_bikeshop |> 
+  datatable(
+    colnames = c(
+      "Bikeshop",
+      "Mean",
+      "Median",
+      "Standard deviation"
+    )
+  ) |> 
+  formatRound(
+    columns = c(2, 4),
+    digits = 2
+  )
+
+## Percentage of revenue ----
+pct_revenue_by_cat2_frame <- bike_sales |> 
+  group_by(category.secondary, frame) |> 
+  summarise(
+    total_revenue = sum(price.ext), 
+  ) |> 
+  ungroup() |> 
+  mutate(
+    pct_revenue = (total_revenue / sum(total_revenue))*100
+  ) |> 
+  arrange(desc(pct_revenue))
+
+pct_revenue_by_cat2_frame |> 
+  datatable(
+    colnames =  c(
+      "Category secondary",
+      "Frame",
+      "Total revenue",
+      "Percentage total revenue"
+    )
+  ) |> 
+  formatRound(
+    columns = 4
+  )
+
+pct_revenue_by_bikeshop <- bike_sales |> 
+  group_by(bikeshop.name) |> 
+  summarise(
+    total_revenue = sum(price.ext), 
+  ) |> 
+  ungroup() |> 
+  mutate(
+    pct_revenue = (total_revenue / sum(total_revenue))*100
+  ) |> 
+  arrange(desc(pct_revenue))
+
+pct_revenue_by_bikeshop |> 
+  datatable(
+    colnames =  c(
+      "Bikeshop",
+      "Total revenue",
+      "Percentage total revenue"
+    )
+  ) |> 
+  formatRound(
+    columns = 3
   )
