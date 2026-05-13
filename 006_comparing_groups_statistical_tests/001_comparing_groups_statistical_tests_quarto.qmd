@@ -1,0 +1,35 @@
+---
+title: "Comparing groups: statistical tests"
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: load-r-libraries
+#| message: false
+#| warning: false
+
+library(tidyverse)
+```
+
+# Introduction
+
+Pending
+
+# Import data
+
+```{r}
+#| message: false
+segmentation <- read_csv(
+    file = "../000_data/005_data_set_chapter-5.csv"
+    )
+```
+
