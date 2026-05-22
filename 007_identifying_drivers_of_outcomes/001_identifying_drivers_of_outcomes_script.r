@@ -111,3 +111,59 @@ model2_tidy |>
 ### Checking assumptions ----
 check_model(model1)
 check_model(model2)
+
+### Comparing models
+anova_lm <- anova(
+  model1,
+  model2,
+  test = "F"
+)
+
+anova_lm_tidy <- anova_lm |> 
+  tidy()
+
+alpha <- 0.05
+
+anova_lm_tidy
+
+## Predictios
+model2_tidy
+
+((model2_tidy$estimate) * c(1, 30, 10, 57, 90)) |> 
+  sum()
+
+((model2_tidy$estimate) * c(1, 6, 8, 10, 12)) |> 
+  sum()
+
+new_data <- tibble(
+  rides = c(30, 70),
+  games = c(10, 80),
+  wait  = c(57, 60),
+  clean = c(90, 93)
+)
+
+model2_new_data_pred <- predict(
+  object = model2,
+  newdata = new_data
+) |> 
+  enframe(
+    name = "observation",
+    value = "overall_pred"
+  ) |> 
+  bind_cols(new_data)
+
+model2_new_data_pred |> 
+  datatable(
+    colnames = c(
+      "Observation",
+      "Overall prediction",
+      "Rides",
+      "Games",
+      "Wait",
+      "Clean"
+    )
+  ) |> 
+  formatRound(
+    columns = c(2),
+    digits = 2
+  )
