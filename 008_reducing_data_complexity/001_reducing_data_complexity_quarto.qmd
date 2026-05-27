@@ -1,0 +1,111 @@
+---
+title: Reducing data complexity
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: load-r-libraries
+#| message: false
+#| warning: false
+library(tidyverse)
+library(skimr)
+library(corrr)
+library(tidyheatmaps)
+```
+
+# Introduction
+
+Pending
+
+# Import data 
+
+```{r}
+#| label: import-data
+#| message: false
+consumer_brand <- read_csv(
+  file = "../000_data/008_data_set_chapter-8.csv"
+)
+
+```
+
+# Transform
+
+```{r}
+consumer_brand_scale <- consumer_brand |>
+  mutate(
+    across(
+      .cols = perform:rebuy,
+      .fns  = \(x) scale(x = x, center = TRUE, scale = TRUE)[,1]
+    )
+  )
+```
+
+# Summarize
+
+```{r}
+consumer_brand_scale |> 
+  skim()
+```
+
+# Correlation
+
+```{r}
+#| warning: false
+correlation_matrix <- consumer_brand_scale |> 
+  select(-brand) |> 
+  correlate(
+    use = "pairwise.complete.obs",
+    method = "pearson"
+  )
+
+correlation_matrix |> 
+  autoplot(
+    method = "HC", # hierarchical clustering
+    triangular = "lower"
+  )
+```
+
+# Heatmaps
+
+```{r}
+brand_mean <- consumer_brand_scale |> 
+  group_by(brand) |> 
+  summarize(
+    across(
+      .cols = perform:rebuy,
+      .fns  = mean
+    )
+  ) |> 
+  ungroup()
+
+brand_mean_longer <- brand_mean |> 
+  pivot_longer(
+    cols = perform:rebuy, 
+    names_to = "perceptual_adjectives",
+    values_to = "value_mean"
+  )
+
+tidyheatmap(
+  df = brand_mean_longer,
+  rows = brand,
+  columns = perceptual_adjectives,
+  values = value_mean, 
+  border_color = "black",
+  display_numbers = TRUE,
+  fontsize = 12,
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  clustering_method = "complete"
+)
+```
+
+# Principal component analysis
