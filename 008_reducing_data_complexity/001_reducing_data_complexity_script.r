@@ -3,6 +3,8 @@ library(tidyverse)
 library(skimr)
 library(corrr)
 library(tidyheatmaps)
+library(tidymodels)
+library(ggbiplot)
 
 # Import data ----
 # "/data/data_sets_marketing/008_data_set_chapter-8.csv"
@@ -146,4 +148,59 @@ boat_gray_wider <- boat_gray |>
     id_cols = x,
     names_from = y,
     values_from = value
+  )
+
+consumer_brand_sample_tbl <- consumer_brand_sample |> 
+  select(-brand) 
+
+consumer_brand_sample_tbl_pca <- consumer_brand_sample_tbl |> 
+  prcomp(
+    center = TRUE,
+    scale. = TRUE
+  )
+
+consumer_brand_sample_tbl_pca
+
+consumer_brand_sample_tbl_pca$center
+consumer_brand_sample_tbl_pca$scale
+consumer_brand_sample_tbl_pca$x
+consumer_brand_sample_tbl_pca$rotation
+
+consumer_brand_sample_tbl_pca |> 
+  tidy(matrix = "eigenvalues") |> 
+  mutate(variance = std.dev^2, .after = std.dev) |> 
+  mutate(percent2 = variance / sum(variance), .after = percent)
+
+consumer_brand_sample_tbl_pca |> 
+  ggscreeplot() +
+  scale_x_continuous(breaks = 1:2)
+
+consumer_brand_sample_tbl_pca |> 
+  ggbiplot(
+    groups = consumer_brand_sample$brand,
+    scale = 1,
+    pc.biplot = TRUE
+  )
+
+consumer_brand_pca <- consumer_brand |> 
+  select(-brand) |> 
+  prcomp(
+    center = TRUE,
+    scale. = TRUE
+  )
+
+consumer_brand_pca$x
+
+consumer_brand_pca |> 
+  tidy(matrix = "eigenvalues") 
+
+consumer_brand_pca |> 
+  ggscreeplot() +
+  scale_x_continuous(breaks = 1:9)
+
+consumer_brand_pca |> 
+  ggbiplot(
+    groups = consumer_brand$brand,
+    scale = 1,
+    pc.biplot = TRUE
   )
