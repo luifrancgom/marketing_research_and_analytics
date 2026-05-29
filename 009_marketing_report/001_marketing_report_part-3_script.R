@@ -4,6 +4,7 @@ library(scales)
 library(sweep)
 library(tidymodels)
 library(DT)
+library(tidyheatmaps)
 
 # Import data ----
 bike_sales <- bike_sales |> 
@@ -165,3 +166,91 @@ model2_new_data_pred |>
     columns = c(2),
     digits = 2
   )
+
+# Segment bike shops with k-means clustering ----
+## Bike shop revenue trends ----
+bike_sales_total_revenue <- bike_sales |> 
+  select(
+    bikeshop.name,
+    price.ext,
+    model,
+    category.primary,
+    category.secondary,
+    frame
+  ) |> 
+  group_by(
+    bikeshop.name,
+    model,
+    category.primary,
+    category.secondary,
+    frame
+  ) |> 
+  summarise(total_revenue = sum(price.ext)) |> 
+  ungroup()
+
+## Prepare data ----
+bike_sales_total_revenue_pct <- bike_sales_total_revenue |> 
+  group_by(bikeshop.name) |> 
+  mutate(total_revenue_pct = total_revenue / sum(total_revenue)) |> 
+  ungroup()
+
+bike_sales_total_revenue_pct
+
+### Customer-product table
+customer_product_table <- bike_sales_total_revenue_pct |> 
+  select(
+    bikeshop.name,
+    model,
+    total_revenue_pct
+  ) |> 
+  pivot_wider(
+    id_cols = bikeshop.name,
+    names_from = model,
+    values_from = total_revenue_pct,
+    values_fill = 0 
+  )
+
+customer_product_table
+
+## Data visualization k-means and pca ----
+### PCA ----
+pca_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  prcomp(
+    center = TRUE,
+    scale. = FALSE
+  )
+
+pca_1_2 <- pca_object$x |> 
+  as_tibble() |> 
+  select(
+    PC1,
+    PC2
+  )
+
+pca_1_2 |> 
+  ggplot() + 
+  geom_point(
+    aes(x = PC1, y = PC2)
+  )
+
+### Heatmap ----
+customer_product_table_longer <- customer_product_table |> 
+  pivot_longer(
+    cols = -bikeshop.name,
+    names_to = "model",
+    values_to = "total_revenue_pct"
+  )
+
+customer_product_table_longer
+
+tidyheatmap(
+  df = customer_product_table_longer,
+  rows = model,
+  columns = bikeshop.name,
+  values = total_revenue_pct,
+  border_color = "black",
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  clustering_method = "complete"
+)
