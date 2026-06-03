@@ -1,0 +1,61 @@
+---
+title: "Segmentation: clustering"
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true 
+---
+
+```{r}
+#| label: load-r-libraries
+#| message: false
+#| warning: false
+library(tidyverse)
+library(skimr)
+```
+
+# Introduction
+
+Pending
+
+# Import data
+
+Pending
+
+```{r}
+#| label: import-data
+#| message: false
+segmentation <- read_csv(
+  file = "../000_data/005_data_set_chapter-5.csv"
+) |> 
+  select(-Segment)
+```
+
+# Transform data
+
+Pending
+
+```{r}
+segmentation <- segmentation |> 
+  mutate(
+    gender = factor(x = gender, ordered = FALSE),
+    kids = as.integer(x = kids),
+    ownHome = factor(x = ownHome, ordered = FALSE),
+    subscribe = factor(x = subscribe, ordered = FALSE)
+  )
+```
+
+# Summarize data
+
+Pending
+
+```{r}
+segmentation |> 
+  skim()
+```
