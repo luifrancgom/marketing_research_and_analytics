@@ -5,6 +5,7 @@ library(sweep)
 library(tidymodels)
 library(DT)
 library(tidyheatmaps)
+library(parameters)
 
 # Import data ----
 bike_sales <- bike_sales |> 
@@ -221,6 +222,9 @@ pca_object <- customer_product_table |>
     scale. = FALSE
   )
 
+pca_object |> 
+  tidy(matrix = "eigenvalues")
+
 pca_1_2 <- pca_object$x |> 
   as_tibble() |> 
   select(
@@ -254,3 +258,90 @@ tidyheatmap(
   cluster_cols = TRUE,
   clustering_method = "complete"
 )
+
+## Sementation clustering kmeans ----
+customer_product_table
+### Choosing the number of clusters ----
+n_clust_customer_product_table <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  n_clusters(
+    standardize = FALSE, # The data is using the same scale
+    nbclust_method = "kmeans",
+    n_max = 10
+  )
+
+n_clust_customer_product_table |> 
+  as_tibble() |> 
+  mutate(n_Clusters = as.integer(n_Clusters)) |> 
+  datatable(
+    colnames = c(
+      "Number of Clusters",
+      "Method",
+      "R package",
+      "Duration (seconds)"
+    )
+  ) |> 
+  formatRound(
+    columns = c(4),
+    digits = 2
+  )
+
+n_clust_customer_porduct_table |> 
+  View()
+
+n_clusters <- 4
+
+### Applying k-means ----
+set.seed(seed = 1234)
+kmeans_object <- customer_product_table |> 
+  select(-bikeshop.name) |> 
+  kmeans(
+    centers = n_clusters, 
+    algorithm = "Hartigan-Wong"  
+  )
+
+
+kmeans_object$cluster
+kmeans_object$centers |> 
+  as_tibble()
+
+### Extract clusters ----
+clusters <- kmeans_object |> 
+  augment(
+    data = customer_product_table
+  ) |> 
+  select(
+    bikeshop.name,
+    .cluster
+  )
+
+clusters |> 
+  arrange(.cluster) |> 
+  datatable(
+    colnames = c(
+      "Bikeshop name",
+      "Cluster"
+    )
+  )
+
+### Cluster visualization ----
+pca_1_2 |> 
+  ggplot() +
+  geom_point(
+    aes(x = PC1, y = PC2)
+  )
+
+clusters_pca_1_2 <- pca_1_2 |> 
+  bind_cols(clusters)
+
+clusters_pca_1_2 |> 
+  ggplot() + 
+  geom_point(
+    aes(
+      x = PC1, y = PC2,
+      color = .cluster
+    )
+  )
+
+clusters_pca_1_2 |> 
+  filter(PC1 < -0.1)
