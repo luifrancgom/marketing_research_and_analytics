@@ -1,0 +1,41 @@
+---
+title: Business case
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+---
+
+```{r}
+# Load packages ----
+library(tidyverse)
+library(sweep)
+```
+
+# Introduction
+
+In this report we are examine the different categories of the identities of the data base.
+
+# Import data
+
+In this section the data is imported from package sweep.
+
+```{r}
+# Import data ----
+bike_sales <- bike_sales
+```
+
+# Count
+
+## Bike shops
+
+```{r}
+bike_sales |>
+    count(bikeshop.name)
+```
