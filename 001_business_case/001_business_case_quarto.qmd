@@ -38,4 +38,5 @@ bike_sales <- bike_sales
 ```{r}
 bike_sales |>
     count(bikeshop.name)
+
 ```
