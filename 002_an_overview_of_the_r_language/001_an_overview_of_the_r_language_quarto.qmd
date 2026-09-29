@@ -30,7 +30,7 @@ In this section were are going to import and transform the data to show descript
 ```{r}
 #| message: false
 satisfaction_data <- read_csv(
-    file = "http://goo.gl/UDv12g"
+    file = "../000_data/002_chapter_2.csv"
 )
 ```
 
