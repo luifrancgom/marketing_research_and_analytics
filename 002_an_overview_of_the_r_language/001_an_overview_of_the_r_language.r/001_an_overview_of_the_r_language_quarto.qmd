@@ -1,0 +1,52 @@
+---
+title: An overview of the R language
+format:
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+    code-fold: true
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez 
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(skimr)
+```
+
+# Introduction
+
+In this report we are going to inspect a data base related with a satisfaction survey.
+
+# Import data
+
+In this section were are going to import and transform the data to show descriptive statistics.
+
+```{r}
+#| message: false
+satisfaction_data <- read_csv(
+    file = "http://goo.gl/UDv12g"
+)
+```
+
+# Summarize data
+
+Pending
+
+```{r}
+satisfaction_data <- satisfaction_data |>
+    mutate(
+        Segment = factor(
+            x = Segment,
+            ordered = FALSE
+        )
+    )
+
+satisfaction_data |>
+    skim()
+```
