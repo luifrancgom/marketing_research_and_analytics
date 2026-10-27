@@ -1,0 +1,54 @@
+---
+title: Describing data
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: load-packages
+#| message: false
+#| warning: false
+library(tidyverse)
+library(skimr)
+```
+
+# Introduction
+
+Pending 
+
+# Import 
+
+```{r}
+#| message: false
+weekly_store <- read_csv(
+    file = "../000_data/003_chapter_3.csv"
+)
+```
+
+# Transform
+
+```{r}
+weekly_store <- weekly_store |>
+    mutate(
+        storeNum = factor(storeNum, ordered = FALSE),
+        Year = factor(Year, levels = 1:2, ordered = TRUE),
+        Week = factor(Week, levels = 1:52, ordered = TRUE),
+        p1prom = as.logical(p1prom),
+        p2prom = as.logical(p2prom)
+    )
+```
+
+# Summarise
+
+```{r}
+weekly_store |>
+    skim()
+```
