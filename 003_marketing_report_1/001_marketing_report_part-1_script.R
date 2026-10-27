@@ -26,33 +26,65 @@ bike_sales <- bike_sales |>
     )
 
 # Inspect ----
-bike_sales |> 
+bike_sales |>
     glimpse()
 
 # Summarise ---
-bike_sales |> 
+bike_sales |>
     skim()
 
 # Count ----
-bike_sales_tbl <- bike_sales |> 
+bike_sales_tbl <- bike_sales |>
     count(category.secondary)
 
-bike_sales_tbl |> 
+bike_sales_tbl |>
     datatable(
         colnames = c(
             "Category secondary",
             "N"
-        ) 
+        )
     )
 
-bike_sales |> 
+bike_sales |>
     count(frame)
 
-bike_sales |> 
+bike_sales |>
     count(
         category.secondary,
         frame
     )
 
-bike_sales |> 
+bike_sales |>
     count(bikeshop.name)
+
+# Visualization ----
+bike_sales |> 
+    ggplot() +
+    geom_histogram(
+        aes(x = quantity),
+        color = "black"
+    ) +
+    labs(
+        x = "Quantities (units)",
+        y = "Frequency"
+    )
+
+bike_sales |> 
+    ggplot() +
+    geom_histogram(
+        aes(x = price),
+        color = "black"
+    ) +
+    labs(
+        x = "Dollars (USD/frame)",
+        y = "Frequency"
+    )
+
+bike_sales |> 
+    ggplot() +
+    geom_boxplot(
+        aes(
+            x = price.ext,
+            y = category.secondary
+        )
+    )
