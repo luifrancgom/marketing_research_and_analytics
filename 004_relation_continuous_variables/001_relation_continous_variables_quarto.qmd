@@ -1,0 +1,56 @@
+---
+title: Relationships Between Continuous Variables
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format:
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+    code-fold: true
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(skimr)
+```
+
+# Introduction
+
+Pending
+
+# Import data
+
+```{r}
+#| message: false
+customer <- read_csv(
+    file = "../000_data/004_chapter_4.csv"
+)
+```
+
+# Transform 
+
+```{r}
+customer <- customer |>
+    mutate(
+        cust.id = factor(x = cust.id, ordered = FALSE),
+        email = factor(x = email, ordered = FALSE),
+        online.visits = as.integer(x = online.visits),
+        online.trans = as.integer(x = online.trans),
+        store.trans = as.integer(x = store.trans),
+        sat.service = factor(x = sat.service, ordered = TRUE),
+        sat.selection = factor(x = sat.selection, ordered = TRUE)
+    )
+```
+
+# Summarize
+
+
+```{r}
+customer |>
+    skim()
+```
