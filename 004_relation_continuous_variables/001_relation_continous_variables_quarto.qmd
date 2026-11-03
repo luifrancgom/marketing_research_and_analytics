@@ -17,6 +17,7 @@ format:
 #| warning: false
 library(tidyverse)
 library(skimr)
+library(corrr)
 ```
 
 # Introduction
@@ -53,4 +54,26 @@ customer <- customer |>
 ```{r}
 customer |>
     skim()
+```
+
+# Correlation 
+
+## Pearson correlation matrix
+
+```{r}
+#| warning: false
+correlation_matrix <- customer |>
+    select(
+        where(is.numeric)
+    ) |>
+    correlate(
+        use = "pairwise.complete.obs",
+        method = "pearson",
+        diagonal = NA
+    )
+
+correlation_matrix |>
+    autoplot(
+        triangular = "lower"
+    )
 ```
