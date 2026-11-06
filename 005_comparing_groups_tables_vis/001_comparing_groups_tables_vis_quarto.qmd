@@ -1,0 +1,199 @@
+---
+title: "Comparing groups: tables and visualizations"
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gomez
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: load-packages
+#| message: false
+#| warning: false
+library(tidyverse)
+library(skimr)
+library(DT)
+library(scales)
+```
+
+# Introduction
+
+Pending
+
+# Import data
+
+Pending
+
+```{r}
+#| message: false
+segmentation <- read_csv(
+    file = "../000_data/005_chapter_5.csv"
+)
+```
+
+# Transform 
+
+Pending
+
+```{r}
+segmentation <- segmentation |>
+    mutate(
+        gender = factor(
+            x = gender,
+            ordered = FALSE
+        ),
+        kids = as.integer(kids),
+        ownHome = factor(
+            x = ownHome,
+            ordered = FALSE
+        ),
+        subscribe = factor(
+            x = subscribe,
+            ordered = FALSE
+        ),
+        Segment = factor(
+            x = Segment,
+            ordered = FALSE
+        )
+    )
+```
+
+# Summarize 
+
+Pending
+
+```{r}
+segmentation |>
+    skim()
+```
+
+## Summary statistics by group
+
+Pending
+
+### Number of kids
+
+Pending
+
+```{r}
+#| label: tbl-sum-kids
+#| tbl-cap: Total number of kids by segment and ownership home
+#| message: false
+sum_kids_table <- segmentation |>
+    group_by(
+        Segment,
+        ownHome
+    ) |>
+    summarise(
+        sum_kids = sum(kids)
+    ) |>
+    ungroup()
+
+sum_kids_table |>
+    datatable(
+        colnames = c(
+            "Segment",
+            "Ownership home",
+            "Total kids"
+        )
+    )
+```
+
+### Frequencies by group
+
+Pending
+
+```{r}
+#| label: tbl-subscriptions-segment-owner-home
+#| tbl-cap: Subscriptions by segment and home ownership
+subscriber_by_segment_home_ownership <- segmentation |>
+    count(
+        subscribe,
+        Segment,
+        ownHome
+    ) |>
+    group_by(
+        Segment,
+        ownHome
+    ) |>
+    mutate(
+        n_pct = (n / sum(n)) * 100
+    ) |>
+    arrange(Segment, ownHome) |>
+    ungroup()
+
+subscriber_by_segment_home_ownership |>
+    datatable(
+        colnames = c(
+            "Status subscription",
+            "Segment",
+            "Ownership home",
+            "Number",
+            "Percentage"
+        )
+    ) |>
+    formatRound(
+        columns = 5,
+        digits = 2
+    )
+```
+
+### Visualization
+
+Pending
+
+#### Frequencies
+
+```{r}
+#| label: subscriptions-segment-owner-home
+#| fig-cap: Percentage of subscriptions by segment and ownership home
+subscriber_by_segment_home_ownership |>
+    ggplot() +
+    geom_col(
+        aes(
+            x = subscribe,
+            y = n_pct
+        )
+    ) +
+    facet_wrap(
+        facets = vars(
+            Segment,
+            ownHome
+        ),
+        nrow = 2
+    ) +
+    labs(
+        x = "Subscription status",
+        y = "Percentage (%)"
+    )
+```
+
+#### Continous variables by groups
+
+```{r}
+#| label: fig-distribution-income-segment-own-home
+#| fig-cap: Distribution of income by segment and ownership home
+segmentation |>
+    ggplot() +
+    geom_boxplot(
+        aes(
+            x = income,
+            y = Segment
+        )
+    ) +
+    facet_wrap(
+        facets = vars(ownHome)
+    ) +
+    scale_x_continuous(
+        labels = label_currency()
+    ) +
+    labs(
+        x = "Yearly Disposable income (USD Dollars)"
+    )
+```
