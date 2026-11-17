@@ -4,6 +4,7 @@ library(tidyverse)
 library(skimr)
 library(scales)
 library(DT)
+library(tidymodels)
 
 # Import data ----
 bike_sales <- bike_sales |>
@@ -236,3 +237,171 @@ pct_revenue_by_bikeshop |>
         columns = 3,
         digits = 2
     )
+
+# Statisticial tests by group ----
+## Chisq2 frame cat2 ----
+table_cat2_frame <- bike_sales |>
+    group_by(
+        category.secondary,
+        frame
+    ) |>
+    summarise(
+        total_revenue = sum(price.ext)
+    ) |>
+    ungroup() |>
+    mutate(
+        total_revenue_pct = (total_revenue / sum(total_revenue) * 100)
+    ) |>
+    arrange(
+        desc(total_revenue_pct)
+    )
+
+table_models <- table_cat2_frame |>
+    mutate(
+        model = str_c(
+            category.secondary,
+            frame,
+            sep = " "
+        )
+    ) |>
+    select(
+        model,
+        total_revenue
+    )
+
+deframe_table_models <- table_models |>
+    deframe() |>
+    chisq.test(
+        p = rep.int(x = 1 / 13, times = 13)
+    )
+
+deframe_table_models |>
+    tidy() |>
+    datatable(
+        colnames = c(
+            "Statistics",
+            "P-value",
+            "Degrees of freedom",
+            "Method"
+        )
+    ) |>
+    formatRound(
+        columns = 1,
+        digits = 2
+    )
+
+## Chisq2 bikeshops ----
+deframe_table_models2 <- bike_sales |>
+    group_by(
+        bikeshop.name
+    ) |>
+    summarise(
+        total_revenue = sum(price.ext)
+    ) |>
+    mutate(
+        total_revenue_pct = (total_revenue / sum(total_revenue)) * 100
+    ) |>
+    arrange(
+        desc(total_revenue_pct)
+    ) |>
+    select(
+        bikeshop.name,
+        total_revenue
+    ) |>
+    deframe()
+
+deframe_table_models2 |>
+    chisq.test(
+        p = rep.int(
+            x = 1 / 30,
+            times = 30
+        )
+    ) |>
+    tidy() |>
+    datatable(
+        colnames = c(
+            "Statistic",
+            "P-value",
+            "Degrees of freedom",
+            "Method"
+        )
+    ) |>
+    formatRound(
+        columns = 1,
+        digits = 2
+    )
+
+## T-test revenue mean by frame ----
+alpha <- 0.05
+
+bike_sales |>
+    t_test(
+        formula = price.ext ~ frame,
+        alternative = "two-sided",
+        order = c("Aluminum", "Carbon"),
+        mu = 0,
+        conf_level = 1 - alpha
+    ) |>
+    datatable(
+        colnames = c(
+            "Statistic",
+            "Degrees of freedom",
+            "P-value",
+            "Method",
+            "Estimate",
+            "Lower interval value",
+            "Upper interval value"
+        )
+    ) |>
+    formatRound(
+        columns = c(1, 2, 3, 5, 6, 7)
+    )
+
+## Anova ----
+model1 <- aov(
+    data = bike_sales,
+    formula = price ~ category.secondary
+) |>
+    anova() |>
+    tidy()
+
+model1
+
+model2 <- aov(
+    data = bike_sales,
+    formula = price ~ category.secondary + frame
+) |>
+    anova() |>
+    tidy()
+
+model2
+
+model3 <- aov(
+    data = bike_sales,
+    formula = price ~ category.secondary + frame + category.secondary:frame
+) |>
+    anova() |>
+    tidy()
+
+model3 |>
+    datatable(
+      colnames = c(
+        "Term",
+        "Degrees of freedom",
+        "Sum of squares",
+        "Mean of squares",
+        "Statistic",
+        "P-value"
+      )
+    ) |> 
+    formatRound(
+      columns = c(3, 4, 5, 6)
+    )
+
+
+# model4 <- aov(
+#   data = bike_sales,
+#   formula = price ~ category.secondary*frame*bikeshop.state
+# ) |>
+# anova() |>
+# tidy()
