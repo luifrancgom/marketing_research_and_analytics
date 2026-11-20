@@ -1,0 +1,75 @@
+---
+title: "Idenfying driver outcomes: linear models"
+author:
+  - Norah Jones
+  - Bill Gates
+  - Luis Francisco Gómez
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: load-packages
+#| message: false
+#| warning: false
+library(tidyverse)
+library(skimr)
+library(corrr)
+```
+
+# Introduction
+
+Pending
+
+# Import data
+
+Pending
+
+```{r}
+#| message: false
+amusement_park <- read_csv(
+    file = "../000_data/007_chapter_7.csv"
+) |>
+    mutate(
+        weekend = factor(
+            x = weekend,
+            ordered = FALSE
+        ),
+        num.child = as.integer(num.child),
+        logdist = log(
+            x = distance,
+            base = exp(1)
+        )
+    )
+```
+
+# Summary statistics
+
+Pending
+
+```{r}
+amusement_park |>
+    skim()
+```
+
+# Correlation matrix
+
+```{r}
+#| message: false
+#| warning: false
+correlation_matrix <- amusement_park |>
+    select(
+        num.child,
+        rides:logdist
+    ) |>
+    correlate()
+
+correlation_matrix |>
+    autoplot(
+        triangular = "lower"
+    )
+```
