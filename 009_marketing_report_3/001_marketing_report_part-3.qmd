@@ -1,0 +1,248 @@
+---
+title: "Marketing report part 3"
+date: 2026-11-28
+author: 
+  - Norah Jones   
+  - Bill Gates
+  - Luis Francisco Gomez 
+format: 
+  html:
+    toc: true
+    code-fold: true
+    number-sections: true
+    embed-resources: true
+editor: source
+---
+
+```{r }
+#| label: libraries
+#| warning: false
+#| message: false
+library(sweep)
+library(tidyverse)
+library(scales)
+library(tidymodels)
+library(DT)
+```
+
+# Modeling
+
+## Introduction
+
+Pending
+
+Bla bla bla @fig-total-sales-by-model-cat2-frame
+
+## Import data
+
+Pending
+
+```{r}
+# Import the data from the sweep package
+bike_sales <- bike_sales |>
+    mutate(
+        order.id = factor(
+            x = order.id,
+            ordered = TRUE
+        ),
+        order.line = factor(
+            x = order.line,
+            ordered = TRUE
+        ),
+        customer.id = factor(
+            x = customer.id,
+            ordered = FALSE
+        ),
+        product.id = factor(
+            x = product.id,
+            ordered = FALSE
+        )
+    )
+```
+
+## The product gap
+
+### Prepare data
+
+Pending
+
+```{r}
+#| message: false
+total_sales_by_model_cat2_frame <- bike_sales |>
+    select(
+        model,
+        category.secondary,
+        frame,
+        price.ext
+    ) |>
+    group_by(
+        model,
+        category.secondary,
+        frame
+    ) |>
+    summarise(
+        total_revenue = sum(price.ext)
+    ) |>
+    ungroup() |>
+    arrange(
+        desc(total_revenue)
+    ) |>
+    mutate(
+        category.secondary = fct_reorder(
+            .f = category.secondary,
+            .x = total_revenue
+        )
+    )
+```
+
+### Visualization
+
+Pending
+
+```{r}
+#| label: fig-total-sales-by-model-cat2-frame
+#| fig-cap: Total sales of the 97 models by category secondary and frame
+
+total_sales_by_model_cat2_frame |>
+    ggplot() +
+    geom_point(
+        aes(
+            x = frame,
+            y = total_revenue
+        ),
+        position = position_jitter(
+            width = 0.2,
+            height = 0.2
+        )
+    ) +
+    facet_wrap(
+        facets = vars(category.secondary)
+    ) +
+    scale_y_continuous(
+        labels = label_currency()
+    ) +
+    labs(
+        x = "Frame",
+        y = "Total revenue (US Dollars)"
+    )
+```
+
+## Determine the price of a new product
+
+Pending
+
+### Selecting a new potential product
+
+Pending
+
+-   Cyclocross Aluminum
+-   Fat Bike Carbon
+-   Over Mountain Aluminum
+-   Sport Carbon
+-   Triathalon Aluminum
+
+### Building a model to price a new product
+
+Pending
+
+#### Choosing a model
+
+Pending
+
+-   `price ~ category.secondary + frame` (see @tbl-model-2-price-cat2-frame)
+
+#### Fit the model
+
+Pending
+
+```{r}
+#| label: tbl-model-2-price-cat2-frame
+#| tbl-cap: Linear model to predict price based in category secondary and frame
+model_2 <- lm(
+    data = bike_sales,
+    formula = price ~ category.secondary + frame
+)
+
+model_2 |>
+    tidy() |>
+    datatable(
+        colnames = c(
+            "Term",
+            "Estimate",
+            "Standard Error",
+            "Statistic",
+            "P-value"
+        )
+    ) |>
+    formatRound(
+        columns = 2:5,
+        digits = 3
+    )
+```
+
+#### Predict the price of the new product
+
+Pending
+
+```{r}
+#| label: tbl-predict-price-model-2
+#| tbl-cap: Predicted prices (US Dollars / unit) using the choosen model
+new_data <- tibble(
+    category.secondary = c(
+        "Cyclocross",
+        "Fat Bike",
+        "Over Mountain",
+        "Sport",
+        "Triathalon"
+    ),
+    frame = c(
+        "Aluminum",
+        "Carbon",
+        "Aluminum",
+        "Carbon",
+        "Aluminum"
+    )
+)
+
+predict(
+    object = model_2,
+    newdata = new_data
+) |>
+    enframe(
+        name = "observation",
+        value = "pred_price"
+    ) |>
+    bind_cols(
+        new_data
+    ) |>
+    select(
+        category.secondary,
+        frame,
+        pred_price
+    ) |>
+    datatable(
+        colnames = c(
+            "Category secondary",
+            "Frame",
+            "Predict price"
+        )
+    ) |>
+    formatRound(
+        columns = 3,
+        digits = 0
+    )
+```
+
+# Ai use disclaimer
+
+The tools used in this report were:
+
+- Gemini
+- Claude
+
+Also the following uses were applied using the above tools:
+
+- [ ] Assistance in text writing
+- [ ] Assistance in image creation
+- [x] Assistance in developing ideas and exploring arguments
+- [x] Assistance with computer programming
